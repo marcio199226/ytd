@@ -4,6 +4,8 @@ github.com/Masterminds/semver
 github.com/abadojack/whatlanggo
 # github.com/bitly/go-simplejson v0.5.0
 github.com/bitly/go-simplejson
+# github.com/bwmarrin/snowflake v0.3.0
+github.com/bwmarrin/snowflake
 # github.com/fatih/color v1.7.0
 github.com/fatih/color
 # github.com/go-playground/colors v1.2.0
@@ -55,6 +57,17 @@ github.com/wailsapp/wails/lib/renderer
 github.com/wailsapp/wails/lib/renderer/bridge
 github.com/wailsapp/wails/lib/renderer/webview
 github.com/wailsapp/wails/runtime
+# github.com/xujiajun/mmap-go v1.0.1
+github.com/xujiajun/mmap-go
+# github.com/xujiajun/nutsdb v0.6.0
+## explicit
+github.com/xujiajun/nutsdb
+github.com/xujiajun/nutsdb/ds/list
+github.com/xujiajun/nutsdb/ds/set
+github.com/xujiajun/nutsdb/ds/zset
+# github.com/xujiajun/utils v0.0.0-20190123093513-8bf096c4f53b
+github.com/xujiajun/utils/filesystem
+github.com/xujiajun/utils/strconv2
 # golang.org/x/image v0.0.0-20200430140353-33d19683fad8
 golang.org/x/image/draw
 golang.org/x/image/math/f64

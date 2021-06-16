@@ -11,22 +11,92 @@ import (
 	"time"
 
 	. "ytd/clipboard"
+	. "ytd/db"
+	. "ytd/models"
 	. "ytd/plugins"
 
 	_ "embed"
 
 	"github.com/wailsapp/wails"
+	"github.com/xujiajun/nutsdb"
 )
 
-func basic() string {
-	return "World!"
-}
+var wailsRuntime *wails.Runtime
+var plugins []Plugin = []Plugin{&Yt{Name: "youtube"}}
 
 //go:embed frontend/dist/my-app/main.js
 var js string
 
 //go:embed frontend/dist/my-app/styles.css
 var css string
+
+type AppState struct {
+	log     *wails.CustomLogger
+	runtime *wails.Runtime
+	db      *nutsdb.DB
+	plugins []Plugin
+	Entries []*GenericEntry
+	Config  AppConfig
+}
+
+func (state *AppState) WailsInit(runtime *wails.Runtime) error {
+	fmt.Println("APP STATE INITIALIZED")
+	// Save runtime
+	state.runtime = runtime
+	state.log = runtime.Log.New("AppState")
+	// Do some other initialisation
+
+	state.db = InitializeDb()
+
+	for _, plugin := range plugins {
+		plugin.SetWailsRuntime(runtime)
+	}
+
+	return nil
+}
+
+func saveSettingBoolValue(name string, val bool) error {
+	var v string
+	if val {
+		v = "1"
+	} else {
+		v = "0"
+	}
+	return DbWriteSetting(name, v)
+}
+
+func saveSettingValue(name string, val string) error {
+	return DbWriteSetting(name, val)
+}
+
+func readSettingBoolValue(name string) (bool, error) {
+	val, err := DbReadSetting(name)
+	if err != nil {
+		return false, err
+	}
+	if val == "1" {
+		return true, nil
+	}
+	return false, nil
+}
+
+func readSettingValue(name string) (string, error) {
+	return DbReadSetting(name)
+}
+
+func addToDownload(url string) error {
+	// usare lo logica di quando si riceve un copia
+	return nil
+}
+
+//WailsRuntime .
+type WailsRuntime struct {
+	runtime *wails.Runtime
+}
+
+func (s *WailsRuntime) WailsShutdown() {
+	CloseDb()
+}
 
 func main() {
 
@@ -38,9 +108,13 @@ func main() {
 		CSS:    css,
 		Colour: "#131313",
 	})
-	app.Bind(basic)
+	app.Bind(&AppState{})
+	app.Bind(saveSettingBoolValue)
+	app.Bind(saveSettingValue)
+	app.Bind(readSettingBoolValue)
+	app.Bind(readSettingValue)
+	app.Bind(addToDownload)
 
-	var plugins []Plugin = []Plugin{&Yt{Name: "youtube"}}
 	wg := &sync.WaitGroup{}
 	wg.Add(2)
 	ctx, cancelCtx := context.WithCancel(context.Background())
@@ -85,10 +159,13 @@ func main() {
 					log.Printf("change received: '%s'", change)
 					for _, plugin := range plugins {
 						if support := plugin.Supports(change); support {
-							fetchErr := plugin.Fetch(change)
-							if fetchErr != nil {
-								fmt.Printf("Unable to download %s \n", change)
-							}
+							go func() {
+								_, fetchErr := plugin.Fetch(change)
+								if fetchErr != nil {
+									fmt.Printf("Unable to download %s - %s \n", change, fetchErr)
+								}
+								// fmt.Println(fetchEntry)
+							}()
 							continue
 						}
 					}

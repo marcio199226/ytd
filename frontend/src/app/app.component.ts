@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import * as Wails from '@wailsapp/runtime';
 
 @Component({
   selector: '[id="app"]',
@@ -8,12 +9,7 @@ import { Component } from '@angular/core';
 export class AppComponent {
   title = 'my-app';
 
-  clickMessage = '';
-
-  onClickMe() {
-    // @ts-ignore
-    window.backend.basic().then(result =>
-      this.clickMessage = result
-    );
+  ngOnInit() {
+    Wails.Events.On("ytd:track", payload => console.log(payload))
   }
 }

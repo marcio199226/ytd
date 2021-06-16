@@ -2,16 +2,33 @@ package plugins
 
 import (
 	"fmt"
+	"io"
 	"net/url"
 	"os"
 	"strings"
 
 	ytDownloader "github.com/kkdai/youtube/v2"
+	"github.com/wailsapp/wails"
+
+	. "ytd/db"
+	. "ytd/models"
 )
 
 type Yt struct {
-	Name string
-	dir  string
+	Name         string
+	WailsRuntime *wails.Runtime
+	dir          string
+	client       ytDownloader.Client
+}
+
+type YtEntry struct {
+	Type     string
+	Track    GenericTrack
+	Playlist GenericPlaylist
+}
+
+func (yt *Yt) SetWailsRuntime(runtime *wails.Runtime) {
+	yt.WailsRuntime = runtime
 }
 
 func (yt *Yt) GetName() string {
@@ -19,7 +36,8 @@ func (yt *Yt) GetName() string {
 }
 
 func (yt *Yt) Initialize() error {
-	fmt.Println("Initializing from yt...")
+	fmt.Println("Initializing yt client...")
+	yt.client = ytDownloader.Client{Debug: true}
 	return nil
 }
 
@@ -31,42 +49,41 @@ func (yt *Yt) SetDir(dir string) {
 	}
 }
 
-func (yt *Yt) Fetch(url string) error {
+func (yt *Yt) Fetch(url string) (*GenericEntry, error) {
 	fmt.Println("Fetching from yt...")
+	// time.Sleep(60 * time.Second)
 
-	y := ytDownloader.Client{Debug: true}
-	/* 	video, err := y.GetVideo(url)
-	   	if err != nil {
-	   		return err
-	   	} */
+	if isPlaylist := strings.Contains(url, "playlist?"); isPlaylist {
+		fmt.Println("Fetching playlist info...")
+		ytEntry := &GenericEntry{Source: yt.Name, Type: "playlist"}
+		playlist, err := yt.client.GetPlaylist(url)
+		if err != nil {
+			return &GenericEntry{}, err
+		}
 
-	playlist, err := y.GetPlaylist(url)
-	if err != nil {
-		panic(err)
+		var playlistTracks []GenericTrack
+		playlistEntry := NewGenericPlaylist(playlist.ID, playlist.Title, len(playlist.Videos), playlistTracks)
+		ytEntry.Playlist = playlistEntry
+		for k, v := range playlist.Videos {
+			fmt.Printf("(%d) %s - '%s'\n", k+1, v.Author, v.Title)
+			video, err := yt.client.VideoFromPlaylistEntry(v)
+			if err != nil {
+				return &GenericEntry{}, err
+			}
+
+			track := NewGenericTrack(video.ID, video.Title, video.Author, video.ID, url)
+			playlistTracks = append(playlistTracks, track)
+
+			err = yt.downloadTrack(video, fmt.Sprintf("%s_%s", playlist.ID, video.ID))
+			if err != nil {
+				return &GenericEntry{}, err
+			}
+			track.Downloaded = true
+		}
+		return &GenericEntry{}, nil
 	}
-	fmt.Println(playlist)
-	return nil
 
-	/* 	for _, format := range video.Formats.Type("audio/webm") {
-	   		fmt.Printf("%d | %d | %s | %s | %s | %s | %s \n", format.ItagNo, format.AudioChannels, format.AudioQuality, format.AudioSampleRate, format.Quality, format.QualityLabel, format.MimeType)
-	   	}
-	   	audioFormats := video.Formats.Type("audio/webm")
-	   	stream, _, err := y.GetSśtream(video, &audioFormats[0])
-	   	if err != nil {
-	   		return err
-	   	}
-
-	   	file, err := os.Create(fmt.Sprintf("%s/%s.webm", yt.dir, video.ID))
-	   	if err != nil {
-	   		return err
-	   	}
-	   	defer file.Close()
-
-	   	_, err = io.Copy(file, stream)
-	   	if err != nil {
-	   		return err
-	   	}
-	   	return nil */
+	return yt.fetchTrack(url)
 }
 
 func (yt *Yt) GetFilename() error {
@@ -79,4 +96,54 @@ func (yt *Yt) Supports(address string) bool {
 		return false
 	}
 	return strings.Contains(u.Hostname(), "youtube")
+}
+
+func (yt *Yt) fetchTrack(url string) (*GenericEntry, error) {
+	video, err := yt.client.GetVideo(url)
+	if err != nil {
+		return &GenericEntry{}, err
+	}
+	track := NewGenericTrack(video.ID, video.Title, video.Author, video.ID, url)
+	for _, thumbnail := range video.Thumbnails {
+		track.Thumbnails = append(track.Thumbnails, thumbnail.URL)
+	}
+	ytEntry := &GenericEntry{Source: yt.Name, Type: "track", Track: track}
+	DbWriteEntry(track.ID, ytEntry)
+	yt.WailsRuntime.Events.Emit("ytd:track", ytEntry)
+
+	err = yt.downloadTrack(video, video.ID)
+	if err != nil {
+		return &GenericEntry{}, err
+	}
+	ytEntry.Track.Downloaded = true
+
+	DbWriteEntry(track.ID, ytEntry)
+	yt.WailsRuntime.Events.Emit("ytd:track", ytEntry)
+	return ytEntry, nil
+}
+
+func (yt *Yt) downloadTrack(video *ytDownloader.Video, filename string) error {
+	for _, format := range video.Formats.Type("audio/webm") {
+		fmt.Printf("%d | %d | %s | %s | %s | %s | %s \n", format.ItagNo, format.AudioChannels, format.AudioQuality, format.AudioSampleRate, format.Quality, format.QualityLabel, format.MimeType)
+	}
+	audioFormats := video.Formats.Type("audio/webm")
+	stream, _, err := yt.client.GetStream(video, &audioFormats[0])
+	if err != nil {
+		return err
+	}
+	return yt.saveTrack(stream, filename)
+}
+
+func (yt *Yt) saveTrack(stream io.ReadCloser, filename string) error {
+	file, err := os.Create(fmt.Sprintf("%s/%s.webm", yt.dir, filename))
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	_, err = io.Copy(file, stream)
+	if err != nil {
+		return err
+	}
+	return nil
 }
