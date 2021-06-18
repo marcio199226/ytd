@@ -1,4 +1,4 @@
-package surge
+package db
 
 import (
 	"encoding/json"
@@ -8,6 +8,8 @@ import (
 	"log"
 
 	"github.com/xujiajun/nutsdb"
+
+	. "ytd/models"
 )
 
 const entriesBucketName = "entriesBucket"
@@ -27,8 +29,6 @@ func InitializeDb() *nutsdb.DB {
 		log.Panic(err)
 	}
 
-	// dbGetAllEntries()
-
 	return db
 
 }
@@ -36,6 +36,32 @@ func InitializeDb() *nutsdb.DB {
 //CloseDb .
 func CloseDb() {
 	db.Close()
+}
+
+func DbGetAllEntries() []GenericEntry {
+	data := []GenericEntry{}
+
+	if err := db.View(
+		func(tx *nutsdb.Tx) error {
+			entries, err := tx.GetAll(entriesBucketName)
+			if err != nil {
+				return err
+			}
+
+			for _, entry := range entries {
+
+				genericEntry := &GenericEntry{}
+				json.Unmarshal(entry.Value, genericEntry)
+				data = append(data, *genericEntry)
+			}
+
+			return nil
+		}); err != nil {
+		log.Println(err)
+	} else {
+		return data
+	}
+	return data
 }
 
 func DbWriteEntry(Key string, value interface{}) error {

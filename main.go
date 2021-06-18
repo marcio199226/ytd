@@ -40,7 +40,6 @@ type AppState struct {
 }
 
 func (state *AppState) WailsInit(runtime *wails.Runtime) error {
-	fmt.Println("APP STATE INITIALIZED")
 	// Save runtime
 	state.runtime = runtime
 	state.log = runtime.Log.New("AppState")
@@ -52,6 +51,13 @@ func (state *AppState) WailsInit(runtime *wails.Runtime) error {
 		plugin.SetWailsRuntime(runtime)
 	}
 
+	// this is sync so it blocks until finished and wails:loaded are not dispatched until this finishes
+	runtime.Events.Once("wails:loaded", func(...interface{}) {
+		entries := DbGetAllEntries()
+		runtime.Events.Emit("ytd:onload", entries)
+	})
+
+	fmt.Println("APP STATE INITIALIZED")
 	return nil
 }
 
@@ -160,11 +166,7 @@ func main() {
 					for _, plugin := range plugins {
 						if support := plugin.Supports(change); support {
 							go func() {
-								_, fetchErr := plugin.Fetch(change)
-								if fetchErr != nil {
-									fmt.Printf("Unable to download %s - %s \n", change, fetchErr)
-								}
-								// fmt.Println(fetchEntry)
+								plugin.Fetch(change)
 							}()
 							continue
 						}

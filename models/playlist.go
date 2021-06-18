@@ -1,18 +1,20 @@
 package models
 
 type GenericPlaylist struct {
-	ID          string
-	TracksCount int
-	Name        string
-	Tracks      []GenericTrack
+	ID          string   `json:"id"`
+	Url         string   `json:"url"`
+	TracksCount int      `json:"count"`
+	Name        string   `json:"name"`
+	Thumbnails  string   `json:"thumbnail"`
+	TracksIds   []string `json:"tracksIds"`
 }
 
-func NewGenericPlaylist(id string, name string, playlistSize int, tracks []GenericTrack) GenericPlaylist {
+func NewGenericPlaylist(id string, name string, playlistSize int, tracks []string) GenericPlaylist {
 	return GenericPlaylist{
 		ID:          id,
 		Name:        name,
 		TracksCount: playlistSize,
-		Tracks:      tracks,
+		TracksIds:   tracks,
 	}
 }
 
