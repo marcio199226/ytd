@@ -1,6 +1,7 @@
 package youtube
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -37,10 +38,7 @@ func (c *Client) GetVideoContext(ctx context.Context, url string) (*Video, error
 }
 
 func (c *Client) videoFromID(ctx context.Context, id string) (*Video, error) {
-	// Circumvent age restriction to pretend access through googleapis.com
-	eurl := "https://youtube.googleapis.com/v/" + id
-
-	body, err := c.httpGetBodyBytes(ctx, "https://www.youtube.com/get_video_info?video_id="+id+"&html5=1&eurl="+eurl)
+	body, err := c.videoDataByInnertube(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -62,6 +60,82 @@ func (c *Client) videoFromID(ctx context.Context, id string) (*Video, error) {
 	}
 
 	return v, err
+}
+
+type innertubeRequest struct {
+	VideoID         string            `json:"videoId"`
+	Context         inntertubeContext `json:"context"`
+	PlaybackContext playbackContext   `json:"playbackContext"`
+}
+
+type playbackContext struct {
+	ContentPlaybackContext contentPlaybackContext `json:"contentPlaybackContext"`
+}
+
+type contentPlaybackContext struct {
+	SignatureTimestamp string `json:"signatureTimestamp"`
+}
+
+type inntertubeContext struct {
+	Client innertubeClient `json:"client"`
+}
+
+type innertubeClient struct {
+	HL            string `json:"hl"`
+	GL            string `json:"gl"`
+	ClientName    string `json:"clientName"`
+	ClientVersion string `json:"clientVersion"`
+}
+
+func (c *Client) videoDataByInnertube(ctx context.Context, id string) ([]byte, error) {
+	// fetch sts first
+	sts, err := c.getSignatureTimestamp(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	// seems like same token for all WEB clients
+	//nolint:gosec
+	const webToken = "AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8"
+	u := fmt.Sprintf("https://www.youtube.com/youtubei/v1/player?key=%s", webToken)
+
+	data := innertubeRequest{
+		VideoID: id,
+		Context: inntertubeContext{
+			Client: innertubeClient{
+				HL:            "en",
+				GL:            "US",
+				ClientName:    "WEB",
+				ClientVersion: "2.20210617.01.00",
+			},
+		},
+		PlaybackContext: playbackContext{
+			ContentPlaybackContext: contentPlaybackContext{
+				SignatureTimestamp: sts,
+			},
+		},
+	}
+
+	reqData, err := json.Marshal(data)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, u, bytes.NewReader(reqData))
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.httpDo(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+
+	return io.ReadAll(resp.Body)
 }
 
 // GetPlaylist fetches playlist metadata
@@ -138,7 +212,7 @@ func (c *Client) GetStreamContext(ctx context.Context, video *Video, format *For
 		return io.Copy(w, resp.Body)
 	}
 
-	//nolint:golint,errcheck
+	//nolint:revive,errcheck
 	go func() {
 		// load all the chunks
 		for pos := int64(0); pos < format.ContentLength; {

@@ -6,6 +6,7 @@ import (
 
 const (
 	ErrCipherNotFound             = constError("cipher not found")
+	ErrSignatureTimestampNotFound = constError("signature timestamp not found")
 	ErrInvalidCharactersInVideoID = constError("invalid characters in video id")
 	ErrVideoIDMinLength           = constError("the video id must be at least 10 characters long")
 	ErrReadOnClosedResBody        = constError("http: read on closed response body")
@@ -17,23 +18,6 @@ type constError string
 
 func (e constError) Error() string {
 	return string(e)
-}
-
-type ErrResponseStatus struct {
-	Status string
-	Reason string
-}
-
-func (err ErrResponseStatus) Error() string {
-	if err.Status == "" {
-		return "no response status found in the server's answer"
-	}
-
-	if err.Reason == "" {
-		return fmt.Sprintf("response status: '%s', no reason given", err.Status)
-	}
-
-	return fmt.Sprintf("response status: '%s', reason: '%s'", err.Status, err.Reason)
 }
 
 type ErrPlayabiltyStatus struct {
