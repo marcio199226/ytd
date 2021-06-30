@@ -136,7 +136,8 @@ func (yt *Yt) fetchTrack(url string) {
 	video, err := yt.client.GetVideo(url)
 	if err != nil {
 		fmt.Printf("yt.client.GetVideo(url) error: %s \n", err)
-		yt.WailsRuntime.Events.Emit("ytd:track", NewFailedTrack(url, err))
+		ytEntry := GenericEntry{Source: yt.Name, Type: "track", Track: NewFailedTrack(url, err)}
+		yt.WailsRuntime.Events.Emit("ytd:track", ytEntry)
 		return
 	}
 
@@ -255,9 +256,6 @@ func downloadProgress(done chan int64, progress chan<- uint, path string, total 
 			}
 
 			var percent float64 = float64(size) / float64(total) * 100
-
-			// fmt.Printf("%.0f", percent)
-			// fmt.Println("%")
 			progress <- uint(percent)
 		}
 
