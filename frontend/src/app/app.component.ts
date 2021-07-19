@@ -2,15 +2,18 @@ import { Component } from '@angular/core';
 import * as Wails from '@wailsapp/runtime';
 
 @Component({
-  selector: '[id="app"]',
+  selector: 'app-root,[id="app"]',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  title = 'my-app';
+  title = 'frontend';
 
   ngOnInit() {
-    Wails.Events.On("ytd:onload", payload => console.log(payload))
+    Wails.Events.On("ytd:onload", payload => {
+      console.log(payload);
+      window.APP_STATE = payload;
+    })
 
     Wails.Events.On("ytd:track", payload => console.log(payload))
 

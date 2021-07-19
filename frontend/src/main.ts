@@ -9,6 +9,12 @@ import 'zone.js'
 
 import * as Wails from '@wailsapp/runtime';
 
+declare global {
+  interface Window {
+    [key: string]: any
+  }
+}
+
 if (environment.production) {
   enableProdMode();
 }

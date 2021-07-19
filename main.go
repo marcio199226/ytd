@@ -24,10 +24,13 @@ import (
 var wailsRuntime *wails.Runtime
 var plugins []Plugin = []Plugin{&Yt{Name: "youtube"}}
 
-//go:embed frontend/dist/my-app/main.js
+//go:embed frontend/dist/index.html
+var html string
+
+//go:embed frontend/dist/main.js
 var js string
 
-//go:embed frontend/dist/my-app/styles.css
+//go:embed frontend/dist/styles.css
 var css string
 
 type AppState struct {
@@ -52,7 +55,7 @@ func (state *AppState) WailsInit(runtime *wails.Runtime) error {
 	}
 
 	// this is sync so it blocks until finished and wails:loaded are not dispatched until this finishes
-	runtime.Events.Once("wails:loaded", func(...interface{}) {
+	runtime.Events.On("wails:loaded", func(...interface{}) {
 		entries := DbGetAllEntries()
 		runtime.Events.Emit("ytd:onload", entries)
 	})
@@ -112,7 +115,9 @@ func main() {
 		Title:  "ytd",
 		JS:     js,
 		CSS:    css,
-		Colour: "#131313",
+		//HTML:             html,
+		Colour:           "#131313",
+		DisableInspector: false,
 	})
 	app.Bind(&AppState{})
 	app.Bind(saveSettingBoolValue)

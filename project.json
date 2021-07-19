@@ -10,7 +10,7 @@
  "frontend": {
   "dir": "frontend",
   "install": "npm install",
-  "build": "npx ng build --single-bundle true --output-hashing none --prod --bundle-styles false",
+  "build": "npm run build",
   "bridge": "src",
   "serve": "npm run serve"
  },
