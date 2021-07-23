@@ -33,6 +33,8 @@ var js string
 //go:embed frontend/dist/styles.css
 var css string
 
+var appConfig AppConfig
+
 type AppState struct {
 	log     *wails.CustomLogger
 	runtime *wails.Runtime
@@ -40,6 +42,9 @@ type AppState struct {
 	plugins []Plugin
 	Entries []*GenericEntry
 	Config  AppConfig
+	Stats   struct {
+		DownloadingCount uint
+	}
 }
 
 func (state *AppState) WailsInit(runtime *wails.Runtime) error {
@@ -60,18 +65,39 @@ func (state *AppState) WailsInit(runtime *wails.Runtime) error {
 		runtime.Events.Emit("ytd:onload", entries)
 	})
 
+	appConfig = state.Config.Init()
+	state.Config = appConfig
 	fmt.Println("APP STATE INITIALIZED")
+
+	go func() {
+		for {
+			time.Sleep(10 * time.Second)
+			state.checkForTracksToDownload()
+		}
+	}()
+
+	return nil
+}
+
+func (state *AppState) GetAppConfig() AppConfig {
+	return state.Config
+}
+
+func (state *AppState) checkForTracksToDownload() error {
+	if state.Stats.DownloadingCount >= state.Config.MaxParrallelDownloads {
+		return nil
+	}
+
+	for _, t := range state.Entries {
+		if t.Type == "track" && !t.Track.Downloaded {
+
+		}
+	}
 	return nil
 }
 
 func saveSettingBoolValue(name string, val bool) error {
-	var v string
-	if val {
-		v = "1"
-	} else {
-		v = "0"
-	}
-	return DbWriteSetting(name, v)
+	return DbSaveSettingBoolValue(name, val)
 }
 
 func saveSettingValue(name string, val string) error {
@@ -79,14 +105,7 @@ func saveSettingValue(name string, val string) error {
 }
 
 func readSettingBoolValue(name string) (bool, error) {
-	val, err := DbReadSetting(name)
-	if err != nil {
-		return false, err
-	}
-	if val == "1" {
-		return true, nil
-	}
-	return false, nil
+	return DbReadSettingBoolValue(name)
 }
 
 func readSettingValue(name string) (string, error) {
@@ -95,6 +114,20 @@ func readSettingValue(name string) (string, error) {
 
 func addToDownload(url string) error {
 	// usare lo logica di quando si riceve un copia
+	fmt.Println(appConfig)
+	return nil
+	for _, plugin := range plugins {
+		if support := plugin.Supports(url); support {
+			if appConfig.ConcurrentDownloads {
+				go func() {
+					plugin.Fetch(url)
+				}()
+			} else {
+				plugin.Fetch(url)
+			}
+			continue
+		}
+	}
 	return nil
 }
 
@@ -168,15 +201,7 @@ func main() {
 				change, ok := <-changes /*  */
 				if ok && change != "" {
 					log.Printf("change received: '%s'", change)
-					for _, plugin := range plugins {
-						if support := plugin.Supports(change); support {
-							go func() {
-								plugin.Fetch(change)
-							}()
-							continue
-						}
-					}
-
+					addToDownload(change)
 				} else {
 					log.Println("channel has been closed. exiting...")
 					time.Sleep(time.Millisecond)

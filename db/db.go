@@ -98,6 +98,16 @@ func DbWriteSetting(Name string, value string) error {
 	return err
 }
 
+func DbSaveSettingBoolValue(name string, val bool) error {
+	var v string
+	if val {
+		v = "1"
+	} else {
+		v = "0"
+	}
+	return DbWriteSetting(name, v)
+}
+
 //DbReadSetting .
 func DbReadSetting(Name string) (string, error) {
 	result := ""
@@ -118,4 +128,15 @@ func DbReadSetting(Name string) (string, error) {
 	}
 
 	return result, nil
+}
+
+func DbReadSettingBoolValue(name string) (bool, error) {
+	val, err := DbReadSetting(name)
+	if err != nil {
+		return false, err
+	}
+	if val == "1" {
+		return true, nil
+	}
+	return false, nil
 }
