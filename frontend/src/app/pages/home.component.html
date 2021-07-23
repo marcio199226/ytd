@@ -1,0 +1,18 @@
+<header fxLayout="row wrap" fxLayoutAlign="center center" fxLayoutGap="10px">
+  <div class="search-wrapper">
+    <div class="search" fxFlex fxLayout="row" fxLayoutAlign="start center">
+      <mat-icon>search</mat-icon>
+      <input [formControl]="searchInput" placeholder="Search">
+      <mat-icon 
+        *ngIf="searchInput.value && searchInput.value !== ''" 
+        class="clear-search" 
+        (click)="clearSearch()" 
+        title="Clear">
+        close
+      </mat-icon>
+    </div>
+  </div>
+  <mat-icon class="clickable white">settings</mat-icon>
+</header>
+
+<div class="" fxLayout="row wrap"></div>
