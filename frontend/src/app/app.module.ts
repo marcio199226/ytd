@@ -1,6 +1,7 @@
 import { APP_BASE_HREF, CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -10,14 +11,16 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input'
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatProgressBarModule } from '@angular/material/progress-bar'
 import { NG_EVENT_PLUGINS } from '@tinkoff/ng-event-plugins';
+import { AudioPlayerComponent } from './components';
 
 
 @NgModule({
   declarations: [
     AppComponent,
     HomeComponent,
+    AudioPlayerComponent
   ],
   imports: [
     BrowserModule,
@@ -29,7 +32,8 @@ import { NG_EVENT_PLUGINS } from '@tinkoff/ng-event-plugins';
     FlexLayoutModule,
     MatFormFieldModule,
     MatIconModule,
-    MatInputModule
+    MatInputModule,
+    MatProgressBarModule
   ],
   providers: [
     {provide: APP_BASE_HREF, useValue : '/' },

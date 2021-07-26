@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"os/user"
@@ -40,8 +41,8 @@ type AppState struct {
 	runtime *wails.Runtime
 	db      *nutsdb.DB
 	plugins []Plugin
-	Entries []*GenericEntry
-	Config  AppConfig
+	Entries []GenericEntry `json:"entries"`
+	Config  AppConfig      `json:"config"`
 	Stats   struct {
 		DownloadingCount uint
 	}
@@ -59,10 +60,12 @@ func (state *AppState) WailsInit(runtime *wails.Runtime) error {
 		plugin.SetWailsRuntime(runtime)
 	}
 
+	state.Entries = DbGetAllEntries()
 	// this is sync so it blocks until finished and wails:loaded are not dispatched until this finishes
 	runtime.Events.On("wails:loaded", func(...interface{}) {
-		entries := DbGetAllEntries()
-		runtime.Events.Emit("ytd:onload", entries)
+		// entries := DbGetAllEntries()
+		fmt.Println("EMIT YTD:ONLOAD")
+		runtime.Events.Emit("ytd:onload", state)
 	})
 
 	appConfig = state.Config.Init()
@@ -208,6 +211,11 @@ func main() {
 				}
 			}
 		}
+	}()
+
+	go func() {
+		http.Handle("/", http.FileServer(http.Dir(currentDir)))
+		http.ListenAndServe(":8080", nil)
 	}()
 
 	app.Run()

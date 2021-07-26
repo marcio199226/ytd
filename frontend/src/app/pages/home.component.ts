@@ -6,6 +6,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
+import { AudioPlayerService } from 'app/components/audio-player/audio-player.service';
 import { AppState } from '../models/app-state';
 import { Entry } from '../models/entry';
 
@@ -22,7 +23,8 @@ export class HomeComponent implements OnInit {
   public entries: Entry[] = [];
 
   constructor(
-    private _cdr: ChangeDetectorRef
+    private _cdr: ChangeDetectorRef,
+    private _audioPlayerService: AudioPlayerService
   ) {
     this.searchInput = new FormControl('');
   }
@@ -44,7 +46,7 @@ export class HomeComponent implements OnInit {
   }
 
   getBgUrl(entry: Entry): string {
-    return `url(${entry.track.thumbnails ? entry.track.thumbnails[3] : entry.playlist.thumbnail})`;
+    return `url(${entry.track.thumbnails ? entry.track.thumbnails[4] ? entry.track.thumbnails[4] : entry.track.thumbnails[3] : entry.playlist.thumbnail})`;
   }
 
   onMouseEnter($event: Event, entry: Entry): void {
@@ -55,5 +57,9 @@ export class HomeComponent implements OnInit {
   onMouseLeave($event: Event, entry: Entry): void {
     console.log('onMouseLeave', $event, entry);
     ($event.target as HTMLDivElement).classList.toggle('onHover')
+  }
+
+  playback(entry: Entry): void {
+    this._audioPlayerService.onPlaybackTrack.next(entry.track);
   }
 }

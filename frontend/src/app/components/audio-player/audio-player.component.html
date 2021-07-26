@@ -1,0 +1,30 @@
+<div class="player" fxLayout="row" fxLayoutGap="12px">
+  <ng-container *ngIf="!cannotLoadAudio && track">
+    <div class="name" fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="12px">
+      <img [src]="trackCover" />
+      <div class="label" fxLayout="column" fxLayoutGap="3px">
+        <span class="name">{{ track.name }}</span>
+        <span class="author">{{ track.author }}</span>
+      </div>
+    </div>
+    <div class="controls" fxFlex fxLayout="column">
+      <div class="btns" fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="12px">
+        <mat-icon class="prew clickable">skip_previous</mat-icon>
+        <mat-icon class="play clickable" title="Play" [class.disabled]="!isReady()" (click)="play()" *ngIf="!isPlaying">play_arrow</mat-icon>
+        <mat-icon class="stop clickable" title="Stop" (click)="stop()" *ngIf="isPlaying">stop</mat-icon>
+        <mat-icon class="next clickable">skip_next</mat-icon>
+      </div>
+      <div class="" fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="8px">
+        <div class="duration">{{ elapsedTime }}</div>
+        <mat-progress-bar [mode]="isReady() ? 'determinate' : 'indeterminate'" [value]="elapsedTimeProgress" color="warn">
+        </mat-progress-bar>
+        <div class="duration">{{ duration * 1000 | date: 'mm:ss' }}</div>
+      </div>
+    </div>
+    <div class="volume"></div>
+  </ng-container>
+  <div class="error" fxLayout="row" fxLayoutAlign="space-between center" *ngIf="cannotLoadAudio">
+    <span>Cannot load audio file</span>
+    <mat-icon (click)="reloadAudio()">refresh</mat-icon>
+  </div>
+</div>

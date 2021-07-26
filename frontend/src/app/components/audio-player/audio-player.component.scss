@@ -1,0 +1,71 @@
+audio-player {
+  width: calc(100% - 32px);
+  height: 96px;
+  display: flex;
+  background: rgba(0, 0, 0, 0.75);
+  position: fixed;
+  border: 0;
+  bottom: 10px;
+  align-items: center;
+  border-radius: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 16px;
+  box-sizing: border-box;
+  z-index: 9999;
+
+  .player {
+    width: 100%;
+    color: #fff;
+
+    .name {
+      img {
+        height: 70px;
+        width: 70px;
+        border-radius: 8px;
+        object-fit: cover;
+      }
+
+      .label {
+        font-size: 0.75rem;
+
+        .author {
+          font-weight: 100;
+        }
+      }
+    }
+
+    .controls {
+      .btns {
+        margin-bottom: 8px;
+      }
+    }
+  }
+
+  .message-audio {
+    display: flex;
+    flex-direction: row;
+    width: 250px;
+    justify-content: space-evenly;
+    align-items: center;
+
+    .play,
+    .stop {
+      margin-right: 10px;
+      box-shadow: none !important;
+    }
+
+    .duration {
+      margin-left: 10px;
+    }
+
+    .error {
+      width: 100%;
+      color: #ffecb3;
+
+      mat-icon {
+        cursor: pointer;
+      }
+    }
+  }
+}
