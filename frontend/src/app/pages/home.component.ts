@@ -7,8 +7,8 @@ import {
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { AudioPlayerService } from 'app/components/audio-player/audio-player.service';
+import { Track, Entry } from '@models';
 import { AppState } from '../models/app-state';
-import { Entry } from '../models/entry';
 
 @Component({
   selector: 'app-home',
@@ -22,6 +22,20 @@ export class HomeComponent implements OnInit {
 
   public entries: Entry[] = [];
 
+  public inPlayback: Track = null;
+
+  public get inPlaybackTrackId(): string {
+    if(!this.inPlayback) {
+      return null;
+    }
+    return this.inPlayback.id;
+  }
+
+  public get isAudioPlayerPlaying(): boolean {
+    console.log(this._audioPlayerService)
+    return this._audioPlayerService.action === 'play';
+  }
+
   constructor(
     private _cdr: ChangeDetectorRef,
     private _audioPlayerService: AudioPlayerService
@@ -32,6 +46,16 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
     this.entries = (window.APP_STATE as AppState).entries;
     console.log(this.entries)
+
+    this._audioPlayerService.onPlayCmdTrack.subscribe(track => {
+      this.inPlayback = track;
+      this._cdr.detectChanges();
+    });
+
+    this._audioPlayerService.onStopCmdTrack.subscribe(track => {
+      this.inPlayback = null;
+      this._cdr.detectChanges();
+    });
   }
 
   clearSearch(): void {
@@ -60,6 +84,12 @@ export class HomeComponent implements OnInit {
   }
 
   playback(entry: Entry): void {
+    this.inPlayback = entry.track;
     this._audioPlayerService.onPlaybackTrack.next(entry.track);
+  }
+
+  stop(entry: Entry): void {
+    this.inPlayback = null;
+    this._audioPlayerService.onStopTrack.next(entry.track);
   }
 }

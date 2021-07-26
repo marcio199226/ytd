@@ -2,7 +2,7 @@ audio-player {
   width: calc(100% - 32px);
   height: 96px;
   display: flex;
-  background: rgba(0, 0, 0, 0.75);
+  background: rgba(0, 0, 0, 0.85);
   position: fixed;
   border: 0;
   bottom: 10px;
@@ -38,33 +38,6 @@ audio-player {
     .controls {
       .btns {
         margin-bottom: 8px;
-      }
-    }
-  }
-
-  .message-audio {
-    display: flex;
-    flex-direction: row;
-    width: 250px;
-    justify-content: space-evenly;
-    align-items: center;
-
-    .play,
-    .stop {
-      margin-right: 10px;
-      box-shadow: none !important;
-    }
-
-    .duration {
-      margin-left: 10px;
-    }
-
-    .error {
-      width: 100%;
-      color: #ffecb3;
-
-      mat-icon {
-        cursor: pointer;
       }
     }
   }

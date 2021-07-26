@@ -53,8 +53,22 @@ export class AudioPlayerComponent implements OnInit {
   ngOnInit(): void {
     this._audioPlayerService.onPlaybackTrack.pipe(filter(track => track !== null)).subscribe(track => {
       console.log('player treack', track)
+      if(this.track && this.track.id === track.id) {
+        this.play();
+        return;
+      }
+
+      if(this.audio) {
+        this.audio.pause();
+        this.audio = null;
+      }
+
       this.track = track;
       this._play(track);
+    })
+
+    this._audioPlayerService.onStopTrack.pipe(filter(track => track !== null)).subscribe(track => {
+      this.stop();
     })
   }
 
@@ -107,11 +121,13 @@ export class AudioPlayerComponent implements OnInit {
     this.onPlayAudio.emit();
     this.isPlaying = true;
     this.audio.play();
+    this._audioPlayerService.onPlayCmdTrack.next(this.track);
   }
 
   stop(): void {
     this.isPlaying = false;
     this.audio.pause();
+    this._audioPlayerService.onStopCmdTrack.next(this.track);
 
     this._cdr.detectChanges();
   }

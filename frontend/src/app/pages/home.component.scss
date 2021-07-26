@@ -14,15 +14,15 @@ app-home {
       overflow: hidden;
       background: #fff;
       @include mat-elevation(1);
-  
+
       @include media-breakpoint('xs') {
         width: auto;
       }
-  
+
       @media (max-width: 480px) {
         width: 100%;
       }
-  
+
       .search {
         width: 100%;
         height: 48px;
@@ -73,6 +73,10 @@ app-home {
       margin-bottom: 10px;
       border-radius: 8px;
 
+      &.lastOfRow {
+        margin-right: 0px !important;
+      }
+
       &.onHover {
         .fg {
           display: flex;
@@ -88,12 +92,41 @@ app-home {
         }
       }
 
+      &.playing {
+        .play {
+          display: none;
+        }
+      }
+
+      &:not(.playing) {
+        .stop {
+          display: none;
+        }
+      }
+
       .bg {
         background-repeat: no-repeat !important;
         background-size: cover !important;
         width: 100%;
         height: 100%;
         border-radius: 8px;
+      }
+
+      .title {
+        position: absolute;
+        bottom: 0;
+        border-bottom-left-radius: 8px;
+        border-bottom-right-radius: 8px;
+        text-align: center;
+        color: #fff;
+        background: rgba(0,0,0,0.5);
+        padding: 6px 12px;
+        display: flex;
+        align-items: center;
+        width: 100%;
+        justify-content: center;
+        box-sizing: border-box;
+        min-height: 52px;
       }
 
       .fg {
@@ -106,7 +139,7 @@ app-home {
           justify-content: space-between !important;
           padding: 0 16px;
 
-          .play {
+          .play,stop {
             font-size: 75px;
             height: 75px;
             line-height: 75px;
