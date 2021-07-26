@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "npx ng build --single-bundle true --output-hashing none --aot --build-optimizer --optimization --prod",
+    "build": "npx ng build --single-bundle true --output-hashing none --aot --build-optimizer --optimization --allowed-common-js-dependencies",
     "watch": "ng build --watch --configuration development",
     "serve": "npx --max_old_space_size=4096 ng serve --poll=2000 --host=0.0.0.0 --single-bundle",
     "test": "ng test"

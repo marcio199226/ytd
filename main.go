@@ -144,12 +144,12 @@ func (s *WailsRuntime) WailsShutdown() {
 func main() {
 
 	app := wails.CreateApp(&wails.AppConfig{
-		Width:  1024,
-		Height: 768,
-		Title:  "ytd",
-		JS:     js,
-		CSS:    css,
-		//HTML:             html,
+		Width:            1024,
+		Height:           768,
+		Title:            "ytd",
+		JS:               js,
+		CSS:              css,
+		HTML:             html,
 		Colour:           "#131313",
 		DisableInspector: false,
 	})
