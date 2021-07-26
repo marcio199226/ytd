@@ -20,6 +20,13 @@ if (environment.production) {
 }
 
 Wails.Init(() => {
-  platformBrowserDynamic().bootstrapModule(AppModule)
-    .catch(err => console.error(err));
+  // fetch app data from backend before ng app will be bootstraped
+  Wails.Events.Once('ytd:onload', ({ entries, config }) => {
+    window.APP_STATE = { entries, config };
+    //setTimeout(() => {
+      platformBrowserDynamic().bootstrapModule(AppModule)
+      .then(ngModule => Wails.Events.Emit('frontend:ready')) // notify wails about angular ready state
+      .catch(err => console.error(err));
+    //}, 500000)
+  })
 });

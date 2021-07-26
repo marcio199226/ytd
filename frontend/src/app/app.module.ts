@@ -11,6 +11,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { NG_EVENT_PLUGINS } from '@tinkoff/ng-event-plugins';
 
 
 @NgModule({
@@ -30,7 +31,10 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     MatIconModule,
     MatInputModule
   ],
-  providers: [{provide: APP_BASE_HREF, useValue : '/' }],
+  providers: [
+    {provide: APP_BASE_HREF, useValue : '/' },
+    NG_EVENT_PLUGINS
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

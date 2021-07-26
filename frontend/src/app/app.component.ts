@@ -10,10 +10,10 @@ export class AppComponent {
   title = 'frontend';
 
   ngOnInit() {
-    Wails.Events.On("ytd:onload", payload => {
+/*     Wails.Events.On("ytd:onload", payload => {
       console.log(payload);
       window.APP_STATE = payload;
-    })
+    }) */
 
     Wails.Events.On("ytd:track", payload => console.log(payload))
 

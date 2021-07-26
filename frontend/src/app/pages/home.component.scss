@@ -55,4 +55,65 @@ app-home {
       }
     }
   }
+
+  .entries {
+    margin-top: 20px;
+    padding: 16px;
+    overflow: auto;
+    max-height: calc(768px - 96px - 16px);
+
+    .entry {
+      position: relative;
+      flex: 1;
+      background: rgba(0, 0, 0, 0.3);
+      background-repeat: no-repeat !important;
+      background-size: cover !important;
+      min-width: 220px;
+      height: 250px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+
+      &.onHover {
+        .fg {
+          display: flex;
+          width: 100%;
+          height: 100%;
+          position: absolute;
+          z-index: 999;
+          background: rgba(0,0,0,0.6);
+          top: 0;
+          left: 0;
+          color: #fff;
+          border-radius: 8px;
+        }
+      }
+
+      .bg {
+        background-repeat: no-repeat !important;
+        background-size: cover !important;
+        width: 100%;
+        height: 100%;
+        border-radius: 8px;
+      }
+
+      .fg {
+        display: none;
+
+        .wrapper {
+          width: 100%;
+          display: flex;
+          align-items: center !important;
+          justify-content: space-between !important;
+          padding: 0 16px;
+
+          .play {
+            font-size: 75px;
+            height: 75px;
+            line-height: 75px;
+            width: 75px;
+          }
+        }
+      }
+    }
+  }
 }

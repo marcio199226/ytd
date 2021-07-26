@@ -15,4 +15,20 @@
   <mat-icon class="clickable white">settings</mat-icon>
 </header>
 
-<div class="" fxLayout="row wrap"></div>
+<div class="entries" fxLayout="row wrap" fxLayoutAlign="center start" fxLayoutGap="10px">
+  <div 
+    fxFlex
+    class="entry" 
+    [ngClass]="entry.type" *ngFor="let entry of entries; trackBy: trackById; let idx = index;"
+    (mouseenter.silent)="onMouseEnter($event, entry)"
+    (mouseleave.silent)="onMouseLeave($event, entry)">
+    <div class="bg" [ngStyle]="{'background': getBgUrl(entry)}"></div>
+    <div class="fg">
+      <div class="wrapper">
+        <mat-icon class="clickable">add</mat-icon>
+        <mat-icon class="clickable play">play_circle</mat-icon>
+        <mat-icon class="clickable">more_horiz</mat-icon>
+      </div>
+    </div>
+  </div>
+</div>
