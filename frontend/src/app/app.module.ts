@@ -10,8 +10,10 @@ import { HomeComponent } from './pages/home.component';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input'
-import { MatProgressBarModule } from '@angular/material/progress-bar'
+import { MatInputModule } from '@angular/material/input';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { NG_EVENT_PLUGINS } from '@tinkoff/ng-event-plugins';
 import { AudioPlayerComponent } from './components';
 
@@ -33,7 +35,9 @@ import { AudioPlayerComponent } from './components';
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
-    MatProgressBarModule
+    MatProgressBarModule,
+    MatProgressSpinnerModule,
+    MatSnackBarModule
   ],
   providers: [
     {provide: APP_BASE_HREF, useValue : '/' },

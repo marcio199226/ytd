@@ -9,6 +9,7 @@ import { FormControl } from '@angular/forms';
 import { AudioPlayerService } from 'app/components/audio-player/audio-player.service';
 import { Track, Entry } from '@models';
 import { AppState } from '../models/app-state';
+import * as Wails from '@wailsapp/runtime';
 
 @Component({
   selector: 'app-home',
@@ -31,11 +32,6 @@ export class HomeComponent implements OnInit {
     return this.inPlayback.id;
   }
 
-  public get isAudioPlayerPlaying(): boolean {
-    console.log(this._audioPlayerService)
-    return this._audioPlayerService.action === 'play';
-  }
-
   constructor(
     private _cdr: ChangeDetectorRef,
     private _audioPlayerService: AudioPlayerService
@@ -46,6 +42,26 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
     this.entries = (window.APP_STATE as AppState).entries;
     console.log(this.entries)
+
+
+    Wails.Events.On("ytd:track", (payload: Entry) => {
+      console.log("ytd:track", payload)
+      const entry = this.entries.find(e => e.track.id === payload.track.id);
+      if(entry) {
+        entry.track = payload.track;
+      } else {
+        this.entries.unshift(payload);
+      }
+      this._cdr.detectChanges();
+    });
+
+    Wails.Events.On("ytd:track:progress", ({ id, progress }) => {
+      const entry = this.entries.find(e => e.track.id === id);
+      entry.track.downloadProgress = progress;
+      this._cdr.detectChanges();
+    });
+
+    Wails.Events.On("ytd:playlist", payload => console.log(payload))
 
     this._audioPlayerService.onPlayCmdTrack.subscribe(track => {
       this.inPlayback = track;

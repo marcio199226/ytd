@@ -139,11 +139,38 @@ app-home {
           justify-content: space-between !important;
           padding: 0 16px;
 
-          .play,stop {
+          .play, .stop {
             font-size: 75px;
             height: 75px;
             line-height: 75px;
             width: 75px;
+          }
+
+          .progress-container {
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            flex: 1;
+            font-weight: bold;
+
+            .spinner-container {
+              position: relative;
+              margin-bottom: 1em;
+
+              .mat-progress-spinner {
+                margin: 0 auto;
+                circle {
+                  stroke: #fff;
+                }
+              }
+
+              span {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+              }
+            }
           }
         }
       }

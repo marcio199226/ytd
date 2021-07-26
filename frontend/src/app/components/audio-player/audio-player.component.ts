@@ -11,6 +11,7 @@ import {
 import { filter } from 'rxjs/operators'
 import { Track } from '@models';
 import { AudioPlayerService } from './audio-player.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'audio-player',
@@ -47,6 +48,7 @@ export class AudioPlayerComponent implements OnInit {
 
   constructor(
     private _cdr: ChangeDetectorRef,
+    private _snackbar: MatSnackBar,
     private _audioPlayerService: AudioPlayerService
   ) {}
 
@@ -63,6 +65,7 @@ export class AudioPlayerComponent implements OnInit {
         this.audio = null;
       }
 
+      this.cannotLoadAudio = false;
       this.track = track;
       this._play(track);
     })
@@ -96,6 +99,7 @@ export class AudioPlayerComponent implements OnInit {
 
     this.audio.onerror = (e) => {
       this.cannotLoadAudio = true;
+      this._snackbar.open('File not found');
       this._cdr.detectChanges();
     };
 

@@ -1,9 +1,9 @@
 <div class="player" fxLayout="row" fxLayoutGap="12px">
   <ng-container *ngIf="!cannotLoadAudio && track">
-    <div class="name" fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="12px">
+    <div class="name" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="12px">
       <img [src]="trackCover" />
       <div class="label" fxLayout="column" fxLayoutGap="3px">
-        <span class="name">{{ track.name }}</span>
+        <span class="title">{{ track.name }}</span>
         <span class="author">{{ track.author }}</span>
       </div>
     </div>

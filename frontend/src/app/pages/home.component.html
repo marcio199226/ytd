@@ -28,10 +28,20 @@
     <div class="title">{{ entry.track.name }}</div>
     <div class="fg">
       <div class="wrapper">
-        <mat-icon class="clickable">add</mat-icon>
-        <mat-icon class="clickable play" (click)="playback(entry)">play_circle</mat-icon>
-        <mat-icon class="clickable stop" (click)="stop(entry)">stop</mat-icon>
-        <mat-icon class="clickable">more_horiz</mat-icon>
+        <ng-container *ngIf="entry.track.downloaded">
+          <mat-icon class="clickable">add</mat-icon>
+          <mat-icon class="clickable play" (click)="playback(entry)">play_circle</mat-icon>
+          <mat-icon class="clickable stop" (click)="stop(entry)">stop</mat-icon>
+          <mat-icon class="clickable">more_horiz</mat-icon>
+        </ng-container>
+        <ng-container *ngIf="!entry.track.downloaded">
+          <div class="progress-container">
+            <div class="spinner-container">
+              <span>{{ entry.track.downloadProgress }}%</span>
+              <mat-progress-spinner mode="determinate" [value]="entry.track.downloadProgress"></mat-progress-spinner>
+            </div>
+          </div>
+        </ng-container>
       </div>
     </div>
   </div>

@@ -117,8 +117,6 @@ func readSettingValue(name string) (string, error) {
 
 func addToDownload(url string) error {
 	// usare lo logica di quando si riceve un copia
-	fmt.Println(appConfig)
-	return nil
 	for _, plugin := range plugins {
 		if support := plugin.Supports(url); support {
 			if appConfig.ConcurrentDownloads {
