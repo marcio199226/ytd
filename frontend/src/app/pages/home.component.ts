@@ -3,6 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   OnInit,
+  ViewChild,
   ViewEncapsulation,
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
@@ -13,6 +14,8 @@ import * as Wails from '@wailsapp/runtime';
 import { MatDialog } from '@angular/material/dialog';
 import { SettingsComponent } from 'app/components';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { MatMenu } from '@angular/material/menu';
 
 @Component({
   selector: 'app-home',
@@ -25,6 +28,9 @@ export class HomeComponent implements OnInit {
   public searchInput: FormControl;
 
   public entries: Entry[] = [];
+  public filteredEntries: Entry[] = [];
+
+  public onHoverEntry: Entry = null;
 
   public inPlayback: Track = null;
 
@@ -34,6 +40,11 @@ export class HomeComponent implements OnInit {
     }
     return this.inPlayback.id;
   }
+
+  @ViewChild('menu')
+  public matMenu: MatMenu = null;
+
+  public menuIsOpened: boolean = false;
 
   constructor(
     private _cdr: ChangeDetectorRef,
@@ -46,8 +57,7 @@ export class HomeComponent implements OnInit {
 
   ngOnInit(): void {
     this.entries = (window.APP_STATE as AppState).entries;
-    console.log(this.entries)
-
+    this.filteredEntries = this.entries;
 
     Wails.Events.On("ytd:track", (payload: Entry) => {
       console.log("ytd:track", payload)
@@ -77,6 +87,8 @@ export class HomeComponent implements OnInit {
       this.inPlayback = null;
       this._cdr.detectChanges();
     });
+
+    this._onSearch();
   }
 
   clearSearch(): void {
@@ -141,12 +153,21 @@ export class HomeComponent implements OnInit {
 
   onMouseEnter($event: Event, entry: Entry): void {
     console.log('onMouseEnter', $event, entry);
-    ($event.target as HTMLDivElement).classList.toggle('onHover')
+    this.onHoverEntry = entry;
+    if(this.menuIsOpened) {
+      return;
+    }
+    ($event.target as HTMLDivElement).classList.add('onHover')
   }
 
   onMouseLeave($event: Event, entry: Entry): void {
     console.log('onMouseLeave', $event, entry);
-    ($event.target as HTMLDivElement).classList.toggle('onHover')
+
+    this.onHoverEntry = null;
+    if(this.menuIsOpened) {
+      return;
+    }
+    ($event.target as HTMLDivElement).classList.remove('onHover')
   }
 
   playback(entry: Entry): void {
@@ -157,5 +178,43 @@ export class HomeComponent implements OnInit {
   stop(entry: Entry): void {
     this.inPlayback = null;
     this._audioPlayerService.onStopTrack.next(entry.track);
+  }
+
+  menuOpened(): void {
+    this.menuIsOpened = true;
+  }
+
+  menuClosed(): void {
+    this.menuIsOpened = false;
+    const onHoveredEntry = document.querySelector('.entry.onHover');
+    if(onHoveredEntry && !this.onHoverEntry) {
+      onHoveredEntry.classList.toggle('onHover')
+    }
+  }
+
+  private _onSearch(): void {
+    this.searchInput.valueChanges
+    .pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+    )
+    .subscribe((searchText: string) => {
+      console.log('searchText', searchText, !!searchText)
+
+      if(!!searchText === false) {
+        this.filteredEntries = this.entries;
+        this._cdr.detectChanges();
+        return;
+      }
+
+      searchText = searchText.toLowerCase();
+      this.filteredEntries = this.entries.filter(e => {
+        if(e.type === 'playlist') {
+          return e.playlist.name.toLowerCase().includes(searchText);
+        }
+        return e.track.author.toLowerCase().includes(searchText) || e.track.name.toLowerCase().includes(searchText)
+      });
+      this._cdr.detectChanges();
+    });
   }
 }

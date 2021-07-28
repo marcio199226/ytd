@@ -16,25 +16,46 @@
 </header>
 
 <div class="entries" fxLayout="row wrap" fxLayoutAlign="center start" fxLayoutGap="10px">
+  <mat-menu #menu="matMenu">
+    <ng-template matMenuContent let-entry="entry">
+      <button mat-menu-item>Remove {{ entry.type }}</button>
+      <button mat-menu-item *ngIf="entry.track.status === 'failed' || !entry.track.downloaded">Download</button>
+    </ng-template>
+  </mat-menu>
   <div
     fxFlex
     class="entry"
     [class.lastOfRow]="(idx + 1) % 4 === 0"
     [class.playing]="inPlaybackTrackId === entry.track?.id"
-    [ngClass]="entry.type" *ngFor="let entry of entries; trackBy: trackById; let idx = index;"
+    [ngClass]="entry.type" *ngFor="let entry of filteredEntries; trackBy: trackById; let idx = index;"
     (mouseenter.silent)="onMouseEnter($event, entry)"
     (mouseleave.silent)="onMouseLeave($event, entry)">
     <div class="bg" [ngStyle]="{'background': getBgUrl(entry)}"></div>
     <div class="title">{{ entry.track.name }}</div>
     <div class="fg">
       <div class="wrapper">
-        <ng-container *ngIf="entry.track.downloaded">
+        <ng-container *ngIf="entry.track.status === 'downloaded'">
           <mat-icon class="clickable">add</mat-icon>
           <mat-icon class="clickable play" (click)="playback(entry)">play_circle</mat-icon>
           <mat-icon class="clickable stop" (click)="stop(entry)">stop</mat-icon>
-          <mat-icon class="clickable">more_horiz</mat-icon>
+          <mat-icon class="clickable"
+            [matMenuTriggerFor]="menu"
+            [matMenuTriggerData]="{entry}"
+            (menuOpened)="menuOpened()"
+            (menuClosed)="menuClosed()">
+            more_horiz
+          </mat-icon>
         </ng-container>
-        <ng-container *ngIf="!entry.track.downloaded">
+        <ng-container *ngIf="entry.track.status === 'failed'">
+          <mat-icon class="clickable m-auto"
+            [matMenuTriggerFor]="menu"
+            [matMenuTriggerData]="{entry}"
+            (menuOpened)="menuOpened()"
+            (menuClosed)="menuClosed()">
+            more_horiz
+          </mat-icon>
+        </ng-container>
+        <ng-container *ngIf="entry.track.status !== 'failed' && !entry.track.downloaded">
           <div class="progress-container">
             <div class="spinner-container">
               <span>{{ entry.track.downloadProgress }}%</span>
