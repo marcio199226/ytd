@@ -22,7 +22,7 @@
       "dom"
     ],
     "paths": {
-      "@assets": ["../assets"],
+      "@assets": ["assets/"],
       "@models": ["app/models/"],
       "@pages": ["app/pages/"],
       "@components": ["app/components/"],

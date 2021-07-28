@@ -15,3 +15,24 @@ body {
 [hidden] {
   display: none;
 }
+
+.with-header-dialog {
+  .mat-dialog-container {
+    padding: 0;
+    border-radius: 16px;
+  }
+
+  .dialog-content-wrapper {
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .mat-toolbar {
+    .mat-form-field {
+      .mat-hint {
+        color: #fff;
+      }
+    }
+  }
+}

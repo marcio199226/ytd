@@ -8,10 +8,13 @@ import { environment } from './environments/environment';
 import 'zone.js'
 
 import * as Wails from '@wailsapp/runtime';
+import { AppState, BackendCallbacks } from '@models';
 
 declare global {
   interface Window {
-    [key: string]: any
+    [key: string]: any,
+    APP_STATE: AppState,
+    backend: BackendCallbacks
   }
 }
 

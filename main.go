@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -34,7 +35,8 @@ var js string
 //go:embed frontend/dist/styles.css
 var css string
 
-var appConfig AppConfig
+var appState *AppState
+var appConfig *AppConfig
 
 type AppState struct {
 	log     *wails.CustomLogger
@@ -68,8 +70,9 @@ func (state *AppState) WailsInit(runtime *wails.Runtime) error {
 		runtime.Events.Emit("ytd:onload", state)
 	})
 
-	appConfig = state.Config.Init()
-	state.Config = appConfig
+	appConfig := state.Config.Init()
+	state.Config = *appConfig
+	appState = state
 	fmt.Println("APP STATE INITIALIZED")
 
 	go func() {
@@ -86,6 +89,11 @@ func (state *AppState) GetAppConfig() AppConfig {
 	return state.Config
 }
 
+func (state *AppState) SelectDirectory() string {
+	selectedDirectory := state.runtime.Dialog.SelectDirectory()
+	return selectedDirectory
+}
+
 func (state *AppState) checkForTracksToDownload() error {
 	if state.Stats.DownloadingCount >= state.Config.MaxParrallelDownloads {
 		return nil
@@ -99,12 +107,54 @@ func (state *AppState) checkForTracksToDownload() error {
 	return nil
 }
 
-func saveSettingBoolValue(name string, val bool) error {
-	return DbSaveSettingBoolValue(name, val)
+func saveSettingBoolValue(name string, val bool) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovering from panic saveSettingValue:", r)
+			switch x := r.(type) {
+			case string:
+				err = errors.New(x)
+			case error:
+				err = x
+			default:
+				// Fallback err (per specs, error strings should be lowercase w/o punctuation
+				err = errors.New("unknown panic")
+			}
+		}
+	}()
+
+	error := DbSaveSettingBoolValue(name, val)
+	if err != nil {
+		return error
+	}
+
+	appState.Config.Set(name, val)
+	return nil
 }
 
-func saveSettingValue(name string, val string) error {
-	return DbWriteSetting(name, val)
+func saveSettingValue(name string, val string) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovering from panic saveSettingValue:", r)
+			switch x := r.(type) {
+			case string:
+				err = errors.New(x)
+			case error:
+				err = x
+			default:
+				// Fallback err (per specs, error strings should be lowercase w/o punctuation
+				err = errors.New("unknown panic")
+			}
+		}
+	}()
+
+	error := DbWriteSetting(name, val)
+	if err != nil {
+		return error
+	}
+
+	appState.Config.Set(name, val)
+	return nil
 }
 
 func readSettingBoolValue(name string) (bool, error) {
@@ -116,10 +166,9 @@ func readSettingValue(name string) (string, error) {
 }
 
 func addToDownload(url string) error {
-	// usare lo logica di quando si riceve un copia
 	for _, plugin := range plugins {
 		if support := plugin.Supports(url); support {
-			if appConfig.ConcurrentDownloads {
+			if appState.GetAppConfig().ConcurrentDownloads {
 				go func() {
 					plugin.Fetch(url)
 				}()

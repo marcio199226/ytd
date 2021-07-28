@@ -1,0 +1,43 @@
+<div class="dialog-content-wrapper">
+  <mat-toolbar>
+    <mat-toolbar-row fxFlex fxLayout="row" fxLayoutAlign="space-between center">
+      <span class="title dialog-title">
+        Settings
+      </span>
+      <button mat-icon-button (click)="close()" >
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-toolbar-row>
+  </mat-toolbar>
+
+  <div mat-dialog-content fxLayout="column" fxLayoutGap="12px">
+    <mat-form-field appearance="fill">
+      <mat-label>Save tracks to directory</mat-label>
+      <input matInput readonly [(ngModel)]="model.BaseSaveDir" required>
+      <button mat-icon-button matSuffix (click)="changeBaseSaveDir()">
+        <mat-icon>edit</mat-icon>
+      </button>
+      <mat-hint>Directory where all tracks will be saved</mat-hint>
+    </mat-form-field>
+    <mat-form-field appearance="fill">
+      <mat-label>Max simultaneous downloads</mat-label>
+      <input matInput type="number" min="1" max="10" [(ngModel)]="model.MaxParrallelDownloads">
+      <mat-hint>Max number of tracks that will be downloaded simultaneously</mat-hint>
+    </mat-form-field>
+    <mat-slide-toggle [(ngModel)]="model.ClipboardWatch">
+      Clipboard watch
+    </mat-slide-toggle>
+    <mat-slide-toggle [(ngModel)]="model.DownloadOnCopy" [disabled]="!model.ClipboardWatch">
+      Download on copy
+    </mat-slide-toggle>
+    <mat-slide-toggle [(ngModel)]="model.ConcurrentDownloads">
+      Concurrent downloads
+    </mat-slide-toggle>
+    <mat-slide-toggle [(ngModel)]="model.ConcurrentPlaylistDownloads">
+      Concurrent playlist downloads
+    </mat-slide-toggle>
+  </div>
+  <div mat-dialog-actions>
+    <button mat-flat-button color="primary" (click)="save()">Save</button>
+  </div>
+</div>

@@ -8,21 +8,26 @@ import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HomeComponent } from './pages/home.component';
 import { FlexLayoutModule } from '@angular/flex-layout';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatSnackBarModule, MAT_SNACK_BAR_DEFAULT_OPTIONS } from '@angular/material/snack-bar';
+import { MatToolbarModule } from '@angular/material/toolbar';
 import { NG_EVENT_PLUGINS } from '@tinkoff/ng-event-plugins';
-import { AudioPlayerComponent } from './components';
+import { AudioPlayerComponent, SettingsComponent } from './components';
 
 
 @NgModule({
   declarations: [
     AppComponent,
     HomeComponent,
-    AudioPlayerComponent
+    AudioPlayerComponent,
+    SettingsComponent
   ],
   imports: [
     BrowserModule,
@@ -32,16 +37,21 @@ import { AudioPlayerComponent } from './components';
     FormsModule,
     ReactiveFormsModule,
     FlexLayoutModule,
+    MatButtonModule,
+    MatDialogModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
     MatProgressBarModule,
     MatProgressSpinnerModule,
-    MatSnackBarModule
+    MatSlideToggleModule,
+    MatSnackBarModule,
+    MatToolbarModule
   ],
   providers: [
     {provide: APP_BASE_HREF, useValue : '/' },
-    NG_EVENT_PLUGINS
+    NG_EVENT_PLUGINS,
+    { provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: { duration: 5000 } }
   ],
   bootstrap: [AppComponent]
 })

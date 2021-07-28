@@ -8,8 +8,11 @@ import {
 import { FormControl } from '@angular/forms';
 import { AudioPlayerService } from 'app/components/audio-player/audio-player.service';
 import { Track, Entry } from '@models';
-import { AppState } from '../models/app-state';
+import { AppConfig, AppState } from '../models/app-state';
 import * as Wails from '@wailsapp/runtime';
+import { MatDialog } from '@angular/material/dialog';
+import { SettingsComponent } from 'app/components';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-home',
@@ -34,6 +37,8 @@ export class HomeComponent implements OnInit {
 
   constructor(
     private _cdr: ChangeDetectorRef,
+    private _dialog: MatDialog,
+    private _snackbar: MatSnackBar,
     private _audioPlayerService: AudioPlayerService
   ) {
     this.searchInput = new FormControl('');
@@ -76,6 +81,51 @@ export class HomeComponent implements OnInit {
 
   clearSearch(): void {
     this.searchInput.setValue('');
+  }
+
+  openSettings(): void {
+    const dialogRef = this._dialog.open(SettingsComponent, {
+      autoFocus: false,
+      panelClass: ['settings-dialog',  'with-header-dialog'],
+      width: '600px',
+      maxHeight: '700px',
+      data: { config: window.APP_STATE.config }
+    });
+
+    dialogRef.afterClosed().subscribe(async (result: { config: AppConfig }) => {
+      if(!result) {
+        return;
+      }
+
+      const { config } = result;
+      // put all for into try/catch block and open snackbar with error if something fails
+      try {
+        for (const [key, value] of Object.entries(config)) {
+          switch(key) {
+            case 'BaseSaveDir':
+              await window.backend.saveSettingValue(key, value as string);
+            break;
+
+            case 'ClipboardWatch':
+            case 'DownloadOnCopy':
+            case 'ConcurrentDownloads':
+            case 'ConcurrentPlaylistDownloads':
+              await window.backend.saveSettingBoolValue(key, value as boolean);
+            break;
+
+            case 'MaxParrallelDownloads':
+              await window.backend.saveSettingValue(key, `${value}`);
+            break;
+          }
+        }
+
+        // if no errors save new config without retrieve it from backend again (we load app state only once when app is launched)
+        window.APP_STATE.config = config;
+        this._snackbar.open("Settings has been saved");
+      } catch(e) {
+        this._snackbar.open("An error occured while saving settings");
+      }
+    });
   }
 
   trackById(idx: number, entry: Entry): string {
