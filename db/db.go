@@ -82,6 +82,18 @@ func DbWriteEntry(Key string, value interface{}) error {
 	return err
 }
 
+func DbDeleteEntry(Key string) error {
+	err := db.Update(
+		func(tx *nutsdb.Tx) error {
+			key := []byte(Key)
+			if err := tx.Delete(entriesBucketName, key); err != nil {
+				return err
+			}
+			return nil
+		})
+	return err
+}
+
 //DbWriteSetting .
 func DbWriteSetting(Name string, value string) error {
 	err := db.Update(

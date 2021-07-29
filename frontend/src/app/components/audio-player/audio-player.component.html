@@ -1,5 +1,5 @@
 <div class="player" fxLayout="row" fxLayoutGap="12px">
-  <ng-container *ngIf="!cannotLoadAudio && track">
+  <ng-container *ngIf="track">
     <div class="name" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="12px">
       <img [src]="trackCover" />
       <div class="label" fxLayout="column" fxLayoutGap="3px">
@@ -23,8 +23,4 @@
     </div>
     <div class="volume"></div>
   </ng-container>
-  <div class="error" fxLayout="row" fxLayoutAlign="space-between center" *ngIf="cannotLoadAudio">
-    <span>Cannot load audio file</span>
-    <mat-icon (click)="reloadAudio()">refresh</mat-icon>
-  </div>
 </div>

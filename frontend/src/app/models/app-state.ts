@@ -25,4 +25,5 @@ export interface BackendCallbacks {
   readSettingValue: (name: string) => Promise<any>;
   saveSettingBoolValue: (name: string, val: boolean) => Promise<any>;
   saveSettingValue: (name: string, val: string) => Promise<any>;
+  removeEntry: (entry: Entry) => Promise<any>
 }

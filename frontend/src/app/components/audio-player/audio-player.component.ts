@@ -38,8 +38,6 @@ export class AudioPlayerComponent implements OnInit {
 
   public elapsedTimeProgress: number = null;
 
-  public cannotLoadAudio: boolean = false;
-
   public get trackCover(): string {
     return this.track.thumbnails[3];
   }
@@ -65,7 +63,6 @@ export class AudioPlayerComponent implements OnInit {
         this.audio = null;
       }
 
-      this.cannotLoadAudio = false;
       this.track = track;
       this._play(track);
     })
@@ -98,16 +95,14 @@ export class AudioPlayerComponent implements OnInit {
     };
 
     this.audio.onerror = (e) => {
-      this.cannotLoadAudio = true;
-      this._snackbar.open('File not found');
-      this._cdr.detectChanges();
+      this.track = null;
+      this._snackbar.open("Cannot playback probably track's file does not exists");
     };
 
     this.play();
   }
 
   reloadAudio(): void {
-    this.cannotLoadAudio = false;
     this.audio.load();
   }
 

@@ -78,7 +78,7 @@ app-home {
         margin-right: 0px !important;
       }
 
-      &.onHover {
+      &.onHover, &.playing, &.downloading {
         .fg {
           display: flex;
           width: 100%;

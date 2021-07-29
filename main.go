@@ -19,6 +19,7 @@ import (
 
 	_ "embed"
 
+	"github.com/mitchellh/mapstructure"
 	"github.com/wailsapp/wails"
 	"github.com/xujiajun/nutsdb"
 )
@@ -165,6 +166,25 @@ func readSettingValue(name string) (string, error) {
 	return DbReadSetting(name)
 }
 
+func removeEntry(record map[string]interface{}) error {
+	var err error
+	var entry GenericEntry
+	err = mapstructure.Decode(record, &entry)
+	if err != nil {
+		return err
+	}
+
+	if entry.Type == "track" {
+		if err = DbDeleteEntry(entry.Track.ID); err == nil {
+			err = os.Remove(fmt.Sprintf("%s/%s/%s.webm", appState.Config.BaseSaveDir, entry.Source, entry.Track.ID))
+			if os.IsNotExist(err) {
+				return nil
+			}
+		}
+	}
+	return err
+}
+
 func addToDownload(url string) error {
 	for _, plugin := range plugins {
 		if support := plugin.Supports(url); support {
@@ -207,6 +227,7 @@ func main() {
 	app.Bind(saveSettingValue)
 	app.Bind(readSettingBoolValue)
 	app.Bind(readSettingValue)
+	app.Bind(removeEntry)
 	app.Bind(addToDownload)
 
 	wg := &sync.WaitGroup{}

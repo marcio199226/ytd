@@ -192,6 +192,25 @@ export class HomeComponent implements OnInit {
     }
   }
 
+  async remove(entry: Entry, i: number): Promise<void> {
+    console.log('remove', entry, i)
+    try {
+      await window.backend.removeEntry(entry);
+      this._snackbar.open(`${entry.type} has been removed`);
+      const idx = this.entries.findIndex(e => {
+        if(entry.type === 'playlist') {
+          return e.playlist.id === entry.playlist.id;
+        }
+        return e.track.id === entry.track.id;
+      })
+      this.entries.splice(idx, 1);
+      this.filteredEntries = this.entries;
+      //this._cdr.detectChanges();
+    } catch(e) {
+      this._snackbar.open(`Cannot delete`);
+    }
+  }
+
   private _onSearch(): void {
     this.searchInput.valueChanges
     .pipe(
