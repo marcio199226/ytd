@@ -3,6 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   EventEmitter,
+  HostBinding,
   Input,
   OnInit,
   Output,
@@ -19,11 +20,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   styleUrls: ['./audio-player.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: {
-    '[hidden]': '!track'
-  },
 })
 export class AudioPlayerComponent implements OnInit {
+
   public track: Track = null;
 
   public audio: HTMLAudioElement = null;
@@ -52,7 +51,6 @@ export class AudioPlayerComponent implements OnInit {
 
   ngOnInit(): void {
     this._audioPlayerService.onPlaybackTrack.pipe(filter(track => track !== null)).subscribe(track => {
-      console.log('player treack', track)
       if(this.track && this.track.id === track.id) {
         this.play();
         return;
@@ -132,7 +130,7 @@ export class AudioPlayerComponent implements OnInit {
   }
 
   isReady(): Boolean {
-    return this.audio && this.canPlay;
+    return this.audio && this.audio.readyState === 4;
   }
 
   ngOnDestroy(): void {

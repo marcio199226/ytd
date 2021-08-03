@@ -20,7 +20,9 @@ export interface BackendCallbacks {
     GetAppConfig: () => Promise<any>;
     SelectDirectory: () => Promise<string>
   }
-  addToDownload: (url: string) => Promise<any>;
+  isSupportedUrl: (url: string) => Promise<boolean>;
+  addToDownload: (url: string, isFromClipboard: boolean) => Promise<any>;
+  startDownload: (entry: Entry) => Promise<any>;
   readSettingBoolValue: (name: string) => Promise<any>;
   readSettingValue: (name: string) => Promise<any>;
   saveSettingBoolValue: (name: string, val: boolean) => Promise<any>;

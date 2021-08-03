@@ -7,7 +7,7 @@ app-home {
     height: 96px;
     background: rgba(0, 0, 0, 0.2);
 
-    .search-wrapper {
+    .input-wrapper {
       width: 100%;
       max-width: 480px;
       border-radius: 28px;
@@ -15,15 +15,21 @@ app-home {
       background: #fff;
       @include mat-elevation(1);
 
-      @include media-breakpoint('xs') {
-        width: auto;
+      &.paste {
+        transition: width 0.4s;
+        width: 210px;
+
+        &.focused {
+          position: absolute;
+          left: 0;
+          z-index: 9;
+          width: calc(100% - 32px);
+          max-width: 100%;
+          margin: 0 16px;
+        }
       }
 
-      @media (max-width: 480px) {
-        width: 100%;
-      }
-
-      .search {
+      .input {
         width: 100%;
         height: 48px;
         line-height: 48px;

@@ -5,6 +5,7 @@ import (
 	"os/user"
 	"reflect"
 	"strconv"
+	"sync"
 	_ "unsafe"
 )
 
@@ -15,6 +16,23 @@ func dbReadSettingBoolValue(name string) (bool, error)
 //go:noescape
 //go:linkname dbReadSetting ytd/db.DbReadSetting
 func dbReadSetting(Name string) (string, error)
+
+type AppStats struct {
+	sync.Mutex
+	DownloadingCount uint
+}
+
+func (stats *AppStats) IncDndCount() {
+	stats.Lock()
+	defer stats.Unlock()
+	stats.DownloadingCount++
+}
+
+func (stats *AppStats) DecDndCount() {
+	stats.Lock()
+	defer stats.Unlock()
+	stats.DownloadingCount--
+}
 
 type AppConfig struct {
 	ClipboardWatch              bool
@@ -37,10 +55,11 @@ func NewAppConfig(watch bool, dldOnCopy bool, cDownloads bool, cPlaylistDownload
 	}
 }
 
-func (cfg AppConfig) Init() *AppConfig {
+func (cfg *AppConfig) Init() *AppConfig {
 	usr, _ := user.Current()
 	defaultAppCfg := NewAppConfig(true, true, true, true, 3, fmt.Sprintf("%v/songs", usr.HomeDir))
 
+	cfg = new(AppConfig)
 	cfg.ClipboardWatch = getConfigValue(defaultAppCfg, "ClipboardWatch").(bool)
 	cfg.DownloadOnCopy = getConfigValue(defaultAppCfg, "DownloadOnCopy").(bool)
 	cfg.ConcurrentDownloads = getConfigValue(defaultAppCfg, "ConcurrentDownloads").(bool)
@@ -48,7 +67,7 @@ func (cfg AppConfig) Init() *AppConfig {
 	cfg.MaxParrallelDownloads = getConfigValue(defaultAppCfg, "MaxParrallelDownloads").(uint)
 	cfg.BaseSaveDir = getConfigValue(defaultAppCfg, "BaseSaveDir").(string)
 
-	return &cfg
+	return cfg
 }
 
 func (cfg *AppConfig) Set(name string, val interface{}) error {

@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   OnInit,
   ViewChild,
   ViewEncapsulation,
@@ -27,6 +28,8 @@ import { MatMenu } from '@angular/material/menu';
 export class HomeComponent implements OnInit {
   public searchInput: FormControl;
 
+  public urlInput: FormControl;
+
   public entries: Entry[] = [];
   public filteredEntries: Entry[] = [];
 
@@ -41,6 +44,16 @@ export class HomeComponent implements OnInit {
     return this.inPlayback.id;
   }
 
+  public get isClipboardWatchEnabled(): boolean {
+    return window.APP_STATE.config.ClipboardWatch;
+  }
+
+  @ViewChild('pasteWrapper')
+  public pasteWrapper: ElementRef<HTMLDivElement> = null;
+
+  @ViewChild('pasteInput')
+  public pasteInput: ElementRef<HTMLInputElement> = null;
+
   @ViewChild('menu')
   public matMenu: MatMenu = null;
 
@@ -53,6 +66,7 @@ export class HomeComponent implements OnInit {
     private _audioPlayerService: AudioPlayerService
   ) {
     this.searchInput = new FormControl('');
+    this.urlInput = new FormControl('');
   }
 
   ngOnInit(): void {
@@ -134,6 +148,7 @@ export class HomeComponent implements OnInit {
         // if no errors save new config without retrieve it from backend again (we load app state only once when app is launched)
         window.APP_STATE.config = config;
         this._snackbar.open("Settings has been saved");
+        this._cdr.detectChanges();
       } catch(e) {
         this._snackbar.open("An error occured while saving settings");
       }
@@ -152,7 +167,6 @@ export class HomeComponent implements OnInit {
   }
 
   onMouseEnter($event: Event, entry: Entry): void {
-    console.log('onMouseEnter', $event, entry);
     this.onHoverEntry = entry;
     if(this.menuIsOpened) {
       return;
@@ -161,8 +175,6 @@ export class HomeComponent implements OnInit {
   }
 
   onMouseLeave($event: Event, entry: Entry): void {
-    console.log('onMouseLeave', $event, entry);
-
     this.onHoverEntry = null;
     if(this.menuIsOpened) {
       return;
@@ -189,6 +201,39 @@ export class HomeComponent implements OnInit {
     const onHoveredEntry = document.querySelector('.entry.onHover');
     if(onHoveredEntry && !this.onHoverEntry) {
       onHoveredEntry.classList.toggle('onHover')
+    }
+  }
+
+  async addToDownload(): Promise<void> {
+    const url = this.urlInput.value;
+    if(!url) {
+      return;
+    }
+
+    const isSupported = await window.backend.isSupportedUrl(url);
+    if(!isSupported) {
+      this._snackbar.open('Unsupported url');
+      return
+    }
+
+    try {
+      await window.backend.addToDownload(url, false)
+      this.urlInput.setValue('');
+      this.pasteInput.nativeElement.blur();
+      this.pasteWrapper.nativeElement.classList.remove('focused');
+      this._snackbar.open('Track added to download');
+    } catch(e) {
+      console.log(e);
+      this._snackbar.open('Error while adding track to downloads');
+    }
+  }
+
+  async startDownload(entry: Entry): Promise<void> {
+    try {
+      await window.backend.startDownload(entry);
+      this._snackbar.open("Started downloading");
+    } catch(e) {
+      this._snackbar.open("Cannot download");
     }
   }
 

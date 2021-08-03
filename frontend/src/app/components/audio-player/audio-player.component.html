@@ -1,4 +1,4 @@
-<div class="player" fxLayout="row" fxLayoutGap="12px">
+<div class="player" fxLayout="row" fxLayoutGap="12px" [hidden]="!track">
   <ng-container *ngIf="track">
     <div class="name" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="12px">
       <img [src]="trackCover" />

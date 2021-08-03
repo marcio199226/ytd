@@ -13,7 +13,7 @@ body {
 }
 
 [hidden] {
-  display: none;
+  display: none !important;
 }
 
 .with-header-dialog {
