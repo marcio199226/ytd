@@ -75,7 +75,7 @@
             download
           </mat-icon>
         </ng-container>
-        <ng-container *ngIf="entry.track.status === 'downloading' && !entry.track.downloaded">
+        <ng-container *ngIf="entry.track.status === 'downloading'">
           <div class="progress-container">
             <div class="spinner-container">
               <span>{{ entry.track.downloadProgress }}%</span>

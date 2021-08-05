@@ -19,5 +19,12 @@ settings {
     .mat-toolbar {
       background: transparent;
     }
+
+    .toggle-wrapper {
+      .warning {
+        font-weight: bold;
+        padding-left: 44px;
+      }
+    }
   }
 }

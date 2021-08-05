@@ -3,6 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef,
+  Inject,
   OnInit,
   ViewChild,
   ViewEncapsulation,
@@ -17,6 +18,7 @@ import { SettingsComponent } from 'app/components';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { MatMenu } from '@angular/material/menu';
+import { DOCUMENT } from '@angular/common';
 
 @Component({
   selector: 'app-home',
@@ -61,6 +63,7 @@ export class HomeComponent implements OnInit {
 
   constructor(
     private _cdr: ChangeDetectorRef,
+    @Inject(DOCUMENT) private _document: Document,
     private _dialog: MatDialog,
     private _snackbar: MatSnackBar,
     private _audioPlayerService: AudioPlayerService
@@ -136,6 +139,8 @@ export class HomeComponent implements OnInit {
             case 'DownloadOnCopy':
             case 'ConcurrentDownloads':
             case 'ConcurrentPlaylistDownloads':
+            case 'ConvertToMp3':
+            case 'CleanWebmFiles':
               await window.backend.saveSettingBoolValue(key, value as boolean);
             break;
 
@@ -198,7 +203,7 @@ export class HomeComponent implements OnInit {
 
   menuClosed(): void {
     this.menuIsOpened = false;
-    const onHoveredEntry = document.querySelector('.entry.onHover');
+    const onHoveredEntry = this._document.querySelector('.entry.onHover');
     if(onHoveredEntry && !this.onHoverEntry) {
       onHoveredEntry.classList.toggle('onHover')
     }
@@ -233,7 +238,7 @@ export class HomeComponent implements OnInit {
       await window.backend.startDownload(entry);
       this._snackbar.open("Started downloading");
     } catch(e) {
-      this._snackbar.open("Cannot download");
+      this._snackbar.open(e);
     }
   }
 

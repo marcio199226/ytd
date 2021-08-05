@@ -7,6 +7,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import to from 'await-to-js';
 import { AppConfig } from '@models';
 
 @Component({
@@ -24,7 +25,11 @@ export class SettingsComponent implements OnInit {
     ConcurrentPlaylistDownloads: null,
     DownloadOnCopy: null,
     MaxParrallelDownloads: null,
+    ConvertToMp3: null,
+    CleanWebmFiles: null,
   };
+
+  public isFfmpegAvailable: boolean = false;
 
   constructor(
     private _cdr: ChangeDetectorRef,
@@ -33,12 +38,18 @@ export class SettingsComponent implements OnInit {
   ) {
   }
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.model = { ...this.data.config };
+    const [err, path] = await to(window.backend.isFFmpegInstalled());
+    if(path) {
+      this.isFfmpegAvailable = true;
+      this._cdr.detectChanges();
+    }
   }
 
-  changeBaseSaveDir(): void {
-
+  async changeBaseSaveDir(): Promise<void> {
+    const [err, path] = await to(window.backend.AppState.SelectDirectory());
+    console.log(err, path)
   }
 
   save(): void {

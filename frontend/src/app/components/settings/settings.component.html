@@ -21,7 +21,7 @@
     </mat-form-field>
     <mat-form-field appearance="fill">
       <mat-label>Max simultaneous downloads</mat-label>
-      <input matInput type="number" min="1" max="10" [(ngModel)]="model.MaxParrallelDownloads">
+      <input matInput type="number" min="0" max="10" [(ngModel)]="model.MaxParrallelDownloads">
       <mat-hint>Max number of tracks that will be downloaded simultaneously</mat-hint>
     </mat-form-field>
     <mat-slide-toggle [(ngModel)]="model.ClipboardWatch">
@@ -36,6 +36,22 @@
     <mat-slide-toggle [(ngModel)]="model.ConcurrentPlaylistDownloads">
       Concurrent playlist downloads
     </mat-slide-toggle>
+    <div class="toggle-wrapper" fxLayout="column" fxLayoutGap="5px">
+      <mat-slide-toggle [(ngModel)]="model.ConvertToMp3" [disabled]="!isFfmpegAvailable">
+        Convert to mp3 in background
+      </mat-slide-toggle>
+      <div class="warning" *ngIf="!isFfmpegAvailable">
+        You have to install ffmpeg tool on your system to enable this option
+      </div>
+    </div>
+    <div class="toggle-wrapper" fxLayout="column" fxLayoutGap="5px">
+      <mat-slide-toggle [(ngModel)]="model.CleanWebmFiles" [disabled]="!isFfmpegAvailable || !model.ConvertToMp3">
+        Remove webm files after converting to mp3 (disk space saving)
+      </mat-slide-toggle>
+      <div class="warning" *ngIf="!model.ConvertToMp3">
+        You have to enable "Converto to mp3" option before
+      </div>
+    </div>
   </div>
   <div mat-dialog-actions>
     <button mat-flat-button color="primary" (click)="save()">Save</button>

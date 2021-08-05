@@ -61,6 +61,17 @@ func (yt *Yt) SetDir(dir string) {
 	}
 }
 
+func (yt *Yt) GetDir() string {
+	return yt.dir
+}
+
+func (yt *Yt) IsTrackFileExists(track GenericTrack, fileType string) bool {
+	if _, err := os.Stat(fmt.Sprintf("%s/%s.%s", yt.dir, track.ID, fileType)); os.IsNotExist(err) {
+		return false
+	}
+	return true
+}
+
 func (yt *Yt) Fetch(url string, isFromClipboard bool) {
 	fmt.Printf("Fetching from yt %s...", url)
 
@@ -113,7 +124,6 @@ func (yt *Yt) Fetch(url string, isFromClipboard bool) {
 				yt.WailsRuntime.Events.Emit("ytd:track", ytEntry)
 				continue
 			}
-			ytEntry.Track.Downloaded = true
 			ytEntry.Track.Status = TrackStatusDownladed
 
 			DbWriteEntry(ytEntry.Track.ID, ytEntry)
@@ -169,7 +179,6 @@ func (yt *Yt) fetchTrack(url string, isFromClipboard bool) {
 		yt.WailsRuntime.Events.Emit("ytd:track", ytEntry)
 		return
 	}
-	ytEntry.Track.Downloaded = true
 	ytEntry.Track.Status = TrackStatusDownladed
 	DbWriteEntry(ytEntry.Track.ID, ytEntry)
 	yt.WailsRuntime.Events.Emit("ytd:track", ytEntry)
@@ -197,7 +206,6 @@ func (yt *Yt) StartDownload(ytEntry *GenericEntry) GenericEntry {
 		yt.WailsRuntime.Events.Emit("ytd:track", ytEntry)
 		return *ytEntry
 	}
-	ytEntry.Track.Downloaded = true
 	ytEntry.Track.Status = TrackStatusDownladed
 	DbWriteEntry(ytEntry.Track.ID, ytEntry)
 	yt.WailsRuntime.Events.Emit("ytd:track", ytEntry)

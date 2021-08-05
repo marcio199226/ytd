@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"os/signal"
 	"os/user"
 	"sync"
@@ -27,9 +28,6 @@ import (
 
 var wailsRuntime *wails.Runtime
 var plugins []Plugin = []Plugin{&Yt{Name: "youtube"}}
-
-//go:embed frontend/dist/index.html
-var html string
 
 //go:embed frontend/dist/main.js
 var js string
@@ -65,6 +63,7 @@ func (state *AppState) WailsInit(runtime *wails.Runtime) error {
 	// this is sync so it blocks until finished and wails:loaded are not dispatched until this finishes
 	runtime.Events.On("wails:loaded", func(...interface{}) {
 		// entries := DbGetAllEntries()
+		time.Sleep(100 * time.Millisecond)
 		fmt.Println("EMIT YTD:ONLOAD")
 		runtime.Events.Emit("ytd:onload", state)
 	})
@@ -76,10 +75,25 @@ func (state *AppState) WailsInit(runtime *wails.Runtime) error {
 	}
 	fmt.Println("APP STATE INITIALIZED")
 
-	go func() {
+	/* 	go func() {
 		for {
 			time.Sleep(10 * time.Second)
 			state.checkForTracksToDownload()
+		}
+	}() */
+
+	go func() {
+		restart := make(chan int)
+		time.Sleep(3 * time.Second)
+		go state.convertToMp3(restart)
+
+		for {
+			select {
+			case <-restart:
+				fmt.Println("Restart converting...")
+				go state.convertToMp3(restart)
+			}
+
 		}
 	}()
 
@@ -111,33 +125,87 @@ func (state *AppState) checkForTracksToDownload() error {
 	}
 
 	fmt.Printf("Checking...%d entries\n", len(state.Entries))
-	for _, t := range state.Entries {
+	// range over DbGetAllEntries()
+	for _, t := range DbGetAllEntries() {
 		var freeSlots uint = state.Config.MaxParrallelDownloads - state.Stats.DownloadingCount
+		entry := t
 		// auto download only tracks with processing status
 		// if track has pending/failed status it means that something goes wrong so user have to download it manually from UI
-		if t.Type == "track" && t.Track.Status == TrackStatusProcessing {
+		if entry.Type == "track" && entry.Track.Status == TrackStatusProcessing {
 			if freeSlots == 0 {
 				return nil
 			}
 
 			// start download for track
-			fmt.Printf("Found %s to download\n", t.Track.Name)
-			plugin := getPluginFor(t.Source)
+			fmt.Printf("Found %s to download\n", entry.Track.Name)
+			plugin := getPluginFor(entry.Source)
 			// make chan GenericEntry
 			// goriutine scrive li dentro
 			if plugin != nil {
-				/* 				go func() {
-					storedEntry := state.GetEntryById(t)
-					fmt.Printf("Stored entry %v\n", storedEntry)
-					entry := plugin.StartDownload(&t)
-					storedEntry.Track = entry.Track
-				}() */
+				freeSlots--
+				go func(entry GenericEntry) {
+					// storedEntry := state.GetEntryById(entry)
+					// fmt.Printf("Stored entry %v\n", storedEntry)
+					// fmt.Println(entry.Track.Url)
+					// fmt.Println(storedEntry.Track.Url)
+					plugin.StartDownload(&entry)
+					// storedEntry.Track = entry.Track
+				}(entry)
 			}
-			freeSlots--
 		}
 	}
 
 	// qui un for che legge dal channel e ogni volta che riceve una entry downloadata
+	return nil
+}
+
+func (state *AppState) convertToMp3(restart chan<- int) error {
+	if !state.Config.ConvertToMp3 {
+		// if option is not enabled restart check after 30s
+		time.Sleep(30 * time.Second)
+		restart <- 1
+		return nil
+	}
+
+	fmt.Println("Converting....")
+	ffmpeg, _ := isFFmpegInstalled()
+
+	for _, t := range DbGetAllEntries() {
+		entry := t
+		plugin := getPluginFor(entry.Source)
+
+		if entry.Type == "track" && entry.Track.Status == TrackStatusDownladed && !entry.Track.IsConvertedToMp3 && plugin.IsTrackFileExists(entry.Track, "webm") {
+			fmt.Printf("Extracting audio for %s...\n", entry.Track.Name)
+
+			// ffmpeg -i "41qC3w3UUkU.webm" -vn -ab 128k -ar 44100 -y "41qC3w3UUkU.mp3"
+			cmd := exec.Command(
+				ffmpeg,
+				"-loglevel", "quiet",
+				"-i", fmt.Sprintf("%s/%s.webm", plugin.GetDir(), entry.Track.ID),
+				"-vn",
+				"-ab", "128k",
+				"-ar", "44100",
+				"-y", fmt.Sprintf("%s/%s.mp3", plugin.GetDir(), entry.Track.ID),
+			)
+			cmd.Stdin = os.Stdin
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+
+			if err := cmd.Run(); err != nil {
+				fmt.Println("Failed to extract audio:", err)
+			} else {
+				entry.Track.IsConvertedToMp3 = true
+				DbWriteEntry(entry.Track.ID, entry)
+				state.runtime.Events.Emit("ytd:track", entry) // track:converted:mp3
+			}
+			restart <- 1
+			return nil
+		}
+	}
+
+	// if there are no tracks to convert delay between restart
+	time.Sleep(30 * time.Second)
+	restart <- 1
 	return nil
 }
 
@@ -270,6 +338,11 @@ func isSupportedUrl(url string) bool {
 	return false
 }
 
+func isFFmpegInstalled() (string, error) {
+	ffmpeg, err := exec.LookPath("ffmpeg")
+	return ffmpeg, err
+}
+
 func getPluginFor(name string) Plugin {
 	for _, plugin := range plugins {
 		if plugin.GetName() == name {
@@ -296,7 +369,6 @@ func main() {
 		Title:            "ytd",
 		JS:               js,
 		CSS:              css,
-		HTML:             html,
 		Colour:           "#131313",
 		DisableInspector: false,
 	})
@@ -309,6 +381,7 @@ func main() {
 	app.Bind(addToDownload)
 	app.Bind(startDownload)
 	app.Bind(isSupportedUrl)
+	app.Bind(isFFmpegInstalled)
 
 	wg := &sync.WaitGroup{}
 	wg.Add(2)

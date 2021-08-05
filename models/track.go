@@ -11,24 +11,23 @@ type GenericTrack struct {
 	Duration         float64  `json:"duration"`
 	Author           string   `json:"author"`
 	Thumbnails       []string `json:"thumbnails"`
-	Downloaded       bool     `json:"downloaded"`
 	DownloadProgress uint8    `json:"downloadProgress"`
 	Status           string   `json:"status"`
 	StatusError      string   `json:"statusError"`
 	FileSize         int64    `json:"filesize"` // bytes
+	IsConvertedToMp3 bool     `json:"isConvertedToMp3"`
 	filename         string
 	Url              string `json:"url"`
 }
 
 func NewGenericTrack(id string, name string, author string, filename string, url string) GenericTrack {
 	return GenericTrack{
-		ID:         id,
-		Name:       name,
-		Author:     author,
-		Downloaded: false,
-		Status:     TrackStatusPending,
-		filename:   filename,
-		Url:        url,
+		ID:       id,
+		Name:     name,
+		Author:   author,
+		Status:   TrackStatusPending,
+		filename: filename,
+		Url:      url,
 	}
 }
 

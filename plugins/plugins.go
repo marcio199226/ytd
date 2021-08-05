@@ -9,7 +9,9 @@ import (
 type Plugin interface {
 	GetName() string
 	Initialize() error
+	GetDir() string
 	SetDir(dir string)
+	IsTrackFileExists(track GenericTrack, fileType string) bool
 	Fetch(url string, isFromClipboard bool)
 	StartDownload(ytEntry *GenericEntry) GenericEntry
 	GetFilename() error

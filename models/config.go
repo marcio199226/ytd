@@ -41,6 +41,8 @@ type AppConfig struct {
 	ConcurrentPlaylistDownloads bool
 	MaxParrallelDownloads       uint
 	BaseSaveDir                 string
+	ConvertToMp3                bool
+	CleanWebmFiles              bool
 	Proxy                       interface{}
 }
 
@@ -51,6 +53,8 @@ func NewAppConfig(watch bool, dldOnCopy bool, cDownloads bool, cPlaylistDownload
 		ConcurrentDownloads:         cDownloads,
 		ConcurrentPlaylistDownloads: cPlaylistDownloads,
 		MaxParrallelDownloads:       mpDownloads,
+		ConvertToMp3:                false,
+		CleanWebmFiles:              false,
 		BaseSaveDir:                 baseSaveDir,
 	}
 }
@@ -64,6 +68,8 @@ func (cfg *AppConfig) Init() *AppConfig {
 	cfg.DownloadOnCopy = getConfigValue(defaultAppCfg, "DownloadOnCopy").(bool)
 	cfg.ConcurrentDownloads = getConfigValue(defaultAppCfg, "ConcurrentDownloads").(bool)
 	cfg.ConcurrentPlaylistDownloads = getConfigValue(defaultAppCfg, "ConcurrentPlaylistDownloads").(bool)
+	cfg.ConvertToMp3 = getConfigValue(defaultAppCfg, "ConvertToMp3").(bool)
+	cfg.CleanWebmFiles = getConfigValue(defaultAppCfg, "CleanWebmFiles").(bool)
 	cfg.MaxParrallelDownloads = getConfigValue(defaultAppCfg, "MaxParrallelDownloads").(uint)
 	cfg.BaseSaveDir = getConfigValue(defaultAppCfg, "BaseSaveDir").(string)
 
@@ -84,6 +90,10 @@ func (cfg *AppConfig) Set(name string, val interface{}) error {
 		cfg.SetConcurrentPlaylistDownloads(val)
 	case "MaxParrallelDownloads":
 		cfg.SetMaxParrallelDownloads(val)
+	case "ConvertToMp3":
+		cfg.SetConvertToMp3(val)
+	case "CleanWebmFiles":
+		cfg.SetCleanWebmFiles(val)
 	}
 	return nil
 }
@@ -116,6 +126,16 @@ func (cfg *AppConfig) SetConcurrentPlaylistDownloads(val interface{}) error {
 func (cfg *AppConfig) SetMaxParrallelDownloads(val interface{}) error {
 	v, _ := strconv.ParseUint(val.(string), 10, 8)
 	cfg.MaxParrallelDownloads = uint(v)
+	return nil
+}
+
+func (cfg *AppConfig) SetConvertToMp3(val interface{}) error {
+	cfg.ConvertToMp3 = val.(bool)
+	return nil
+}
+
+func (cfg *AppConfig) SetCleanWebmFiles(val interface{}) error {
+	cfg.CleanWebmFiles = val.(bool)
 	return nil
 }
 

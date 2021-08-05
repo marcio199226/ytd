@@ -71,7 +71,7 @@ export class AudioPlayerComponent implements OnInit {
   }
 
   private _play(track: Track): void {
-    const src = `http://localhost:8080/youtube/${track.id}.webm`;
+    const src = track.isConvertedToMp3 ? `http://localhost:8080/youtube/${track.id}.mp3` : `http://localhost:8080/youtube/${track.id}.webm`;
     this.audio = new Audio(src);
 
     this.audio.ontimeupdate = (e) => {
@@ -93,6 +93,7 @@ export class AudioPlayerComponent implements OnInit {
     };
 
     this.audio.onerror = (e) => {
+      console.log("Track playback error", e)
       this.track = null;
       this._snackbar.open("Cannot playback probably track's file does not exists");
     };

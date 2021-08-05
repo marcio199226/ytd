@@ -1,7 +1,6 @@
 export interface Track {
   id: string;
   author: string;
-  downloaded: boolean;
   downloadProgress: number;
   duration: number;
   filesize: number;
@@ -10,5 +9,6 @@ export interface Track {
   status: "pending" | "processing" | "downloading" | "downloaded" | "failed";
   statusError: string;
   thumbnails: string[];
+  isConvertedToMp3: boolean;
   url: string;
 }
