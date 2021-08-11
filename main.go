@@ -258,12 +258,8 @@ func saveSettingValue(name string, val string) (err error) {
 		}
 	}()
 
-	fmt.Println(val)
-	fmt.Printf("%T", val)
-	fmt.Println()
 	error := DbWriteSetting(name, val)
 	if err != nil {
-		fmt.Println("ERRROR IN WRITE SETTINT")
 		return error
 	}
 
