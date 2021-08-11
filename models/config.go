@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"fmt"
 	"os/user"
 	"reflect"
@@ -34,6 +35,11 @@ func (stats *AppStats) DecDndCount() {
 	stats.DownloadingCount--
 }
 
+type TelegramConfig struct {
+	Share    bool
+	Username string
+}
+
 type AppConfig struct {
 	ClipboardWatch              bool
 	DownloadOnCopy              bool
@@ -43,6 +49,7 @@ type AppConfig struct {
 	BaseSaveDir                 string
 	ConvertToMp3                bool
 	CleanWebmFiles              bool
+	Telegram                    TelegramConfig
 	Proxy                       interface{}
 }
 
@@ -56,6 +63,7 @@ func NewAppConfig(watch bool, dldOnCopy bool, cDownloads bool, cPlaylistDownload
 		ConvertToMp3:                false,
 		CleanWebmFiles:              false,
 		BaseSaveDir:                 baseSaveDir,
+		Telegram:                    TelegramConfig{Share: false, Username: ""},
 	}
 }
 
@@ -72,6 +80,7 @@ func (cfg *AppConfig) Init() *AppConfig {
 	cfg.CleanWebmFiles = getConfigValue(defaultAppCfg, "CleanWebmFiles").(bool)
 	cfg.MaxParrallelDownloads = getConfigValue(defaultAppCfg, "MaxParrallelDownloads").(uint)
 	cfg.BaseSaveDir = getConfigValue(defaultAppCfg, "BaseSaveDir").(string)
+	cfg.Telegram = getConfigValue(defaultAppCfg, "Telegram").(TelegramConfig)
 
 	return cfg
 }
@@ -94,6 +103,8 @@ func (cfg *AppConfig) Set(name string, val interface{}) error {
 		cfg.SetConvertToMp3(val)
 	case "CleanWebmFiles":
 		cfg.SetCleanWebmFiles(val)
+	case "Telegram":
+		cfg.SetTelegram(val)
 	}
 	return nil
 }
@@ -139,6 +150,13 @@ func (cfg *AppConfig) SetCleanWebmFiles(val interface{}) error {
 	return nil
 }
 
+func (cfg *AppConfig) SetTelegram(val interface{}) error {
+	var telegram TelegramConfig
+	json.Unmarshal([]byte(val.(string)), &telegram)
+	cfg.Telegram = telegram
+	return nil
+}
+
 func getConfigValue(defaultAppCfg AppConfig, name string) interface{} {
 	var data interface{}
 	t := reflect.ValueOf(defaultAppCfg).FieldByName(name).Kind()
@@ -161,6 +179,18 @@ func getConfigValue(defaultAppCfg AppConfig, name string) interface{} {
 		} else {
 			val, _ := strconv.ParseUint(cfgVal, 10, 8)
 			data = uint(val)
+		}
+	case reflect.Struct:
+		if cfgVal, err := dbReadSetting(name); err != nil {
+			data = reflect.ValueOf(defaultAppCfg).FieldByName(name).Interface()
+		} else {
+			// unmarshall from db to the correct struct type
+			switch name {
+			case "Telegram":
+				var telegram TelegramConfig
+				json.Unmarshal([]byte(cfgVal), &telegram)
+				data = telegram
+			}
 		}
 	}
 	return data

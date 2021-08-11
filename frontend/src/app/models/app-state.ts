@@ -9,6 +9,10 @@ export interface AppConfig {
   MaxParrallelDownloads: number;
   ConvertToMp3: boolean;
   CleanWebmFiles: boolean;
+  Telegram: {
+    Share: boolean;
+    Username: string
+  }
 }
 
 export interface AppState {

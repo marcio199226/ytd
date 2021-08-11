@@ -130,6 +130,7 @@ export class HomeComponent implements OnInit {
       // put all for into try/catch block and open snackbar with error if something fails
       try {
         for (const [key, value] of Object.entries(config)) {
+          console.log(key ,value)
           switch(key) {
             case 'BaseSaveDir':
               await window.backend.saveSettingValue(key, value as string);
@@ -146,6 +147,10 @@ export class HomeComponent implements OnInit {
 
             case 'MaxParrallelDownloads':
               await window.backend.saveSettingValue(key, `${value}`);
+            break;
+
+            case 'Telegram':
+              await window.backend.saveSettingValue(key, JSON.stringify(value));
             break;
           }
         }
