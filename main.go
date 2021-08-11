@@ -197,6 +197,14 @@ func (state *AppState) convertToMp3(restart chan<- int) error {
 				entry.Track.IsConvertedToMp3 = true
 				DbWriteEntry(entry.Track.ID, entry)
 				state.runtime.Events.Emit("ytd:track", entry) // track:converted:mp3
+
+				// remove webm
+				if state.Config.CleanWebmFiles && plugin.IsTrackFileExists(entry.Track, "webm") {
+					err = os.Remove(fmt.Sprintf("%s/%s.webm", plugin.GetDir(), entry.Track.ID))
+					if err != nil && !os.IsNotExist(err) {
+						fmt.Printf("Cannot remove %s.webm file after successfull converting to mp3\n", entry.Track.ID)
+					}
+				}
 			}
 			restart <- 1
 			return nil
@@ -277,9 +285,21 @@ func removeEntry(record map[string]interface{}) error {
 
 	if entry.Type == "track" {
 		if err = DbDeleteEntry(entry.Track.ID); err == nil {
-			err = os.Remove(fmt.Sprintf("%s/%s/%s.webm", appState.Config.BaseSaveDir, entry.Source, entry.Track.ID))
-			if os.IsNotExist(err) {
-				return nil
+			plugin := getPluginFor(entry.Source)
+			if plugin.IsTrackFileExists(entry.Track, "webm") {
+				err = os.Remove(fmt.Sprintf("%s/%s.webm", plugin.GetDir(), entry.Track.ID))
+				fmt.Println(err)
+				if err != nil && !os.IsNotExist(err) {
+					return err
+				}
+			}
+			// remove mp3 if file has been already converted
+			if plugin.IsTrackFileExists(entry.Track, "mp3") {
+				err = os.Remove(fmt.Sprintf("%s/%s.mp3", plugin.GetDir(), entry.Track.ID))
+				fmt.Println(err)
+				if err != nil && !os.IsNotExist(err) {
+					return err
+				}
 			}
 		}
 	}
