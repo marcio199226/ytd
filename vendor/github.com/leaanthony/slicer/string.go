@@ -1,4 +1,4 @@
-// Package slicer cotains utility classes for handling slices
+// Package slicer contains utility classes for handling slices
 package slicer
 
 // Imports
@@ -21,10 +21,21 @@ func String(slice ...[]string) *StringSlicer {
 // Add a string value to the slicer
 func (s *StringSlicer) Add(value string, additional ...string) {
 	s.slice = append(s.slice, value)
+	s.slice = append(s.slice, additional...)
+}
+
+// AddUnique adds a string value to the slicer if it does not already exist
+func (s *StringSlicer) AddUnique(value string, additional ...string) {
+
+	if !s.Contains(value) {
+		s.slice = append(s.slice, value)
+	}
 
 	// Add additional values
 	for _, value := range additional {
-		s.slice = append(s.slice, value)
+		if !s.Contains(value) {
+			s.slice = append(s.slice, value)
+		}
 	}
 }
 
@@ -82,10 +93,25 @@ func (s *StringSlicer) Clear() {
 	s.slice = []string{}
 }
 
+// Deduplicate removes duplicate values from the slice
+func (s *StringSlicer) Deduplicate() {
+
+	result := &StringSlicer{}
+
+	for _, elem := range s.slice {
+		if !result.Contains(elem) {
+			result.Add(elem)
+		}
+	}
+
+	s.slice = result.AsSlice()
+}
+
 // Join returns a string with the slicer elements separated by the given separator
 func (s *StringSlicer) Join(separator string) string {
 	return strings.Join(s.slice, separator)
 }
+
 // Sort the slice values
 func (s *StringSlicer) Sort() {
 	sort.Strings(s.slice)

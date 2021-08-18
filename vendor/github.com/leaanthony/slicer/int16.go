@@ -1,4 +1,4 @@
-// Package slicer cotains utility classes for handling slices
+// Package slicer contains utility classes for handling slices
 package slicer
 
 // Imports
@@ -22,10 +22,21 @@ func Int16(slice ...[]int16) *Int16Slicer {
 // Add a int16 value to the slicer
 func (s *Int16Slicer) Add(value int16, additional ...int16) {
 	s.slice = append(s.slice, value)
+	s.slice = append(s.slice, additional...)
+}
+
+// AddUnique adds a int16 value to the slicer if it does not already exist
+func (s *Int16Slicer) AddUnique(value int16, additional ...int16) {
+
+	if !s.Contains(value) {
+		s.slice = append(s.slice, value)
+	}
 
 	// Add additional values
 	for _, value := range additional {
-		s.slice = append(s.slice, value)
+		if !s.Contains(value) {
+			s.slice = append(s.slice, value)
+		}
 	}
 }
 
@@ -83,6 +94,20 @@ func (s *Int16Slicer) Clear() {
 	s.slice = []int16{}
 }
 
+// Deduplicate removes duplicate values from the slice
+func (s *Int16Slicer) Deduplicate() {
+
+	result := &Int16Slicer{}
+
+	for _, elem := range s.slice {
+		if !result.Contains(elem) {
+			result.Add(elem)
+		}
+	}
+
+	s.slice = result.AsSlice()
+}
+
 // Join returns a string with the slicer elements separated by the given separator
 func (s *Int16Slicer) Join(separator string) string {
 	var builder strings.Builder
@@ -101,6 +126,7 @@ func (s *Int16Slicer) Join(separator string) string {
 	result := builder.String()
 	return result
 }
+
 // Sort the slice values
 func (s *Int16Slicer) Sort() {
 	sort.Slice(s.slice, func(i, j int) bool { return s.slice[i] < s.slice[j] })

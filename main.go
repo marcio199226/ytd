@@ -24,6 +24,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/wailsapp/wails"
 	"github.com/xujiajun/nutsdb"
+	tb "gopkg.in/tucnak/telebot.v2"
 )
 
 var wailsRuntime *wails.Runtime
@@ -81,6 +82,23 @@ func (state *AppState) WailsInit(runtime *wails.Runtime) error {
 			state.checkForTracksToDownload()
 		}
 	}() */
+
+	go func() {
+		for {
+			restart := make(chan int)
+			time.Sleep(3 * time.Second)
+			go state.telegramShareTracks(restart)
+
+			for {
+				select {
+				case <-restart:
+					fmt.Println("Share tracks...")
+					go state.telegramShareTracks(restart)
+				}
+
+			}
+		}
+	}()
 
 	go func() {
 		restart := make(chan int)
@@ -156,6 +174,44 @@ func (state *AppState) checkForTracksToDownload() error {
 	}
 
 	// qui un for che legge dal channel e ogni volta che riceve una entry downloadata
+	return nil
+}
+
+type recipientString string
+
+func (r recipientString) Recipient() string {
+	return r.Recipient()
+}
+
+func (state *AppState) telegramShareTracks(restart chan<- int) error {
+	if !state.Config.Telegram.Share {
+		// if option is not enabled restart check after 30s
+		time.Sleep(30 * time.Second)
+		restart <- 1
+		return nil
+	}
+
+	b, err := tb.NewBot(tb.Settings{
+		Token:  "1903196088:AAHhWGvfhQfS_MlhvohFvQYnrg3z7GsBPOM",
+		Poller: &tb.LongPoller{Timeout: 10 * time.Second},
+	})
+
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+
+	audio := &tb.Audio{File: tb.FromDisk("/Users/oskarmarciniak/songs/youtube/2vOU4nVI_DA.mp3"), FileName: "Track name", Title: "Track name title", Duration: 207, Caption: "Caption tracks"}
+	b.Send(&tb.Chat{ID: 903612486}, audio)
+
+	b.Handle("/hello", func(m *tb.Message) {
+		fmt.Println(m.Chat)
+		b.Send(m.Sender, "Hello World!")
+		// cercare il primo msg che come username ha quello impostato nell'app e salvarsi la chat_id
+	})
+
+	b.Start()
+
 	return nil
 }
 

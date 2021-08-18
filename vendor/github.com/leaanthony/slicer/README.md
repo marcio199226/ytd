@@ -5,7 +5,7 @@
 </div>
 
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/leaanthony/slicer)](https://goreportcard.com/report/github.com/leaanthony/slicer)  [![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/github.com/leaanthony/slicer) [![CodeFactor](https://www.codefactor.io/repository/github/leaanthony/slicer/badge)](https://www.codefactor.io/repository/github/leaanthony/slicer) ![](https://img.shields.io/bower/l/svg) [![cover.run](https://cover.run/go/github.com/leaanthony/slicer.svg?style=flat&tag=golang-1.10)](https://cover.run/go?tag=golang-1.10&repo=github.com%2Fleaanthony%2Fslicer) [![Mentioned in Awesome Go](https://awesome.re/mentioned-badge.svg)](https://github.com/avelino/awesome-go)  
+[![Go Report Card](https://goreportcard.com/badge/github.com/leaanthony/slicer)](https://goreportcard.com/report/github.com/leaanthony/slicer)  [![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/github.com/leaanthony/slicer) [![CodeFactor](https://www.codefactor.io/repository/github/leaanthony/slicer/badge)](https://www.codefactor.io/repository/github/leaanthony/slicer) [![codecov](https://codecov.io/gh/leaanthony/slicer/branch/master/graph/badge.svg)](https://codecov.io/gh/leaanthony/slicer) [![Mentioned in Awesome Go](https://awesome.re/mentioned-badge.svg)](https://github.com/avelino/awesome-go)  
 
 
 
@@ -36,16 +36,21 @@
 
 ## Available slicers
 
-  - Int
-  - Int8
-  - Int16
-  - Int32
-  - Int64
-  - Float32
-  - Float64
-  - String
-  - Bool
-  - Interface
+- Int
+- Int8
+- Int16
+- Int32
+- Int64  
+- UInt
+- UInt8
+- UInt16
+- UInt32
+- UInt64
+- Float32
+- Float64
+- String
+- Bool
+- Interface
   
 ## API
 
@@ -82,6 +87,17 @@ Adds a value to the slice.
   values := []string{"one", "two", "three"}
   s := slicer.String(values)
   s.Add("four")
+```
+
+### AddUnique
+
+Adds a value to the slice if it doesn't already contain it.
+
+```
+  values := []string{"one", "two", "three", "one", "two", "three"}
+  s := slicer.String(values)
+  result := s.Join(",")
+  // result is "one,two,three"
 ```
 ### AddSlice
 
@@ -180,11 +196,21 @@ Clears all elements from the current slice
 
 ### Sort
 
-Sorts the elements of a slice. 
+Sorts the elements of a slice
 Not supported by: InterfaceSlicer, BoolSlicer
 
 ```
   a := slicer.Int([]int{5,3,4,1,2})
-  a.Sour()
+  a.Sort()
   // a is []int{1,2,3,4,5}
+```
+
+### Deduplicate
+
+Deduplicate removes all duplicates within a slice.
+
+```
+  a := slicer.Int([]int{5,3,5,1,3})
+  a.Deduplicate()
+  // a is []int{5,3,1}
 ```

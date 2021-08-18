@@ -1,4 +1,4 @@
-// Package slicer cotains utility classes for handling slices
+// Package slicer contains utility classes for handling slices
 package slicer
 
 // Imports
@@ -21,10 +21,21 @@ func Interface(slice ...[]interface{}) *InterfaceSlicer {
 // Add a interface{} value to the slicer
 func (s *InterfaceSlicer) Add(value interface{}, additional ...interface{}) {
 	s.slice = append(s.slice, value)
+	s.slice = append(s.slice, additional...)
+}
+
+// AddUnique adds a interface{} value to the slicer if it does not already exist
+func (s *InterfaceSlicer) AddUnique(value interface{}, additional ...interface{}) {
+
+	if !s.Contains(value) {
+		s.slice = append(s.slice, value)
+	}
 
 	// Add additional values
 	for _, value := range additional {
-		s.slice = append(s.slice, value)
+		if !s.Contains(value) {
+			s.slice = append(s.slice, value)
+		}
 	}
 }
 
@@ -80,6 +91,20 @@ func (s *InterfaceSlicer) Length() int {
 // Clear all elements in the slice
 func (s *InterfaceSlicer) Clear() {
 	s.slice = []interface{}{}
+}
+
+// Deduplicate removes duplicate values from the slice
+func (s *InterfaceSlicer) Deduplicate() {
+
+	result := &InterfaceSlicer{}
+
+	for _, elem := range s.slice {
+		if !result.Contains(elem) {
+			result.Add(elem)
+		}
+	}
+
+	s.slice = result.AsSlice()
 }
 
 // Join returns a string with the slicer elements separated by the given separator
