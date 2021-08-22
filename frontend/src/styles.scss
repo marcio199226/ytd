@@ -2,7 +2,7 @@ html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 body {
-  background: url("assets/bg.png");
+  background: url("http://localhost:8080/static/frontend/dist/assets/bg.png");
   background-repeat: no-repeat;
   background-size: cover;
   backdrop-filter: blur(20px);

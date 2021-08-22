@@ -7,7 +7,7 @@ import { environment } from './environments/environment';
 
 import 'zone.js'
 
-import * as Wails from '@wailsapp/runtime';
+import * as Wails from '@wails/runtime';
 import { AppState, BackendCallbacks } from '@models';
 
 declare global {
@@ -24,9 +24,9 @@ if (environment.production) {
 
 Wails.Init(() => {
   // fetch app data from backend before ng app will be bootstraped
-  Wails.Events.Once('ytd:onload', ({ entries, config }) => {
+  Wails.Events.On('ytd:onload', ({ entries, config }) => {
     window.APP_STATE = { entries, config };
-      platformBrowserDynamic().bootstrapModule(AppModule)
+    platformBrowserDynamic().bootstrapModule(AppModule)
       .then(ngModule => Wails.Events.Emit('frontend:ready')) // notify wails about angular ready state
       .catch(err => console.error(err));
   })

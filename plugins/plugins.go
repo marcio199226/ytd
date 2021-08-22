@@ -1,7 +1,7 @@
 package plugins
 
 import (
-	"github.com/wailsapp/wails"
+	"github.com/wailsapp/wails/v2"
 
 	. "ytd/models"
 )

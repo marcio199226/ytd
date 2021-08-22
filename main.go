@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"embed"
 	"errors"
 	"fmt"
 	"log"
@@ -22,13 +23,19 @@ import (
 	_ "embed"
 
 	"github.com/mitchellh/mapstructure"
-	"github.com/wailsapp/wails"
+	"github.com/wailsapp/wails/v2"
+	"github.com/wailsapp/wails/v2/pkg/options"
+	"github.com/wailsapp/wails/v2/pkg/options/dialog"
+	"github.com/wailsapp/wails/v2/pkg/options/mac"
 	"github.com/xujiajun/nutsdb"
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
 var wailsRuntime *wails.Runtime
 var plugins []Plugin = []Plugin{&Yt{Name: "youtube"}}
+
+//go:embed frontend/dist/assets/*
+var static embed.FS
 
 //go:embed frontend/dist/main.js
 var js string
@@ -40,7 +47,6 @@ var appState *AppState
 var newEntries = make(chan GenericEntry)
 
 type AppState struct {
-	log     *wails.CustomLogger
 	runtime *wails.Runtime
 	db      *nutsdb.DB
 	plugins []Plugin
@@ -49,12 +55,19 @@ type AppState struct {
 	Stats   *AppStats
 }
 
-func (state *AppState) WailsInit(runtime *wails.Runtime) error {
+func cors(fs http.Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// do your cors stuff
+		// return if you do not want the FileServer handle a specific request
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		fs.ServeHTTP(w, r)
+	}
+}
+
+func (state *AppState) WailsInit(runtime *wails.Runtime) {
 	// Save runtime
 	state.runtime = runtime
-	state.log = runtime.Log.New("AppState")
 	// Do some other initialisation
-
 	state.db = InitializeDb()
 	state.Entries = DbGetAllEntries()
 	state.Config = state.Config.Init()
@@ -62,12 +75,17 @@ func (state *AppState) WailsInit(runtime *wails.Runtime) error {
 	appState = state
 
 	// this is sync so it blocks until finished and wails:loaded are not dispatched until this finishes
-	runtime.Events.On("wails:loaded", func(...interface{}) {
-		// entries := DbGetAllEntries()
-		time.Sleep(100 * time.Millisecond)
-		fmt.Println("EMIT YTD:ONLOAD")
-		runtime.Events.Emit("ytd:onload", state)
-	})
+	if runtime.System.AppType() == "default" { // wails serve & ng serve
+		runtime.Events.On("wails:loaded", func(...interface{}) {
+			time.Sleep(100 * time.Millisecond)
+			fmt.Println("EMIT YTD:ONLOAD")
+			runtime.Events.Emit("ytd:onload", state)
+		})
+	} else { // dekstop build
+		go func() {
+			runtime.Events.Emit("ytd:onload", state)
+		}()
+	}
 
 	for _, plugin := range plugins {
 		plugin.SetWailsRuntime(runtime)
@@ -83,7 +101,7 @@ func (state *AppState) WailsInit(runtime *wails.Runtime) error {
 		}
 	}() */
 
-	go func() {
+	/* 	go func() {
 		for {
 			restart := make(chan int)
 			time.Sleep(3 * time.Second)
@@ -98,7 +116,7 @@ func (state *AppState) WailsInit(runtime *wails.Runtime) error {
 
 			}
 		}
-	}()
+	}() */
 
 	go func() {
 		restart := make(chan int)
@@ -114,17 +132,20 @@ func (state *AppState) WailsInit(runtime *wails.Runtime) error {
 
 		}
 	}()
-
-	return nil
 }
 
 func (state *AppState) GetAppConfig() *AppConfig {
 	return state.Config
 }
 
-func (state *AppState) SelectDirectory() string {
-	selectedDirectory := state.runtime.Dialog.SelectDirectory()
-	return selectedDirectory
+func (state *AppState) SelectDirectory() (string, error) {
+	selectedDirectory, err := state.runtime.Dialog.OpenDirectory(&dialog.OpenDialog{
+		AllowFiles:           false,
+		CanCreateDirectories: true,
+		AllowDirectories:     true,
+		Title:                "Choose directory",
+	})
+	return selectedDirectory, err
 }
 
 func (state *AppState) GetEntryById(entry GenericEntry) *GenericEntry {
@@ -438,26 +459,16 @@ func (s *WailsRuntime) WailsShutdown() {
 }
 
 func main() {
-
-	app := wails.CreateApp(&wails.AppConfig{
-		Width:            1024,
-		Height:           768,
-		Title:            "ytd",
-		JS:               js,
-		CSS:              css,
-		Colour:           "#131313",
-		DisableInspector: false,
-	})
-	app.Bind(&AppState{})
-	app.Bind(saveSettingBoolValue)
-	app.Bind(saveSettingValue)
-	app.Bind(readSettingBoolValue)
-	app.Bind(readSettingValue)
-	app.Bind(removeEntry)
-	app.Bind(addToDownload)
-	app.Bind(startDownload)
-	app.Bind(isSupportedUrl)
-	app.Bind(isFFmpegInstalled)
+	/* 	app.Bind(&AppState{})
+	   	app.Bind(saveSettingBoolValue)
+	   	app.Bind(saveSettingValue)
+	   	app.Bind(readSettingBoolValue)
+	   	app.Bind(readSettingValue)
+	   	app.Bind(removeEntry)
+	   	app.Bind(addToDownload)
+	   	app.Bind(startDownload)
+	   	app.Bind(isSupportedUrl)
+	   	app.Bind(isFFmpegInstalled) */
 
 	wg := &sync.WaitGroup{}
 	wg.Add(2)
@@ -513,9 +524,36 @@ func main() {
 	}()
 
 	go func() {
-		http.Handle("/", http.FileServer(http.Dir(currentDir)))
+		fs := http.StripPrefix("/static/", http.FileServer(http.FS(static)))
+		http.Handle("/tracks/", http.FileServer(http.Dir(currentDir)))
+		http.Handle("/static/", cors(fs))
 		http.ListenAndServe(":8080", nil)
 	}()
 
-	app.Run()
+	app := &AppState{}
+	err := wails.Run(&options.App{
+		Width:             1024,
+		Height:            768,
+		MinWidth:          1024,
+		MinHeight:         768,
+		StartHidden:       false,
+		HideWindowOnClose: false,
+		DisableResize:     true,
+		Fullscreen:        false,
+		Startup:           app.WailsInit,
+		Mac: &mac.Options{
+			WebviewIsTransparent:          true,
+			WindowBackgroundIsTranslucent: true,
+			TitleBar:                      mac.TitleBarHiddenInset(),
+			ActivationPolicy:              mac.NSApplicationActivationPolicyAccessory,
+		},
+		Title: "ytd",
+		Bind: []interface{}{
+			app,
+		},
+	})
+
+	if err != nil {
+		log.Fatalln(err)
+	}
 }

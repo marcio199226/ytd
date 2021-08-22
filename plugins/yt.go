@@ -9,7 +9,7 @@ import (
 	"time"
 
 	ytDownloader "github.com/kkdai/youtube/v2"
-	"github.com/wailsapp/wails"
+	"github.com/wailsapp/wails/v2"
 
 	. "ytd/constants"
 	. "ytd/db"

@@ -50,7 +50,7 @@
       <div class="wrapper">
         <ng-container *ngIf="entry.track.status === 'downloaded'">
           <mat-icon class="clickable" title="Add to playlist">add</mat-icon>
-          <mat-icon class="clickable play" (click)="playback(entry)" title="Play">play_circle</mat-icon>
+          <mat-icon class="clickable play" (click)="playback(entry)" title="Play">play_circle_filled</mat-icon>
           <mat-icon class="clickable stop" (click)="stop(entry)" title="Stop">stop</mat-icon>
           <mat-icon class="clickable"
             [matMenuTriggerFor]="menu"
