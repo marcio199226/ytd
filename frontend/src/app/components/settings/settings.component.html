@@ -56,14 +56,15 @@
       <mat-slide-toggle [(ngModel)]="model.Telegram.Share" [disabled]="!isFfmpegAvailable || !model.ConvertToMp3">
         Share downloaded tracks with your devices through telegram
       </mat-slide-toggle>
-      <div class="warning" *ngIf="!model.ConvertToMp3">
+      <div class="warning" *ngIf="model.ConvertToMp3">
         You have to enable "Convert to mp3" option before
       </div>
       <mat-form-field appearance="fill" *ngIf="model.Telegram.Share">
         <mat-label>Insert your telegram username</mat-label>
         <input matInput [(ngModel)]="model.Telegram.Username" required>
-        <mat-icon matPrefix>alternate_email</mat-icon>
-        <mat-hint>You have to set username into telegram's settings</mat-hint>
+        <span matPrefix class="at">@</span>
+        <mat-hint>
+          You have to set <span class="open-link" title="Click for more details" (click)="openUrl('https://telegram.org/faq?setln=en#q-what-are-usernames-how-do-i-get-one')">username</span> into telegram's settings</mat-hint>
         <mat-error>Cannot be empty if enabled</mat-error>
       </mat-form-field>
     </div>

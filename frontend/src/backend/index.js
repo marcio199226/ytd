@@ -6,6 +6,15 @@ const backend = {
   "main": {
     "AppState": {
       /**
+       * AddToDownload
+       * @param {string} arg1 - Go Type: string
+       * @param {boolean} arg2 - Go Type: bool
+       * @returns {Promise<Error>}  - Go Type: error
+       */
+      "AddToDownload": (arg1, arg2) => {
+        return window.backend.main.AppState.AddToDownload(arg1, arg2);
+      },
+      /**
        * GetAppConfig
        * @returns {Promise<any>}  - Go Type: *models.AppConfig
        */
@@ -21,11 +30,84 @@ const backend = {
         return window.backend.main.AppState.GetEntryById(arg1);
       },
       /**
+       * IsFFmpegInstalled
+       * @returns {Promise<string|Error>}  - Go Type: string
+       */
+      "IsFFmpegInstalled": () => {
+        return window.backend.main.AppState.IsFFmpegInstalled();
+      },
+      /**
+       * IsSupportedUrl
+       * @param {string} arg1 - Go Type: string
+       * @returns {Promise<boolean>}  - Go Type: bool
+       */
+      "IsSupportedUrl": (arg1) => {
+        return window.backend.main.AppState.IsSupportedUrl(arg1);
+      },
+      /**
+       * OpenUrl
+       * @param {string} arg1 - Go Type: string
+       * @returns {Promise<Error>}  - Go Type: error
+       */
+      "OpenUrl": (arg1) => {
+        return window.backend.main.AppState.OpenUrl(arg1);
+      },
+      /**
+       * ReadSettingBoolValue
+       * @param {string} arg1 - Go Type: string
+       * @returns {Promise<boolean|Error>}  - Go Type: bool
+       */
+      "ReadSettingBoolValue": (arg1) => {
+        return window.backend.main.AppState.ReadSettingBoolValue(arg1);
+      },
+      /**
+       * ReadSettingValue
+       * @param {string} arg1 - Go Type: string
+       * @returns {Promise<string|Error>}  - Go Type: string
+       */
+      "ReadSettingValue": (arg1) => {
+        return window.backend.main.AppState.ReadSettingValue(arg1);
+      },
+      /**
+       * RemoveEntry
+       * @param {any} arg1 - Go Type: map[string]interface {}
+       * @returns {Promise<Error>}  - Go Type: error
+       */
+      "RemoveEntry": (arg1) => {
+        return window.backend.main.AppState.RemoveEntry(arg1);
+      },
+      /**
+       * SaveSettingBoolValue
+       * @param {string} arg1 - Go Type: string
+       * @param {boolean} arg2 - Go Type: bool
+       * @returns {Promise<Error>}  - Go Type: error
+       */
+      "SaveSettingBoolValue": (arg1, arg2) => {
+        return window.backend.main.AppState.SaveSettingBoolValue(arg1, arg2);
+      },
+      /**
+       * SaveSettingValue
+       * @param {string} arg1 - Go Type: string
+       * @param {string} arg2 - Go Type: string
+       * @returns {Promise<Error>}  - Go Type: error
+       */
+      "SaveSettingValue": (arg1, arg2) => {
+        return window.backend.main.AppState.SaveSettingValue(arg1, arg2);
+      },
+      /**
        * SelectDirectory
        * @returns {Promise<string|Error>}  - Go Type: string
        */
       "SelectDirectory": () => {
         return window.backend.main.AppState.SelectDirectory();
+      },
+      /**
+       * StartDownload
+       * @param {any} arg1 - Go Type: map[string]interface {}
+       * @returns {Promise<Error>}  - Go Type: error
+       */
+      "StartDownload": (arg1) => {
+        return window.backend.main.AppState.StartDownload(arg1);
       },
     }
   }

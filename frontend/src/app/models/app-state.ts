@@ -22,17 +22,20 @@ export interface AppState {
 
 
 export interface BackendCallbacks {
-  AppState: {
-    GetAppConfig: () => Promise<any>;
-    SelectDirectory: () => Promise<string>
+  main: {
+    AppState: {
+      GetAppConfig: () => Promise<any>;
+      SelectDirectory: () => Promise<string>
+      IsSupportedUrl: (url: string) => Promise<boolean>;
+      AddToDownload: (url: string, isFromClipboard: boolean) => Promise<any>;
+      StartDownload: (entry: Entry) => Promise<any>;
+      ReadSettingBoolValue: (name: string) => Promise<any>;
+      ReadSettingValue: (name: string) => Promise<any>;
+      SaveSettingBoolValue: (name: string, val: boolean) => Promise<any>;
+      SaveSettingValue: (name: string, val: string) => Promise<any>;
+      RemoveEntry: (entry: Entry) => Promise<any>;
+      IsFFmpegInstalled: () => Promise<boolean>;
+      OpenUrl: (url :string) => Promise<any>;
+    }
   }
-  isSupportedUrl: (url: string) => Promise<boolean>;
-  addToDownload: (url: string, isFromClipboard: boolean) => Promise<any>;
-  startDownload: (entry: Entry) => Promise<any>;
-  readSettingBoolValue: (name: string) => Promise<any>;
-  readSettingValue: (name: string) => Promise<any>;
-  saveSettingBoolValue: (name: string, val: boolean) => Promise<any>;
-  saveSettingValue: (name: string, val: string) => Promise<any>;
-  removeEntry: (entry: Entry) => Promise<any>;
-  isFFmpegInstalled: () => Promise<boolean>;
 }

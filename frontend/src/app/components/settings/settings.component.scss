@@ -20,10 +20,26 @@ settings {
       background: transparent;
     }
 
+    .open-link {
+      font-weight: bold;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .at {
+      font-weight: bold;
+      padding-right: 8px;
+    }
+
     .toggle-wrapper {
+      margin-left: 46px;
+
+      .mat-slide-toggle {
+        margin-left: -46px;
+      }
+
       .warning {
         font-weight: bold;
-        padding-left: 44px;
       }
     }
   }

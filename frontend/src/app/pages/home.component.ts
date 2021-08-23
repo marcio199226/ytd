@@ -132,7 +132,7 @@ export class HomeComponent implements OnInit {
         for (const [key, value] of Object.entries(config)) {
           switch(key) {
             case 'BaseSaveDir':
-              await window.backend.saveSettingValue(key, value as string);
+              await window.backend.main.AppState.SaveSettingValue(key, value as string);
             break;
 
             case 'ClipboardWatch':
@@ -141,15 +141,15 @@ export class HomeComponent implements OnInit {
             case 'ConcurrentPlaylistDownloads':
             case 'ConvertToMp3':
             case 'CleanWebmFiles':
-              await window.backend.saveSettingBoolValue(key, value as boolean);
+              await window.backend.main.AppState.SaveSettingBoolValue(key, value as boolean);
             break;
 
             case 'MaxParrallelDownloads':
-              await window.backend.saveSettingValue(key, `${value}`);
+              await window.backend.main.AppState.SaveSettingValue(key, `${value}`);
             break;
 
             case 'Telegram':
-              await window.backend.saveSettingValue(key, JSON.stringify(value));
+              await window.backend.main.AppState.SaveSettingValue(key, JSON.stringify(value));
             break;
           }
         }
@@ -159,6 +159,7 @@ export class HomeComponent implements OnInit {
         this._snackbar.open("Settings has been saved");
         this._cdr.detectChanges();
       } catch(e) {
+        console.log(e)
         this._snackbar.open("An error occured while saving settings");
       }
     });
@@ -219,14 +220,14 @@ export class HomeComponent implements OnInit {
       return;
     }
 
-    const isSupported = await window.backend.isSupportedUrl(url);
+    const isSupported = await window.backend.main.AppState.IsSupportedUrl(url);
     if(!isSupported) {
       this._snackbar.open('Unsupported url');
       return
     }
 
     try {
-      await window.backend.addToDownload(url, false)
+      await window.backend.main.AppState.AddToDownload(url, false)
       this.urlInput.setValue('');
       this.pasteInput.nativeElement.blur();
       this.pasteWrapper.nativeElement.classList.remove('focused');
@@ -239,7 +240,7 @@ export class HomeComponent implements OnInit {
 
   async startDownload(entry: Entry): Promise<void> {
     try {
-      await window.backend.startDownload(entry);
+      await window.backend.main.AppState.StartDownload(entry);
       this._snackbar.open("Started downloading");
     } catch(e) {
       this._snackbar.open(e);
@@ -249,7 +250,7 @@ export class HomeComponent implements OnInit {
   async remove(entry: Entry, i: number): Promise<void> {
     console.log('remove', entry, i)
     try {
-      await window.backend.removeEntry(entry);
+      await window.backend.main.AppState.RemoveEntry(entry);
       this._snackbar.open(`${entry.type} has been removed`);
       const idx = this.entries.findIndex(e => {
         if(entry.type === 'playlist') {

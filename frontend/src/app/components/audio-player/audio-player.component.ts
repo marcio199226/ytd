@@ -71,7 +71,7 @@ export class AudioPlayerComponent implements OnInit {
   }
 
   private _play(track: Track): void {
-    const src = track.isConvertedToMp3 ? `http://localhost:8080/youtube/${track.id}.mp3` : `http://localhost:8080/youtube/${track.id}.webm`;
+    const src = track.isConvertedToMp3 ? `http://localhost:8080/tracks/youtube/${track.id}.mp3` : `http://localhost:8080/tracks/youtube/${track.id}.webm`;
     this.audio = new Audio(src);
 
     this.audio.ontimeupdate = (e) => {

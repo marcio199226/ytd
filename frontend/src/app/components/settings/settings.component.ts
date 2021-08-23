@@ -44,7 +44,7 @@ export class SettingsComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.model = { ...this.data.config };
-    const [err, path] = await to(window.backend.isFFmpegInstalled());
+    const [err, path] = await to(window.backend.main.AppState.IsFFmpegInstalled());
     if(path) {
       this.isFfmpegAvailable = true;
       this._cdr.detectChanges();
@@ -52,8 +52,12 @@ export class SettingsComponent implements OnInit {
   }
 
   async changeBaseSaveDir(): Promise<void> {
-    const [err, path] = await to(window.backend.AppState.SelectDirectory());
+    const [err, path] = await to(window.backend.main.AppState.SelectDirectory());
     console.log(err, path)
+  }
+
+  async openUrl(url: string): Promise<void> {
+    await window.backend.main.AppState.OpenUrl(url);
   }
 
   save(): void {
