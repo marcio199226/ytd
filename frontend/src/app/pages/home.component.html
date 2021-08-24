@@ -32,7 +32,7 @@
   <mat-menu #menu="matMenu">
     <ng-template matMenuContent let-entry="entry" let-idx="idx">
       <button mat-menu-item (click)="remove(entry, idx)">Remove {{ entry.type }}</button>
-      <button mat-menu-item *ngIf="entry.track.status === 'failed' || !entry.track.downloaded">Download</button>
+      <button mat-menu-item *ngIf="entry.track.status === 'failed'">Download</button>
     </ng-template>
   </mat-menu>
   <div
