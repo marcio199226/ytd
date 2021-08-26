@@ -25,6 +25,9 @@ import (
 
 var plugins []Plugin = []Plugin{&Yt{Name: "youtube"}}
 
+//go:embed .version
+var version string
+
 //go:embed frontend/dist/assets/*
 var static embed.FS
 

@@ -175,21 +175,6 @@ func (state *AppState) newTrayMenu() *menu.Menu {
 		},
 	})
 	m.Append(&menu.MenuItem{
-		Type:  menu.TextType,
-		Label: "Settings",
-		Click: func(ctx *menu.CallbackData) {
-			state.ShowWindow()
-			state.runtime.Events.Emit("ytd:show:dialog:settings")
-		},
-	})
-	m.Append(&menu.MenuItem{
-		Type:  menu.TextType,
-		Label: "Show app",
-		Click: func(ctx *menu.CallbackData) {
-			state.ShowWindow()
-		},
-	})
-	m.Append(&menu.MenuItem{
 		Type:    menu.CheckboxType,
 		Label:   "Run in background on close", // hide window on close
 		Checked: appState.Config.RunInBackgroundOnClose,
@@ -242,6 +227,26 @@ func (state *AppState) newTrayMenu() *menu.Menu {
 				CancelButton: "OK",
 			})
 		},
+	})
+	m.Append(menu.Separator())
+	m.Append(&menu.MenuItem{
+		Type:  menu.TextType,
+		Label: "Settings",
+		Click: func(ctx *menu.CallbackData) {
+			state.ShowWindow()
+			state.runtime.Events.Emit("ytd:show:dialog:settings")
+		},
+	})
+	m.Append(&menu.MenuItem{
+		Type:  menu.TextType,
+		Label: "Show app",
+		Click: func(ctx *menu.CallbackData) {
+			state.ShowWindow()
+		},
+	})
+	m.Append(&menu.MenuItem{
+		Type:  menu.TextType,
+		Label: fmt.Sprintf("ytd (%s)", version),
 	})
 	m.Append(&menu.MenuItem{
 		Type:        menu.TextType,
