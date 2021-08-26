@@ -563,6 +563,12 @@ func (state *AppState) IsSupportedUrl(url string) bool {
 
 func (state *AppState) IsFFmpegInstalled() (string, error) {
 	ffmpeg, err := exec.LookPath("ffmpeg")
+	if state.runtime.System.Platform() == "darwin" && err != nil {
+		// on darwin check if ffmpeg is maybe installed by homebrew
+		// (searching for ffmpeg only give wrong results if installed with homebrew)
+		ffmpeg, err := exec.LookPath("/opt/homebrew/bin/ffmpeg")
+		return ffmpeg, err
+	}
 	return ffmpeg, err
 }
 

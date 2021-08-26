@@ -37,6 +37,13 @@ const backend = {
         return window.backend.main.AppState.GetEntryById(arg1);
       },
       /**
+       * InitializeListeners
+       * @returns {Promise<void>} 
+       */
+      "InitializeListeners": () => {
+        return window.backend.main.AppState.InitializeListeners();
+      },
+      /**
        * IsFFmpegInstalled
        * @returns {Promise<string|Error>}  - Go Type: string
        */
@@ -58,6 +65,13 @@ const backend = {
        */
       "OpenUrl": (arg1) => {
         return window.backend.main.AppState.OpenUrl(arg1);
+      },
+      /**
+       * PreWailsInit
+       * @returns {Promise<void>} 
+       */
+      "PreWailsInit": () => {
+        return window.backend.main.AppState.PreWailsInit();
       },
       /**
        * ReadSettingBoolValue
