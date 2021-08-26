@@ -35,7 +35,7 @@ type AppState struct {
 	defaultTrayMenu *menu.TrayMenu
 }
 
-func (state *AppState) InitDb() {
+func (state *AppState) PreWailsInit() {
 	state.db = InitializeDb()
 	state.Entries = DbGetAllEntries()
 	state.Config = state.Config.Init()
@@ -45,9 +45,6 @@ func (state *AppState) WailsInit(runtime *wails.Runtime) {
 	// Save runtime
 	state.runtime = runtime
 	// Do some other initialisation
-	//state.db = InitializeDb()
-	//state.Entries = DbGetAllEntries()
-	//state.Config = state.Config.Init()
 	state.Stats = &AppStats{}
 	appState = state
 
