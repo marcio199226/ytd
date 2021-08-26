@@ -49,6 +49,9 @@ type AppConfig struct {
 	BaseSaveDir                 string
 	ConvertToMp3                bool
 	CleanWebmFiles              bool
+	RunInBackgroundOnClose      bool
+	CheckForUpdates             bool
+	StartAtLogin                bool
 	Telegram                    TelegramConfig
 	Proxy                       interface{}
 }
@@ -63,6 +66,9 @@ func NewAppConfig(watch bool, dldOnCopy bool, cDownloads bool, cPlaylistDownload
 		ConvertToMp3:                false,
 		CleanWebmFiles:              false,
 		BaseSaveDir:                 baseSaveDir,
+		RunInBackgroundOnClose:      false,
+		CheckForUpdates:             false,
+		StartAtLogin:                false,
 		Telegram:                    TelegramConfig{Share: false, Username: ""},
 	}
 }
@@ -80,6 +86,9 @@ func (cfg *AppConfig) Init() *AppConfig {
 	cfg.CleanWebmFiles = getConfigValue(defaultAppCfg, "CleanWebmFiles").(bool)
 	cfg.MaxParrallelDownloads = getConfigValue(defaultAppCfg, "MaxParrallelDownloads").(uint)
 	cfg.BaseSaveDir = getConfigValue(defaultAppCfg, "BaseSaveDir").(string)
+	cfg.RunInBackgroundOnClose = getConfigValue(defaultAppCfg, "RunInBackgroundOnClose").(bool)
+	cfg.CheckForUpdates = getConfigValue(defaultAppCfg, "CheckForUpdates").(bool)
+	cfg.StartAtLogin = getConfigValue(defaultAppCfg, "StartAtLogin").(bool)
 	cfg.Telegram = getConfigValue(defaultAppCfg, "Telegram").(TelegramConfig)
 
 	return cfg
@@ -103,6 +112,12 @@ func (cfg *AppConfig) Set(name string, val interface{}) error {
 		cfg.SetConvertToMp3(val)
 	case "CleanWebmFiles":
 		cfg.SetCleanWebmFiles(val)
+	case "RunInBackgroundOnClose":
+		cfg.SetRunInBackgroundOnClose(val)
+	case "CheckForUpdates":
+		cfg.SetCheckForUpdates(val)
+	case "StartAtLogin":
+		cfg.SetStartAtLogin(val)
 	case "Telegram":
 		cfg.SetTelegram(val)
 	}
@@ -147,6 +162,21 @@ func (cfg *AppConfig) SetConvertToMp3(val interface{}) error {
 
 func (cfg *AppConfig) SetCleanWebmFiles(val interface{}) error {
 	cfg.CleanWebmFiles = val.(bool)
+	return nil
+}
+
+func (cfg *AppConfig) SetRunInBackgroundOnClose(val interface{}) error {
+	cfg.RunInBackgroundOnClose = val.(bool)
+	return nil
+}
+
+func (cfg *AppConfig) SetCheckForUpdates(val interface{}) error {
+	cfg.CheckForUpdates = val.(bool)
+	return nil
+}
+
+func (cfg *AppConfig) SetStartAtLogin(val interface{}) error {
+	cfg.StartAtLogin = val.(bool)
 	return nil
 }
 

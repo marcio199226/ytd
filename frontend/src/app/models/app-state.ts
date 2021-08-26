@@ -9,6 +9,9 @@ export interface AppConfig {
   MaxParrallelDownloads: number;
   ConvertToMp3: boolean;
   CleanWebmFiles: boolean;
+	RunInBackgroundOnClose: boolean;
+	CheckForUpdates: boolean;
+	StartAtLogin: boolean;
   Telegram: {
     Share: boolean;
     Username: string

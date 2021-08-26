@@ -27,6 +27,9 @@ export class SettingsComponent implements OnInit {
     MaxParrallelDownloads: null,
     ConvertToMp3: null,
     CleanWebmFiles: null,
+	  RunInBackgroundOnClose: null,
+	  CheckForUpdates: null,
+	  StartAtLogin: null,
     Telegram: {
       Share: null,
       Username: null

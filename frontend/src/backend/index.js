@@ -15,6 +15,13 @@ const backend = {
         return window.backend.main.AppState.AddToDownload(arg1, arg2);
       },
       /**
+       * ForceQuit
+       * @returns {Promise<void>} 
+       */
+      "ForceQuit": () => {
+        return window.backend.main.AppState.ForceQuit();
+      },
+      /**
        * GetAppConfig
        * @returns {Promise<any>}  - Go Type: *models.AppConfig
        */
@@ -100,6 +107,13 @@ const backend = {
        */
       "SelectDirectory": () => {
         return window.backend.main.AppState.SelectDirectory();
+      },
+      /**
+       * ShowWindow
+       * @returns {Promise<void>} 
+       */
+      "ShowWindow": () => {
+        return window.backend.main.AppState.ShowWindow();
       },
       /**
        * StartDownload

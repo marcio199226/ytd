@@ -1,4 +1,5 @@
 import {
+  ApplicationRef,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -13,7 +14,7 @@ import { AudioPlayerService } from 'app/components/audio-player/audio-player.ser
 import { Track, Entry } from '@models';
 import { AppConfig, AppState } from '../models/app-state';
 import * as Wails from '@wailsapp/runtime';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { SettingsComponent } from 'app/components';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -63,6 +64,7 @@ export class HomeComponent implements OnInit {
 
   constructor(
     private _cdr: ChangeDetectorRef,
+    private _appRef: ApplicationRef,
     @Inject(DOCUMENT) private _document: Document,
     private _dialog: MatDialog,
     private _snackbar: MatSnackBar,
@@ -95,6 +97,21 @@ export class HomeComponent implements OnInit {
 
     Wails.Events.On("ytd:playlist", payload => console.log(payload))
 
+    Wails.Events.On("ytd:app:config", (config) => {
+      console.log(config)
+      window.APP_STATE.config = config;
+      this._snackbar.open("Settings has been saved");
+      this._cdr.markForCheck();
+    });
+
+    Wails.Events.On("ytd:show:dialog:settings", () => {
+      setTimeout(() => {
+        const dialogRef = this.openSettings();
+        this._cdr.markForCheck();
+        this._appRef.tick()
+      }, 1000)
+    });
+
     this._audioPlayerService.onPlayCmdTrack.subscribe(track => {
       this.inPlayback = track;
       this._cdr.detectChanges();
@@ -112,7 +129,8 @@ export class HomeComponent implements OnInit {
     this.searchInput.setValue('');
   }
 
-  openSettings(): void {
+  openSettings(): MatDialogRef<SettingsComponent, any> {
+    console.log('window.APP_STATE.config', window.APP_STATE.config)
     const dialogRef = this._dialog.open(SettingsComponent, {
       autoFocus: false,
       panelClass: ['settings-dialog',  'with-header-dialog'],
@@ -157,12 +175,15 @@ export class HomeComponent implements OnInit {
         // if no errors save new config without retrieve it from backend again (we load app state only once when app is launched)
         window.APP_STATE.config = config;
         this._snackbar.open("Settings has been saved");
+        Wails.Events.Emit("ytd:app:tray:update")
         this._cdr.detectChanges();
       } catch(e) {
         console.log(e)
         this._snackbar.open("An error occured while saving settings");
       }
     });
+
+    return dialogRef
   }
 
   trackById(idx: number, entry: Entry): string {

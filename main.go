@@ -102,26 +102,42 @@ func main() {
 		http.ListenAndServe(":8080", nil)
 	}()
 
+	app.InitDb()
 	err := wails.Run(&options.App{
 		Width:             1024,
 		Height:            768,
 		MinWidth:          1024,
 		MinHeight:         768,
-		StartHidden:       false,
-		HideWindowOnClose: false,
-		DisableResize:     true,
+		StartHidden:       app.Config.StartAtLogin,
+		HideWindowOnClose: app.Config.RunInBackgroundOnClose,
+		DisableResize:     false,
 		Fullscreen:        false,
 		Startup:           app.WailsInit,
+		Shutdown:          app.WailsShutdown,
 		Mac: &mac.Options{
 			WebviewIsTransparent:          true,
 			WindowBackgroundIsTranslucent: true,
 			TitleBar:                      mac.TitleBarHiddenInset(),
 			ActivationPolicy:              mac.NSApplicationActivationPolicyAccessory,
+			/* 			Menu: menu.NewMenuFromItems(
+				menu.AppMenu(),
+				menu.EditMenu(),
+				menu.WindowMenu(),
+				&menu.MenuItem{
+					Type:  menu.SubmenuType,
+					Label: "Browser",
+					SubMenu: menu.NewMenuFromItems(
+						menu.Text("Quit 1", keys.CmdOrCtrl("r"), app.ForceQuit),
+						menu.Text("Quit 2", keys.Combo("r", keys.CmdOrCtrlKey, keys.ShiftKey), app.ForceQuit),
+					),
+				},
+			), */
 		},
 		Title: "ytd",
 		Bind: []interface{}{
 			app,
 		},
+		Frameless: false,
 	})
 
 	if err != nil {
