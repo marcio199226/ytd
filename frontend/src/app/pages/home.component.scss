@@ -63,10 +63,11 @@ app-home {
   }
 
   .entries {
-    margin-top: 20px;
+    margin: 20px auto;
     padding: 16px;
     overflow: auto;
     max-height: calc(768px - 96px - 16px);
+    max-width: 1024px;
 
     .entry {
       position: relative;

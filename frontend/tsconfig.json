@@ -27,6 +27,7 @@
       "@models": ["app/models/"],
       "@pages": ["app/pages/"],
       "@components": ["app/components/"],
+      "@services": ["app/services/"],
     }
   },
   "angularCompilerOptions": {

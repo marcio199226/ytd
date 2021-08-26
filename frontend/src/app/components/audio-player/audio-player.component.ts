@@ -12,7 +12,7 @@ import {
 import { filter } from 'rxjs/operators'
 import { Track } from '@models';
 import { AudioPlayerService } from './audio-player.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { SnackbarService } from 'app/services/snackbar.service';
 
 @Component({
   selector: 'audio-player',
@@ -45,7 +45,7 @@ export class AudioPlayerComponent implements OnInit {
 
   constructor(
     private _cdr: ChangeDetectorRef,
-    private _snackbar: MatSnackBar,
+    private _snackbar: SnackbarService,
     private _audioPlayerService: AudioPlayerService
   ) {}
 
@@ -95,7 +95,7 @@ export class AudioPlayerComponent implements OnInit {
     this.audio.onerror = (e) => {
       console.log("Track playback error", e)
       this.track = null;
-      this._snackbar.open("Cannot playback probably track's file does not exists");
+      this._snackbar.openError("Cannot playback probably track's file does not exists");
     };
 
     this.play();

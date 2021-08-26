@@ -40,3 +40,51 @@ body {
 .m-auto {
   margin: 0 auto;
 }
+
+.mat-snack-bar-container {
+  max-width: 66vw !important;
+
+  &.success {
+    background: #4caf50 !important;
+    color: #fff !important;
+    border-left: 8px solid #2e7d32;
+
+    button {
+      color: #000;
+      background: #fff;
+    }
+  }
+
+  &.error {
+    background: #ef5350 !important;
+    color: #fff !important;
+    border-left: 8px solid #b71c1c;
+
+    button {
+      color: #000;
+      background: #fff;
+    }
+  }
+
+  &.info {
+    background: #b3e5fc !important;
+    color: #000 !important;
+    border-left: 8px solid #03a9f4;
+
+    button {
+      color: #fff;
+      background: #000;
+    }
+  }
+
+  &.warning {
+    background: #ffecb3 !important;
+    color: #000 !important;
+    border-left: 8px solid #ffc107;
+
+    button {
+      color: #fff;
+      background: #000;
+    }
+  }
+}

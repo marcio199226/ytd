@@ -17,10 +17,10 @@ import { AppConfig, AppState } from '../models/app-state';
 import * as Wails from '@wailsapp/runtime';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { SettingsComponent } from 'app/components';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { MatMenu } from '@angular/material/menu';
 import { DOCUMENT } from '@angular/common';
+import { SnackbarService } from 'app/services/snackbar.service';
 
 @Component({
   selector: 'app-home',
@@ -52,6 +52,16 @@ export class HomeComponent implements OnInit {
     return window.APP_STATE.config.ClipboardWatch;
   }
 
+  public get isSearching(): boolean {
+    if(!this.searchNativeInput) {
+      return false;
+    }
+    return this.searchNativeInput.nativeElement === document.activeElement || !!this.searchInput.value;
+  }
+
+  @ViewChild('searchNativeInput')
+  public searchNativeInput: ElementRef<HTMLInputElement> = null;
+
   @ViewChild('pasteWrapper')
   public pasteWrapper: ElementRef<HTMLDivElement> = null;
 
@@ -69,7 +79,7 @@ export class HomeComponent implements OnInit {
     private _ngZone: NgZone,
     @Inject(DOCUMENT) private _document: Document,
     private _dialog: MatDialog,
-    private _snackbar: MatSnackBar,
+    private _snackbar: SnackbarService,
     private _audioPlayerService: AudioPlayerService
   ) {
     this.searchInput = new FormControl('');
@@ -103,7 +113,6 @@ export class HomeComponent implements OnInit {
       this._ngZone.run(() => {
         window.APP_STATE.config = config;
         this._snackbar.open("Settings has been saved");
-        this._cdr.detectChanges();
       });
     });
 
@@ -126,8 +135,9 @@ export class HomeComponent implements OnInit {
     this._onSearch();
   }
 
-  clearSearch(): void {
-    this.searchInput.setValue('');
+  clearSearch(event: any): void {
+    this.searchNativeInput.nativeElement.focus();
+    setTimeout(() => this.searchInput.setValue(''))
   }
 
   openSettings(): MatDialogRef<SettingsComponent, any> {
@@ -175,12 +185,12 @@ export class HomeComponent implements OnInit {
 
         // if no errors save new config without retrieve it from backend again (we load app state only once when app is launched)
         window.APP_STATE.config = config;
-        this._snackbar.open("Settings has been saved");
+        this._snackbar.openSuccess("Settings has been saved");
         Wails.Events.Emit("ytd:app:tray:update")
         this._cdr.detectChanges();
       } catch(e) {
         console.log(e)
-        this._snackbar.open("An error occured while saving settings");
+        this._snackbar.openError("An error occured while saving settings");
       }
     });
 
@@ -215,6 +225,11 @@ export class HomeComponent implements OnInit {
   }
 
   playback(entry: Entry): void {
+    if(window.wails.System.Platform() ==='darwin' && !entry.track.isConvertedToMp3) {
+      const ref = this._snackbar.openWarning("Cannot playback on MacOs, you should enable \"Convert to mp3\" option", "Open settings")
+      ref.onAction().subscribe(() => this.openSettings());
+      return
+    }
     this.inPlayback = entry.track;
     this._audioPlayerService.onPlaybackTrack.next(entry.track);
   }
@@ -244,7 +259,7 @@ export class HomeComponent implements OnInit {
 
     const isSupported = await window.backend.main.AppState.IsSupportedUrl(url);
     if(!isSupported) {
-      this._snackbar.open('Unsupported url');
+      this._snackbar.openWarning('Unsupported url');
       return
     }
 
@@ -253,27 +268,26 @@ export class HomeComponent implements OnInit {
       this.urlInput.setValue('');
       this.pasteInput.nativeElement.blur();
       this.pasteWrapper.nativeElement.classList.remove('focused');
-      this._snackbar.open('Track added to download');
+      this._snackbar.openSuccess('Track added to download');
     } catch(e) {
       console.log(e);
-      this._snackbar.open('Error while adding track to downloads');
+      this._snackbar.openError('Error while adding track to downloads');
     }
   }
 
   async startDownload(entry: Entry): Promise<void> {
     try {
       await window.backend.main.AppState.StartDownload(entry);
-      this._snackbar.open("Started downloading");
+      this._snackbar.openSuccess("Started downloading");
     } catch(e) {
-      this._snackbar.open(e);
+      this._snackbar.openError(e);
     }
   }
 
   async remove(entry: Entry, i: number): Promise<void> {
-    console.log('remove', entry, i)
     try {
       await window.backend.main.AppState.RemoveEntry(entry);
-      this._snackbar.open(`${entry.type} has been removed`);
+      this._snackbar.openSuccess(`${entry.type} has been removed`);
       const idx = this.entries.findIndex(e => {
         if(entry.type === 'playlist') {
           return e.playlist.id === entry.playlist.id;
@@ -284,7 +298,7 @@ export class HomeComponent implements OnInit {
       this.filteredEntries = this.entries;
       //this._cdr.detectChanges();
     } catch(e) {
-      this._snackbar.open(`Cannot delete`);
+      this._snackbar.openError(`Cannot delete`);
     }
   }
 
@@ -295,8 +309,6 @@ export class HomeComponent implements OnInit {
       distinctUntilChanged(),
     )
     .subscribe((searchText: string) => {
-      console.log('searchText', searchText, !!searchText)
-
       if(!!searchText === false) {
         this.filteredEntries = this.entries;
         this._cdr.detectChanges();

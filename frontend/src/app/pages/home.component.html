@@ -15,11 +15,11 @@
   <div class="input-wrapper">
     <div class="input" fxFlex fxLayout="row" fxLayoutAlign="start center">
       <mat-icon>search</mat-icon>
-      <input [formControl]="searchInput" placeholder="Search">
+      <input #searchNativeInput [formControl]="searchInput" placeholder="Search">
       <mat-icon
         *ngIf="searchInput.value && searchInput.value !== ''"
         class="clear-search"
-        (click)="clearSearch()"
+        (click)="clearSearch($event)"
         title="Clear">
         close
       </mat-icon>
@@ -41,7 +41,8 @@
     [class.lastOfRow]="(idx + 1) % 4 === 0"
     [class.playing]="inPlaybackTrackId === entry.track?.id"
     [class.downloading]="entry.track.status === 'downloading'"
-    [ngClass]="entry.type" *ngFor="let entry of filteredEntries; trackBy: trackById; let idx = index;"
+    [ngClass]="entry.type"
+    *ngFor="let entry of filteredEntries; trackBy: trackById; let idx = index;"
     (mouseenter.silent)="onMouseEnter($event, entry)"
     (mouseleave.silent)="onMouseLeave($event, entry)">
     <div class="bg" [ngStyle]="{'background': getBgUrl(entry)}"></div>
@@ -85,5 +86,12 @@
         </ng-container>
       </div>
     </div>
+  </div>
+
+  <div *ngIf="!isSearching && !filteredEntries.length">
+    You have not downloaded tracks, start to download some
+  </div>
+  <div *ngIf="isSearching && !filteredEntries.length">
+    There are no tracks for your searching
   </div>
 </div>
