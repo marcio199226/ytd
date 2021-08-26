@@ -39,6 +39,8 @@ export interface BackendCallbacks {
       RemoveEntry: (entry: Entry) => Promise<any>;
       IsFFmpegInstalled: () => Promise<boolean>;
       OpenUrl: (url :string) => Promise<any>;
+      ShowWindow: () => Promise<any>;
+      ForceQuit: () => Promise<any>;
     }
   }
 }

@@ -32,6 +32,7 @@ type AppState struct {
 	Config  *AppConfig     `json:"config"`
 	Stats   *AppStats
 
+	isInForeground  bool
 	defaultTrayMenu *menu.TrayMenu
 }
 
@@ -67,6 +68,7 @@ func (state *AppState) WailsInit(runtime *wails.Runtime) {
 		plugin.SetAppStats(state.Stats)
 	}
 	fmt.Println("APP STATE INITIALIZED")
+	state.InitializeListeners()
 
 	state.defaultTrayMenu = &menu.TrayMenu{
 		Label: "ytd",
@@ -136,6 +138,15 @@ func (state *AppState) WailsInit(runtime *wails.Runtime) {
 
 func (state *AppState) WailsShutdown() {
 	CloseDb()
+}
+
+func (state *AppState) InitializeListeners() {
+	state.runtime.Events.On("ytd:app:foreground", func(optionalData ...interface{}) {
+		var json map[string]interface{} = optionalData[0].(map[string]interface{})
+		if isInForeground, ok := json["isInForeground"]; ok {
+			state.isInForeground = isInForeground.(bool)
+		}
+	})
 }
 
 func (state *AppState) newTrayMenu() *menu.Menu {

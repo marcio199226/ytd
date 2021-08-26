@@ -5,6 +5,7 @@ import {
   Component,
   ElementRef,
   Inject,
+  NgZone,
   OnInit,
   ViewChild,
   ViewEncapsulation,
@@ -65,6 +66,7 @@ export class HomeComponent implements OnInit {
   constructor(
     private _cdr: ChangeDetectorRef,
     private _appRef: ApplicationRef,
+    private _ngZone: NgZone,
     @Inject(DOCUMENT) private _document: Document,
     private _dialog: MatDialog,
     private _snackbar: MatSnackBar,
@@ -98,18 +100,17 @@ export class HomeComponent implements OnInit {
     Wails.Events.On("ytd:playlist", payload => console.log(payload))
 
     Wails.Events.On("ytd:app:config", (config) => {
-      console.log(config)
-      window.APP_STATE.config = config;
-      this._snackbar.open("Settings has been saved");
-      this._cdr.markForCheck();
+      this._ngZone.run(() => {
+        window.APP_STATE.config = config;
+        this._snackbar.open("Settings has been saved");
+        this._cdr.detectChanges();
+      });
     });
 
     Wails.Events.On("ytd:show:dialog:settings", () => {
-      setTimeout(() => {
-        const dialogRef = this.openSettings();
-        this._cdr.markForCheck();
-        this._appRef.tick()
-      }, 1000)
+      this._ngZone.run(() => {
+        this.openSettings();
+      })
     });
 
     this._audioPlayerService.onPlayCmdTrack.subscribe(track => {
