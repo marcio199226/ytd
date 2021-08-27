@@ -14,8 +14,6 @@ import (
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/wailsapp/wails/v2"
-	"github.com/wailsapp/wails/v2/pkg/menu"
-	"github.com/wailsapp/wails/v2/pkg/menu/keys"
 	"github.com/wailsapp/wails/v2/pkg/options/dialog"
 	"github.com/xujiajun/nutsdb"
 
@@ -32,8 +30,8 @@ type AppState struct {
 	Config  *AppConfig     `json:"config"`
 	Stats   *AppStats
 
-	isInForeground  bool
-	defaultTrayMenu *menu.TrayMenu
+	isInForeground bool
+	tray           TrayMenu
 }
 
 func (state *AppState) PreWailsInit() {
@@ -69,32 +67,15 @@ func (state *AppState) WailsInit(runtime *wails.Runtime) {
 	}
 	fmt.Println("APP STATE INITIALIZED")
 	state.InitializeListeners()
-
-	state.defaultTrayMenu = &menu.TrayMenu{
-		Label: "ytd",
-		Menu:  state.newTrayMenu(),
-	}
-	state.runtime.Menu.SetTrayMenu(state.defaultTrayMenu)
+	// create app sys tray menu
+	state.tray.createTray()
+	state.runtime.Menu.SetTrayMenu(state.tray.defaultTrayMenu)
 	// event emitted from fe if tray should be updated
 	runtime.Events.On("ytd:app:tray:update", func(data ...interface{}) {
-		state.runtime.Menu.DeleteTrayMenu(state.defaultTrayMenu)
-
-		state.defaultTrayMenu = &menu.TrayMenu{
-			Label: "ytd",
-			Menu:  state.newTrayMenu(),
-		}
-		state.runtime.Menu.SetTrayMenu(state.defaultTrayMenu)
+		state.runtime.Menu.DeleteTrayMenu(state.tray.defaultTrayMenu)
+		state.tray.createTray()
+		state.runtime.Menu.SetTrayMenu(state.tray.defaultTrayMenu)
 	})
-
-	c := &menu.Menu{}
-	c.Append(&menu.MenuItem{
-		Label: "Quit app",
-		Type:  menu.TextType,
-		Click: func(cd *menu.CallbackData) {
-			state.ForceQuit()
-		},
-	})
-	state.runtime.Menu.UpdateApplicationMenu()
 
 	/* 	go func() {
 		for {
@@ -147,117 +128,6 @@ func (state *AppState) InitializeListeners() {
 			state.isInForeground = isInForeground.(bool)
 		}
 	})
-}
-
-func (state *AppState) newTrayMenu() *menu.Menu {
-	m := &menu.Menu{}
-	m.Append(&menu.MenuItem{
-		Type:    menu.CheckboxType,
-		Label:   "Clipboard watch",
-		Checked: appState.Config.ClipboardWatch,
-		Click: func(ctx *menu.CallbackData) {
-			if ctx.MenuItem.Checked && appState.Config.ClipboardWatch {
-				// nothing to do
-				return
-			}
-			if !ctx.MenuItem.Checked && !appState.Config.ClipboardWatch {
-				// nothing to do
-				return
-			}
-
-			watch, err := state.ReadSettingBoolValue("ClipboardWatch")
-			if err != nil {
-				state.runtime.Log.Error(fmt.Sprintf("Tray clipboard watch error: %s", err))
-			}
-			state.SaveSettingBoolValue("ClipboardWatch", !watch)
-			ctx.MenuItem.Checked = appState.Config.ClipboardWatch
-			state.runtime.Events.Emit("ytd:app:config", state.Config)
-		},
-	})
-	m.Append(&menu.MenuItem{
-		Type:    menu.CheckboxType,
-		Label:   "Run in background on close", // hide window on close
-		Checked: appState.Config.RunInBackgroundOnClose,
-		Click: func(ctx *menu.CallbackData) {
-			watch, err := state.ReadSettingBoolValue("RunInBackgroundOnClose")
-			if err != nil {
-				state.runtime.Log.Error(fmt.Sprintf("Tray RunInBackgroundOnClose error: %s", err))
-			}
-			state.SaveSettingBoolValue("RunInBackgroundOnClose", !watch)
-			ctx.MenuItem.Checked = appState.Config.RunInBackgroundOnClose
-			state.runtime.Events.Emit("ytd:app:config", state.Config)
-		},
-	})
-	m.Append(&menu.MenuItem{
-		Type:     menu.CheckboxType,
-		Label:    "Check for updates", // hide window on close
-		Disabled: true,
-		Checked:  appState.Config.CheckForUpdates,
-		Click: func(ctx *menu.CallbackData) {
-			watch, err := state.ReadSettingBoolValue("CheckForUpdates")
-			if err != nil {
-				state.runtime.Log.Error(fmt.Sprintf("Tray CheckForUpdates error: %s", err))
-			}
-			state.SaveSettingBoolValue("CheckForUpdates", !watch)
-			ctx.MenuItem.Checked = appState.Config.CheckForUpdates
-			state.runtime.Events.Emit("ytd:app:config", state.Config)
-		},
-	})
-	m.Append(&menu.MenuItem{
-		Type:     menu.CheckboxType,
-		Label:    "Start at login (system startup)",
-		Disabled: true,
-		Checked:  appState.Config.StartAtLogin,
-		Click: func(ctx *menu.CallbackData) {
-			watch, err := state.ReadSettingBoolValue("StartAtLogin")
-			if err != nil {
-				state.runtime.Log.Error(fmt.Sprintf("Tray StartAtLogin error: %s", err))
-			}
-			state.SaveSettingBoolValue("StartAtLogin", !watch)
-
-			ctx.MenuItem.Checked = appState.Config.StartAtLogin
-			state.runtime.Events.Emit("ytd:app:config", state.Config)
-			// @TODO: update to latest commit or wait for next release
-			// mac.StartAtLogin(ctx.MenuItem.Checked)
-			state.runtime.Dialog.Message(&dialog.MessageDialog{
-				Type:         dialog.InfoDialog,
-				Title:        "Update successful",
-				Message:      "Please restart app for the changes to take effect.",
-				Buttons:      []string{"OK"},
-				CancelButton: "OK",
-			})
-		},
-	})
-	m.Append(menu.Separator())
-	m.Append(&menu.MenuItem{
-		Type:  menu.TextType,
-		Label: "Settings",
-		Click: func(ctx *menu.CallbackData) {
-			state.ShowWindow()
-			state.runtime.Events.Emit("ytd:show:dialog:settings")
-		},
-	})
-	m.Append(&menu.MenuItem{
-		Type:  menu.TextType,
-		Label: "Show app",
-		Click: func(ctx *menu.CallbackData) {
-			state.ShowWindow()
-		},
-	})
-	m.Append(&menu.MenuItem{
-		Type:  menu.TextType,
-		Label: fmt.Sprintf("ytd (%s)", version),
-	})
-	m.Append(&menu.MenuItem{
-		Type:        menu.TextType,
-		Label:       "Quit app",
-		Accelerator: keys.CmdOrCtrl("q"),
-		Hidden:      false,
-		Click: func(ctx *menu.CallbackData) {
-			state.ForceQuit()
-		},
-	})
-	return m
 }
 
 func (state *AppState) GetAppConfig() *AppConfig {

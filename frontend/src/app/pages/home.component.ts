@@ -112,7 +112,8 @@ export class HomeComponent implements OnInit {
     Wails.Events.On("ytd:app:config", (config) => {
       this._ngZone.run(() => {
         window.APP_STATE.config = config;
-        this._snackbar.open("Settings has been saved");
+        this._snackbar.openSuccess("Settings has been saved");
+        this._cdr.detectChanges();
       });
     });
 
