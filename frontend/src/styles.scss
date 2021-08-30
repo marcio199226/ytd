@@ -6,6 +6,12 @@ body {
   background-repeat: no-repeat;
   background-size: cover;
   backdrop-filter: blur(20px);
+
+  &.player-visible {
+    .mat-snack-bar-container {
+      margin-bottom: 120px;
+    }
+  }
 }
 
 .clickable {

@@ -6,4 +6,7 @@ const (
 	TrackStatusFailed      = "failed"
 	TrackStatusDownloading = "downloading"
 	TrackStatusDownladed   = "downloaded"
+	TrakcConverting        = "converting"
+	TrakcConverted         = "converted"
+	TrakcConvertFailed     = "failed"
 )

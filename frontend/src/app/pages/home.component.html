@@ -41,6 +41,7 @@
     [class.lastOfRow]="(idx + 1) % 4 === 0"
     [class.playing]="inPlaybackTrackId === entry.track?.id"
     [class.downloading]="entry.track.status === 'downloading'"
+    [class.converting]="entry.track.converting.status === 'converting'"
     [ngClass]="entry.type"
     *ngFor="let entry of filteredEntries; trackBy: trackById; let idx = index;"
     (mouseenter.silent)="onMouseEnter($event, entry)"
@@ -49,7 +50,7 @@
     <div class="title">{{ entry.type === 'track' ? entry.track.name : entry.playlist.name }}</div>
     <div class="fg">
       <div class="wrapper">
-        <ng-container *ngIf="entry.track.status === 'downloaded'">
+        <ng-container *ngIf="entry.track.status === 'downloaded' && entry.track.converting.status !== 'converting'">
           <mat-icon class="clickable" title="Add to playlist">add</mat-icon>
           <mat-icon class="clickable play" (click)="playback(entry)" title="Play">play_circle_filled</mat-icon>
           <mat-icon class="clickable stop" (click)="stop(entry)" title="Stop">stop</mat-icon>
@@ -82,6 +83,12 @@
               <span>{{ entry.track.downloadProgress }}%</span>
               <mat-progress-spinner mode="determinate" [value]="entry.track.downloadProgress"></mat-progress-spinner>
             </div>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="entry.track.converting.status === 'converting'">
+          <div fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="4px" fxFlex>
+            <span>Converting to mp3...</span>
+            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
           </div>
         </ng-container>
       </div>

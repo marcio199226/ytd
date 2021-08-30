@@ -17,7 +17,17 @@ export class AudioPlayerService {
 
   public onStopCmdTrack: BehaviorSubject<Track>;
 
-  public onTrackChanges: BehaviorSubject<string>;
+  public onPrevTrack: BehaviorSubject<Track>;
+
+  public onPrevTrackCmd: BehaviorSubject<Track>;
+
+  public onNextTrack: BehaviorSubject<Track>;
+
+  public onNextTrackCmd: BehaviorSubject<Track>;
+
+  public onShuffleTrack: BehaviorSubject<Track>;
+
+  public onShuffleTrackCmd: BehaviorSubject<Track>;
 
   public get trackId(): string {
     if(!this.track) {
@@ -27,11 +37,16 @@ export class AudioPlayerService {
   }
 
   constructor() {
-    this.onPlaybackTrack  = new BehaviorSubject(null);
-    this.onPlayCmdTrack   = new BehaviorSubject(null);
-    this.onStopTrack      = new BehaviorSubject(null);
-    this.onStopCmdTrack   = new BehaviorSubject(null);
-    this.onTrackChanges   = new BehaviorSubject(null);
+    this.onPlaybackTrack    = new BehaviorSubject(null);
+    this.onPlayCmdTrack     = new BehaviorSubject(null);
+    this.onStopTrack        = new BehaviorSubject(null);
+    this.onStopCmdTrack     = new BehaviorSubject(null);
+    this.onPrevTrack        = new BehaviorSubject(null);
+    this.onPrevTrackCmd     = new BehaviorSubject(null);
+    this.onNextTrack        = new BehaviorSubject(null);
+    this.onNextTrackCmd     = new BehaviorSubject(null);
+    this.onShuffleTrack     = new BehaviorSubject(null);
+    this.onShuffleTrackCmd  = new BehaviorSubject(null);
 
     this.onPlaybackTrack.subscribe(track => {
       this.action = 'play';

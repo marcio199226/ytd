@@ -1,6 +1,7 @@
 audio-player {
   .player {
     width: calc(100% - 32px);
+    max-width: calc(1024px - 32px);
     height: 96px;
     display: flex;
     background: rgba(0, 0, 0, 0.85);
@@ -15,6 +16,11 @@ audio-player {
     box-sizing: border-box;
     z-index: 9999;
     color: #fff;
+
+    .close-player {
+      margin-right: -10px;
+      align-self: flex-start;
+    }
 
     .name {
       max-width: 300px;
@@ -38,7 +44,21 @@ audio-player {
 
     .controls {
       .btns {
-        margin-bottom: 8px;
+        margin-bottom: 12px;
+      }
+    }
+
+    .volume {
+      .mat-slider {
+        .mat-slider-track-wrapper {
+          background: #fff;
+        }
+
+        &:not(.mat-slider.sliding) {
+          .mat-slider-thumb, .mat-slider-thumb-label {
+            background-color: #fff;
+          }
+        }
       }
     }
   }

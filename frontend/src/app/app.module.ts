@@ -17,6 +17,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatSliderModule}  from '@angular/material/slider';
 import { MatSnackBarModule, MAT_SNACK_BAR_DEFAULT_OPTIONS } from '@angular/material/snack-bar';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { NG_EVENT_PLUGINS } from '@tinkoff/ng-event-plugins';
@@ -47,6 +48,7 @@ import { AudioPlayerComponent, SettingsComponent } from './components';
     MatProgressBarModule,
     MatProgressSpinnerModule,
     MatSlideToggleModule,
+    MatSliderModule,
     MatSnackBarModule,
     MatToolbarModule
   ],

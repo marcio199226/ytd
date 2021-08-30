@@ -10,5 +10,10 @@ export interface Track {
   statusError: string;
   thumbnails: string[];
   isConvertedToMp3: boolean;
+  converting: {
+    status: "converting" | "converted" | "failed";
+    error: string;
+    attempts: number;
+  }
   url: string;
 }

@@ -9,10 +9,12 @@
     </div>
     <div class="controls" fxFlex fxLayout="column">
       <div class="btns" fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="12px">
-        <mat-icon class="prew clickable">skip_previous</mat-icon>
+        <mat-icon class="shuffle clickable" title="Shuffle" (click)="shuffle()">shuffle</mat-icon>
+        <mat-icon class="prew clickable" title="Previous track" (click)="prev()">skip_previous</mat-icon>
         <mat-icon class="play clickable" title="Play" [class.disabled]="!isReady()" (click)="play()" *ngIf="!isPlaying">play_arrow</mat-icon>
         <mat-icon class="stop clickable" title="Stop" (click)="stop()" *ngIf="isPlaying">stop</mat-icon>
-        <mat-icon class="next clickable">skip_next</mat-icon>
+        <mat-icon class="next clickable" title="Next track" (click)="next()">skip_next</mat-icon>
+        <mat-icon class="replay clickable" title="Replay" (click)="replay()">replay</mat-icon>
       </div>
       <div class="" fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="8px">
         <div class="duration">{{ elapsedTime }}</div>
@@ -21,6 +23,18 @@
         <div class="duration">{{ duration * 1000 | date: 'mm:ss' }}</div>
       </div>
     </div>
-    <div class="volume"></div>
+    <div class="volume" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="4px">
+      <mat-icon>{{ volume === 0 ? 'volume_off' : 'volume_up' }}</mat-icon>
+      <mat-slider
+        [max]="1"
+        [min]="0"
+        [step]="0.1"
+        [tickInterval]="0.1"
+        [value]="volume"
+        (input)="changeVolume($event)"
+        [vertical]="false">
+      </mat-slider>
+    </div>
+    <mat-icon class="close-player clickable" (click)="closePlayer()">close</mat-icon>
   </ng-container>
 </div>

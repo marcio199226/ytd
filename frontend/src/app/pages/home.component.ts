@@ -17,10 +17,14 @@ import { AppConfig, AppState } from '../models/app-state';
 import * as Wails from '@wailsapp/runtime';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { SettingsComponent } from 'app/components';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, filter } from 'rxjs/operators';
 import { MatMenu } from '@angular/material/menu';
 import { DOCUMENT } from '@angular/common';
 import { SnackbarService } from 'app/services/snackbar.service';
+
+const minMax = (min: number, max: number) => {
+  return Math.floor(Math.random() * (max - min)) + min;
+}
 
 @Component({
   selector: 'app-home',
@@ -123,6 +127,7 @@ export class HomeComponent implements OnInit {
       })
     });
 
+    // players commands
     this._audioPlayerService.onPlayCmdTrack.subscribe(track => {
       this.inPlayback = track;
       this._cdr.detectChanges();
@@ -132,6 +137,57 @@ export class HomeComponent implements OnInit {
       this.inPlayback = null;
       this._cdr.detectChanges();
     });
+
+    this._audioPlayerService.onPrevTrackCmd.pipe(filter(track => track !== null)).subscribe(currentTrack => {
+      const trackIdx = this.entries.findIndex(e => e.track && e.track.id === currentTrack.id);
+
+      if(trackIdx - 1 < 0) {
+        this._snackbar.openWarning("Cannot playback prev track")
+        return;
+      }
+
+      let idx = 1;
+      let prevTrack;
+      do {
+        prevTrack = this.entries[trackIdx - idx].track;
+        idx++;
+      } while(
+        window.wails.System.Platform() !=='darwin' ||
+        window.wails.System.Platform() ==='darwin' && !prevTrack.isConvertedToMp3
+      )
+
+      this.inPlayback = prevTrack;
+      this._audioPlayerService.onPlaybackTrack.next(prevTrack);
+    });
+
+    this._audioPlayerService.onNextTrackCmd.pipe(filter(track => track !== null)).subscribe(currentTrack => {
+      const trackIdx = this.entries.findIndex(e => e.track && e.track.id === currentTrack.id);
+      if(trackIdx + 1 >= this.entries.length) {
+        this._snackbar.openWarning("Cannot playback next track")
+        return;
+      }
+
+      let idx = 1;
+      let nextTrack;
+      do {
+        nextTrack = this.entries[trackIdx + idx].track;
+        idx++;
+      } while(
+        window.wails.System.Platform() !=='darwin' ||
+        window.wails.System.Platform() ==='darwin' && !nextTrack.isConvertedToMp3
+      )
+
+      this.inPlayback = nextTrack;
+      this._audioPlayerService.onPlaybackTrack.next(nextTrack);
+    });
+
+    this._audioPlayerService.onShuffleTrackCmd.pipe(filter(track => track !== null)).subscribe(currentTrack => {
+      const tracks = this.entries.filter(e => e.type === 'track');
+      const idx = minMax(0, tracks.length)
+      this.inPlayback = tracks[idx].track;
+      this._audioPlayerService.onPlaybackTrack.next(tracks[idx].track);
+    });
+
 
     this._onSearch();
   }
@@ -229,8 +285,9 @@ export class HomeComponent implements OnInit {
     if(window.wails.System.Platform() ==='darwin' && !entry.track.isConvertedToMp3) {
       const ref = this._snackbar.openWarning("Cannot playback on MacOs, you should enable \"Convert to mp3\" option", "Open settings")
       ref.onAction().subscribe(() => this.openSettings());
-      return
+      return;
     }
+
     this.inPlayback = entry.track;
     this._audioPlayerService.onPlaybackTrack.next(entry.track);
   }

@@ -235,7 +235,7 @@ func (state *AppState) telegramShareTracks(restart chan<- int) error {
 func (state *AppState) convertToMp3(restart chan<- int) error {
 	if !state.Config.ConvertToMp3 {
 		// if option is not enabled restart check after 30s
-		time.Sleep(30 * time.Second)
+		time.Sleep(10 * time.Second)
 		restart <- 1
 		return nil
 	}
@@ -249,6 +249,9 @@ func (state *AppState) convertToMp3(restart chan<- int) error {
 
 		if entry.Type == "track" && entry.Track.Status == TrackStatusDownladed && !entry.Track.IsConvertedToMp3 && plugin.IsTrackFileExists(entry.Track, "webm") {
 			fmt.Printf("Extracting audio for %s...\n", entry.Track.Name)
+			entry.Track.ConvertingStatus.Status = TrakcConverting
+			DbWriteEntry(entry.Track.ID, entry)
+			state.runtime.Events.Emit("ytd:track", entry)
 
 			// ffmpeg -i "41qC3w3UUkU.webm" -vn -ab 128k -ar 44100 -y "41qC3w3UUkU.mp3"
 			cmd := exec.Command(
@@ -266,7 +269,14 @@ func (state *AppState) convertToMp3(restart chan<- int) error {
 
 			if err := cmd.Run(); err != nil {
 				fmt.Println("Failed to extract audio:", err)
+				entry.Track.ConvertingStatus.Status = TrakcConvertFailed
+				entry.Track.ConvertingStatus.Err = err.Error()
+				entry.Track.ConvertingStatus.Attempts += 1
+				DbWriteEntry(entry.Track.ID, entry)
+				state.runtime.Events.Emit("ytd:track", entry)
+
 			} else {
+				entry.Track.ConvertingStatus.Status = TrakcConverted
 				entry.Track.IsConvertedToMp3 = true
 				DbWriteEntry(entry.Track.ID, entry)
 				state.runtime.Events.Emit("ytd:track", entry) // track:converted:mp3
@@ -285,7 +295,7 @@ func (state *AppState) convertToMp3(restart chan<- int) error {
 	}
 
 	// if there are no tracks to convert delay between restart
-	time.Sleep(30 * time.Second)
+	time.Sleep(10 * time.Second)
 	restart <- 1
 	return nil
 }

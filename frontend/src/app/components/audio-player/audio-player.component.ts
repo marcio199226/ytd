@@ -4,15 +4,19 @@ import {
   Component,
   EventEmitter,
   HostBinding,
+  Inject,
   Input,
   OnInit,
   Output,
+  Renderer2,
   ViewEncapsulation,
 } from '@angular/core';
 import { filter } from 'rxjs/operators'
 import { Track } from '@models';
 import { AudioPlayerService } from './audio-player.service';
 import { SnackbarService } from 'app/services/snackbar.service';
+import { MatSliderChange } from '@angular/material/slider';
+import { DOCUMENT } from '@angular/common';
 
 @Component({
   selector: 'audio-player',
@@ -26,6 +30,8 @@ export class AudioPlayerComponent implements OnInit {
   public track: Track = null;
 
   public audio: HTMLAudioElement = null;
+
+  public volume: number = 0.5;
 
   public isPlaying: Boolean = false;
 
@@ -45,6 +51,7 @@ export class AudioPlayerComponent implements OnInit {
 
   constructor(
     private _cdr: ChangeDetectorRef,
+    @Inject(DOCUMENT) private document: Document,
     private _snackbar: SnackbarService,
     private _audioPlayerService: AudioPlayerService
   ) {}
@@ -73,6 +80,7 @@ export class AudioPlayerComponent implements OnInit {
   private _play(track: Track): void {
     const src = track.isConvertedToMp3 ? `http://localhost:8080/tracks/youtube/${track.id}.mp3` : `http://localhost:8080/tracks/youtube/${track.id}.webm`;
     this.audio = new Audio(src);
+    this.audio.volume = this.volume;
 
     this.audio.ontimeupdate = (e) => {
       const s = parseInt((this.audio.currentTime % 60).toString(), 10);
@@ -116,6 +124,7 @@ export class AudioPlayerComponent implements OnInit {
   }
 
   play(): void {
+    this.document.body.classList.add('player-visible');
     this.onPlayAudio.emit();
     this.isPlaying = true;
     this.audio.play();
@@ -130,8 +139,37 @@ export class AudioPlayerComponent implements OnInit {
     this._cdr.detectChanges();
   }
 
+  changeVolume(event: MatSliderChange): void {
+    this.volume = event.value;
+    this.audio.volume = event.value;
+  }
+
+  prev(): void {
+    this._audioPlayerService.onPrevTrackCmd.next(this.track);
+  }
+
+  next(): void {
+    this._audioPlayerService.onNextTrackCmd.next(this.track);
+  }
+
+  replay(): void {
+    this.audio.currentTime = 0;
+  }
+
+  shuffle(): void {
+    this._audioPlayerService.onShuffleTrackCmd.next(this.track);
+  }
+
   isReady(): Boolean {
     return this.audio && this.audio.readyState === 4;
+  }
+
+  closePlayer(): void {
+    this.audio.pause();
+    this._audioPlayerService.onStopCmdTrack.next(this.track);
+    this.audio = null;
+    this.track = null;
+    this.document.body.classList.remove('player-visible');
   }
 
   ngOnDestroy(): void {
