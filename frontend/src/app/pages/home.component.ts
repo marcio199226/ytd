@@ -294,6 +294,12 @@ export class HomeComponent implements OnInit {
         return;
       }
 
+      const { action } = result;
+
+      switch(action) {
+        case 'UpdateAndReplace':
+          await window.backend.main.AppState.Update(false);
+      }
 
     });
   }

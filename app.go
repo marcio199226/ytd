@@ -40,6 +40,7 @@ type AppState struct {
 	isInForeground  bool
 	canStartAtLogin bool
 	tray            TrayMenu
+	updater         *Updater
 }
 
 func (state *AppState) PreWailsInit() {
@@ -337,7 +338,7 @@ func (state *AppState) checkForUpdates() {
 		return
 	}
 
-	u := Updater{
+	state.updater = &Updater{
 		CurrentVersion:              version,
 		LatestReleaseGitHubEndpoint: "https://api.github.com/repos/marcio199226/ytd-binaries/releases",
 		Client:                      &http.Client{Timeout: 10 * time.Minute},
@@ -348,7 +349,7 @@ func (state *AppState) checkForUpdates() {
 		DownloadBytesLimit: 10_741_824, // 10MB
 	}
 
-	latest, hasUpdate, err := u.HasUpdate()
+	latest, hasUpdate, err := state.updater.HasUpdate()
 
 	if err != nil {
 		_, err := state.runtime.Dialog.Message(&dialog.MessageDialog{
@@ -404,7 +405,11 @@ func (state *AppState) checkForUpdates() {
 		return
 	}
 
-	_, err = u.Update()
+	state.Update(false)
+}
+
+func (state *AppState) Update(restart bool) {
+	_, err := state.updater.Update()
 	if err != nil {
 		_, err := state.runtime.Dialog.Message(&dialog.MessageDialog{
 			Type:         dialog.WarningDialog,

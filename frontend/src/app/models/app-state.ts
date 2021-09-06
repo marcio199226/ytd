@@ -39,7 +39,8 @@ export interface BackendCallbacks {
       SaveSettingValue: (name: string, val: string) => Promise<any>;
       RemoveEntry: (entry: Entry) => Promise<any>;
       IsFFmpegInstalled: () => Promise<boolean>;
-      OpenUrl: (url :string) => Promise<any>;
+      OpenUrl: (url: string) => Promise<any>;
+      Update: (restart: boolean) => Promise<any>;
       ShowWindow: () => Promise<any>;
       ForceQuit: () => Promise<any>;
     }
