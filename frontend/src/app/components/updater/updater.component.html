@@ -1,0 +1,29 @@
+<div class="dialog-content-wrapper">
+  <mat-toolbar>
+    <mat-toolbar-row fxFlex fxLayout="row" fxLayoutAlign="space-between center">
+      <span class="title dialog-title">
+        New update is available
+      </span>
+      <button mat-icon-button (click)="close()" >
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-toolbar-row>
+  </mat-toolbar>
+
+  <div mat-dialog-content fxLayout="column" fxLayoutGap="12px">
+    <div class="desc">
+      New version is available <strong>{{ data.release.Version }}</strong> (you have {{ data.oldVersion }}). <br/>
+    </div>
+    <ul class="assets" *ngFor="let asset of data.release.Assets">
+      <li (click)="updateManually(asset.Url)" title="Download manually">Download & install manually <span class="open-link">{{ asset.Name }}</span></li>
+    </ul>
+    <pre>
+      {{ data.release.Changelog }}
+    </pre>
+  </div>
+  <div mat-dialog-actions>
+    <button mat-flat-button color="primary" (click)="updateAndRestart()">Update & Restart</button>
+    <button mat-flat-button color="primary" (click)="updateAndReplace()">Update without restarting</button>
+    <button mat-flat-button color="primary" (click)="close()">Later</button>
+  </div>
+</div>

@@ -3,13 +3,19 @@ package main
 import (
 	"fmt"
 
+	"github.com/wailsapp/wails/v2"
+	"github.com/wailsapp/wails/v2/pkg/mac"
 	"github.com/wailsapp/wails/v2/pkg/menu"
 	"github.com/wailsapp/wails/v2/pkg/menu/keys"
 	"github.com/wailsapp/wails/v2/pkg/options/dialog"
 )
 
 type TrayMenu struct {
-	defaultTrayMenu *menu.TrayMenu
+	runtime              *wails.Runtime
+	defaultTrayMenu      *menu.TrayMenu
+	updateMenuItem       *menu.MenuItem
+	startAtLoginMenuItem *menu.MenuItem
+	versionMenuItem      *menu.MenuItem
 }
 
 func (tray *TrayMenu) createTray() *menu.TrayMenu {
@@ -19,6 +25,14 @@ func (tray *TrayMenu) createTray() *menu.TrayMenu {
 	}
 
 	return tray.defaultTrayMenu
+}
+
+func (tray *TrayMenu) reRenderTray(callback func()) *menu.TrayMenu {
+	tray.runtime.Menu.DeleteTrayMenu(tray.defaultTrayMenu)
+	m := tray.createTray()
+	callback()
+	tray.runtime.Menu.SetTrayMenu(tray.defaultTrayMenu)
+	return m
 }
 
 func (tray *TrayMenu) createTrayMenu() *menu.Menu {
@@ -51,11 +65,10 @@ func (tray *TrayMenu) createTrayMenu() *menu.Menu {
 			appState.runtime.Events.Emit("ytd:app:config", appState.Config)
 		},
 	})
-	m.Append(&menu.MenuItem{
-		Type:     menu.CheckboxType,
-		Label:    "Check for updates", // hide window on close
-		Disabled: true,
-		Checked:  appState.Config.CheckForUpdates,
+	tray.updateMenuItem = &menu.MenuItem{
+		Type:    menu.CheckboxType,
+		Label:   "Check for updates", // hide window on close
+		Checked: appState.Config.CheckForUpdates,
 		Click: func(ctx *menu.CallbackData) {
 			watch, err := appState.ReadSettingBoolValue("CheckForUpdates")
 			if err != nil {
@@ -65,32 +78,42 @@ func (tray *TrayMenu) createTrayMenu() *menu.Menu {
 			ctx.MenuItem.Checked = appState.Config.CheckForUpdates
 			appState.runtime.Events.Emit("ytd:app:config", appState.Config)
 		},
-	})
-	m.Append(&menu.MenuItem{
+	}
+	m.Append(tray.updateMenuItem)
+	tray.startAtLoginMenuItem = &menu.MenuItem{
 		Type:     menu.CheckboxType,
 		Label:    "Start at login (system startup)",
-		Disabled: true,
-		Checked:  appState.Config.StartAtLogin,
+		Checked:  appState.canStartAtLogin && appState.Config.StartAtLogin,
+		Disabled: !appState.canStartAtLogin,
 		Click: func(ctx *menu.CallbackData) {
-			watch, err := appState.ReadSettingBoolValue("StartAtLogin")
+			enabled, err := appState.ReadSettingBoolValue("StartAtLogin")
 			if err != nil {
 				appState.runtime.Log.Error(fmt.Sprintf("Tray StartAtLogin error: %s", err))
+				return
 			}
-			appState.SaveSettingBoolValue("StartAtLogin", !watch)
 
-			ctx.MenuItem.Checked = appState.Config.StartAtLogin
+			notAvailable := mac.StartAtLogin(!enabled)
+			if notAvailable != nil {
+				tray.reRenderTray(func() {
+					tray.startAtLoginMenuItem.Label = "⚠ Start at Login unavailable"
+					tray.startAtLoginMenuItem.Disabled = true
+				})
+				appState.runtime.Dialog.Message(&dialog.MessageDialog{
+					Type:         dialog.ErrorDialog,
+					Title:        "Cannot enable start at login",
+					Message:      notAvailable.Error(),
+					Buttons:      []string{"OK"},
+					CancelButton: "OK",
+				})
+				return
+			}
+
+			ctx.MenuItem.Checked = !enabled
 			appState.runtime.Events.Emit("ytd:app:config", appState.Config)
-			// @TODO: update to latest commit or wait for next release
-			// mac.StartAtLogin(ctx.MenuItem.Checked)
-			appState.runtime.Dialog.Message(&dialog.MessageDialog{
-				Type:         dialog.InfoDialog,
-				Title:        "Update successful",
-				Message:      "Please restart app for the changes to take effect.",
-				Buttons:      []string{"OK"},
-				CancelButton: "OK",
-			})
+			appState.SaveSettingBoolValue("StartAtLogin", !enabled)
 		},
-	})
+	}
+	m.Append(tray.startAtLoginMenuItem)
 	m.Append(menu.Separator())
 	m.Append(&menu.MenuItem{
 		Type:  menu.TextType,
@@ -107,10 +130,12 @@ func (tray *TrayMenu) createTrayMenu() *menu.Menu {
 			appState.ShowWindow()
 		},
 	})
-	m.Append(&menu.MenuItem{
-		Type:  menu.TextType,
-		Label: fmt.Sprintf("ytd (%s)", version),
-	})
+	tray.versionMenuItem = &menu.MenuItem{
+		Type:     menu.TextType,
+		Disabled: true,
+		Label:    fmt.Sprintf("ytd (%s)", version),
+	}
+	m.Append(tray.versionMenuItem)
 	m.Append(&menu.MenuItem{
 		Type:        menu.TextType,
 		Label:       "Quit app",

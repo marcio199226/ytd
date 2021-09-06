@@ -1,10 +1,25 @@
+# github.com/Masterminds/semver/v3 v3.1.1
+## explicit
+github.com/Masterminds/semver/v3
 # github.com/bitly/go-simplejson v0.5.0
 github.com/bitly/go-simplejson
 # github.com/bwmarrin/snowflake v0.3.0
 github.com/bwmarrin/snowflake
+# github.com/dsnet/compress v0.0.1
+## explicit
+github.com/dsnet/compress
+github.com/dsnet/compress/bzip2
+github.com/dsnet/compress/bzip2/internal/sais
+github.com/dsnet/compress/internal
+github.com/dsnet/compress/internal/errors
+github.com/dsnet/compress/internal/prefix
+# github.com/frankban/quicktest v1.13.1
+## explicit
 # github.com/go-ole/go-ole v1.2.5
 ## explicit
 github.com/go-ole/go-ole
+# github.com/golang/snappy v0.0.3
+github.com/golang/snappy
 # github.com/google/uuid v1.3.0
 ## explicit
 github.com/google/uuid
@@ -39,13 +54,30 @@ github.com/leaanthony/webview2runtime
 github.com/logrusorgru/aurora
 # github.com/mattn/go-isatty v0.0.13
 ## explicit
+# github.com/mholt/archiver v3.1.1+incompatible
+## explicit
+github.com/mholt/archiver
 # github.com/mitchellh/mapstructure v1.4.1
 ## explicit
 github.com/mitchellh/mapstructure
+# github.com/nwaples/rardecode v1.1.2
+## explicit
+github.com/nwaples/rardecode
+# github.com/pierrec/lz4 v2.6.1+incompatible
+## explicit
+github.com/pierrec/lz4
+github.com/pierrec/lz4/internal/xxh32
 # github.com/pkg/errors v0.9.1
+## explicit
 github.com/pkg/errors
 # github.com/rivo/uniseg v0.2.0
 github.com/rivo/uniseg
+# github.com/ulikunitz/xz v0.5.10
+## explicit
+github.com/ulikunitz/xz
+github.com/ulikunitz/xz/internal/hash
+github.com/ulikunitz/xz/internal/xlog
+github.com/ulikunitz/xz/lzma
 # github.com/wailsapp/wails/v2 v2.0.0-alpha.73
 ## explicit
 github.com/wailsapp/wails/v2
@@ -64,16 +96,21 @@ github.com/wailsapp/wails/v2/internal/messagedispatcher
 github.com/wailsapp/wails/v2/internal/messagedispatcher/message
 github.com/wailsapp/wails/v2/internal/runtime
 github.com/wailsapp/wails/v2/internal/servicebus
+github.com/wailsapp/wails/v2/internal/shell
 github.com/wailsapp/wails/v2/internal/signal
 github.com/wailsapp/wails/v2/internal/subsystem
 github.com/wailsapp/wails/v2/internal/webserver
 github.com/wailsapp/wails/v2/pkg/logger
+github.com/wailsapp/wails/v2/pkg/mac
 github.com/wailsapp/wails/v2/pkg/menu
 github.com/wailsapp/wails/v2/pkg/menu/keys
 github.com/wailsapp/wails/v2/pkg/options
 github.com/wailsapp/wails/v2/pkg/options/dialog
 github.com/wailsapp/wails/v2/pkg/options/mac
 github.com/wailsapp/wails/v2/pkg/options/windows
+# github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8
+## explicit
+github.com/xi2/xz
 # github.com/xujiajun/mmap-go v1.0.1
 github.com/xujiajun/mmap-go
 # github.com/xujiajun/nutsdb v0.6.0

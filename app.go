@@ -3,8 +3,13 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
+	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"runtime"
+	"strings"
 	"time"
 
 	. "ytd/constants"
@@ -14,6 +19,7 @@ import (
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/wailsapp/wails/v2"
+	"github.com/wailsapp/wails/v2/pkg/mac"
 	"github.com/wailsapp/wails/v2/pkg/options/dialog"
 	"github.com/xujiajun/nutsdb"
 
@@ -23,21 +29,28 @@ import (
 var wailsRuntime *wails.Runtime
 
 type AppState struct {
-	runtime *wails.Runtime
-	db      *nutsdb.DB
-	plugins []Plugin
-	Entries []GenericEntry `json:"entries"`
-	Config  *AppConfig     `json:"config"`
-	Stats   *AppStats
+	runtime    *wails.Runtime
+	db         *nutsdb.DB
+	plugins    []Plugin
+	Entries    []GenericEntry `json:"entries"`
+	Config     *AppConfig     `json:"config"`
+	Stats      *AppStats
+	AppVersion string `json:"appVersion"`
 
-	isInForeground bool
-	tray           TrayMenu
+	isInForeground  bool
+	canStartAtLogin bool
+	tray            TrayMenu
 }
 
 func (state *AppState) PreWailsInit() {
 	state.db = InitializeDb()
 	state.Entries = DbGetAllEntries()
 	state.Config = state.Config.Init()
+	state.AppVersion = version
+
+	if _, err := mac.StartsAtLogin(); err == nil {
+		state.canStartAtLogin = true
+	}
 }
 
 func (state *AppState) WailsInit(runtime *wails.Runtime) {
@@ -60,22 +73,25 @@ func (state *AppState) WailsInit(runtime *wails.Runtime) {
 		}()
 	}
 
+	// initialize plugins
 	for _, plugin := range plugins {
 		plugin.SetWailsRuntime(runtime)
 		plugin.SetAppConfig(state.Config)
 		plugin.SetAppStats(state.Stats)
 	}
+
 	fmt.Println("APP STATE INITIALIZED")
 	state.InitializeListeners()
 	// create app sys tray menu
+	state.tray.runtime = runtime
 	state.tray.createTray()
 	state.runtime.Menu.SetTrayMenu(state.tray.defaultTrayMenu)
 	// event emitted from fe if tray should be updated
 	runtime.Events.On("ytd:app:tray:update", func(data ...interface{}) {
-		state.runtime.Menu.DeleteTrayMenu(state.tray.defaultTrayMenu)
-		state.tray.createTray()
-		state.runtime.Menu.SetTrayMenu(state.tray.defaultTrayMenu)
+		state.tray.reRenderTray(func() {})
 	})
+
+	state.checkStartsAtLogin()
 
 	/* 	go func() {
 		for {
@@ -108,11 +124,27 @@ func (state *AppState) WailsInit(runtime *wails.Runtime) {
 
 		for {
 			select {
+			// @TODO
+			// qui leggiamo da newEntries dove andiamo a scrivere o dentro yt.Fetch alla fine del metodo
+			// oppure da dentro AddToDownload e facciamo tornare a plugin.fetch l'entry creata
+			// cosi se legge prima da newEntries converte per prima quella altrimenti convertira le tracce che sono in attesa da prima
+			/* 			case <-newEntries:
+			fmt.Println("Converto new track...")
+			go state.convertToMp3(restart, newEntries) */
 			case <-restart:
 				fmt.Println("Restart converting...")
 				go state.convertToMp3(restart)
 			}
 
+		}
+	}()
+
+	go func() {
+		time.Sleep(10 * time.Second)
+		for {
+			state.checkForUpdates()
+			// check again in twelve hours
+			time.Sleep(12 * time.Hour)
 		}
 	}()
 }
@@ -235,7 +267,7 @@ func (state *AppState) telegramShareTracks(restart chan<- int) error {
 func (state *AppState) convertToMp3(restart chan<- int) error {
 	if !state.Config.ConvertToMp3 {
 		// if option is not enabled restart check after 30s
-		time.Sleep(10 * time.Second)
+		time.Sleep(60 * time.Second)
 		restart <- 1
 		return nil
 	}
@@ -295,9 +327,124 @@ func (state *AppState) convertToMp3(restart chan<- int) error {
 	}
 
 	// if there are no tracks to convert delay between restart
-	time.Sleep(10 * time.Second)
+	time.Sleep(15 * time.Second)
 	restart <- 1
 	return nil
+}
+
+func (state *AppState) checkForUpdates() {
+	if !state.Config.CheckForUpdates {
+		return
+	}
+
+	u := Updater{
+		CurrentVersion:              version,
+		LatestReleaseGitHubEndpoint: "https://api.github.com/repos/marcio199226/ytd-binaries/releases",
+		Client:                      &http.Client{Timeout: 10 * time.Minute},
+		SelectAsset: func(release Release, asset Asset) bool {
+			// look for the zip file
+			return strings.Contains(asset.Name, fmt.Sprintf("%s-%s", runtime.GOOS, runtime.GOARCH)) && filepath.Ext(asset.Name) == ".zip"
+		},
+		DownloadBytesLimit: 10_741_824, // 10MB
+	}
+
+	latest, hasUpdate, err := u.HasUpdate()
+
+	if err != nil {
+		_, err := state.runtime.Dialog.Message(&dialog.MessageDialog{
+			Type:         dialog.ErrorDialog,
+			Title:        "Update check failed",
+			Message:      err.Error(),
+			Buttons:      []string{"OK"},
+			CancelButton: "OK",
+		})
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		return
+	}
+
+	if !hasUpdate {
+		_, err := state.runtime.Dialog.Message(&dialog.MessageDialog{
+			Type:         dialog.InfoDialog,
+			Title:        "You're up to date",
+			Message:      fmt.Sprintf("%s is the latest version.", latest.TagName),
+			Buttons:      []string{"OK"},
+			CancelButton: "OK",
+		})
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		return
+	}
+
+	clickedAction, _ := state.runtime.Dialog.Message(&dialog.MessageDialog{
+		Type:         dialog.InfoDialog,
+		Title:        fmt.Sprintf("New version available: %s", latest.TagName),
+		Message:      "Would you like to update?",
+		Buttons:      []string{"OK", "Changelog", "Update"},
+		CancelButton: "OK",
+	})
+
+	state.tray.reRenderTray(func() {
+		state.tray.versionMenuItem.Label = fmt.Sprintf("⚠️ ytd (%s) (new version %s)", version, latest.TagName)
+	})
+
+	switch clickedAction {
+	case "Update":
+		// continue
+	case "Changelog":
+		state.runtime.Window.Show()
+		state.runtime.Events.Emit("ytd:app:update:changelog", latest)
+		return
+	case "OK":
+		state.runtime.Events.Emit("ytd:app:update:available", latest)
+		return
+	}
+
+	_, err = u.Update()
+	if err != nil {
+		_, err := state.runtime.Dialog.Message(&dialog.MessageDialog{
+			Type:         dialog.WarningDialog,
+			Title:        "Update not successful",
+			Message:      err.Error(),
+			Buttons:      []string{"OK"},
+			CancelButton: "OK",
+		})
+		if err != nil {
+			log.Println(err)
+			return
+		}
+	}
+
+	// restart for now does not work properly, it closes current ytd instance but not launch the new one
+	// so notify user that update has been done and could restart app
+	// err = u.Restart()
+	state.runtime.Dialog.Message(&dialog.MessageDialog{
+		Type:         dialog.InfoDialog,
+		Title:        "Update successful",
+		Message:      "Please restart ytd for the changes to take effect.",
+		Buttons:      []string{"OK"},
+		CancelButton: "OK",
+	})
+}
+
+func (state *AppState) checkStartsAtLogin() {
+	startsAtLogin, err := mac.StartsAtLogin()
+	if err != nil {
+		state.tray.reRenderTray(func() {
+			state.tray.startAtLoginMenuItem.Label = "⚠ Start at Login unavailable"
+			state.tray.startAtLoginMenuItem.Disabled = true
+		})
+	} else if startsAtLogin {
+		mac.ShowNotification("Ytd", "App has been started in background", "", "")
+		state.tray.reRenderTray(func() {
+			state.tray.startAtLoginMenuItem.Checked = true
+			state.tray.startAtLoginMenuItem.Disabled = false
+		})
+	}
 }
 
 func (state *AppState) SaveSettingBoolValue(name string, val bool) (err error) {

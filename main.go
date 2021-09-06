@@ -111,7 +111,7 @@ func main() {
 		Height:            768,
 		MinWidth:          1024,
 		MinHeight:         768,
-		StartHidden:       app.Config.StartAtLogin,
+		StartHidden:       app.canStartAtLogin && app.Config.StartAtLogin,
 		HideWindowOnClose: app.Config.RunInBackgroundOnClose,
 		DisableResize:     false,
 		Fullscreen:        false,

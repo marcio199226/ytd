@@ -1,0 +1,33 @@
+updater {
+  [mat-dialog-content] {
+    padding: 0px 16px;
+    margin: 0;
+  }
+
+  [mat-dialog-actions] {
+    justify-content: flex-end;
+    margin-bottom: 0;
+    padding: 8px 16px;
+  }
+}
+
+.updater-dialog {
+  .mat-dialog-container {
+    background: url("http://localhost:8080/static/frontend/dist/assets/bg.png");
+    background-repeat: no-repeat;
+
+    .mat-toolbar {
+      background: transparent;
+    }
+
+    .open-link {
+      font-weight: bold;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    pre {
+      white-space: pre-line;
+    }
+  }
+}

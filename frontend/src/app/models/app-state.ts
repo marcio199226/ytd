@@ -21,6 +21,7 @@ export interface AppConfig {
 export interface AppState {
   entries: Entry[];
   config: AppConfig;
+  appVersion: string;
 }
 
 

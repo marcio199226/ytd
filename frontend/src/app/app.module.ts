@@ -9,6 +9,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HomeComponent } from './pages/home.component';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatButtonModule } from '@angular/material/button';
+import { MatBadgeModule } from '@angular/material/badge';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -21,7 +22,7 @@ import { MatSliderModule}  from '@angular/material/slider';
 import { MatSnackBarModule, MAT_SNACK_BAR_DEFAULT_OPTIONS } from '@angular/material/snack-bar';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { NG_EVENT_PLUGINS } from '@tinkoff/ng-event-plugins';
-import { AudioPlayerComponent, SettingsComponent } from './components';
+import { AudioPlayerComponent, SettingsComponent, UpdaterComponent} from './components';
 
 
 @NgModule({
@@ -29,7 +30,8 @@ import { AudioPlayerComponent, SettingsComponent } from './components';
     AppComponent,
     HomeComponent,
     AudioPlayerComponent,
-    SettingsComponent
+    SettingsComponent,
+    UpdaterComponent
   ],
   imports: [
     BrowserModule,
@@ -40,6 +42,7 @@ import { AudioPlayerComponent, SettingsComponent } from './components';
     ReactiveFormsModule,
     FlexLayoutModule,
     MatButtonModule,
+    MatBadgeModule,
     MatDialogModule,
     MatFormFieldModule,
     MatIconModule,

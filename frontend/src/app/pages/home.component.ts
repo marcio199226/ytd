@@ -12,11 +12,11 @@ import {
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { AudioPlayerService } from 'app/components/audio-player/audio-player.service';
-import { Track, Entry } from '@models';
+import { Track, Entry, UpdateRelease, ReleaseEventPayload } from '@models';
 import { AppConfig, AppState } from '../models/app-state';
 import * as Wails from '@wailsapp/runtime';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { SettingsComponent } from 'app/components';
+import { SettingsComponent, UpdaterComponent } from 'app/components';
 import { debounceTime, distinctUntilChanged, filter } from 'rxjs/operators';
 import { MatMenu } from '@angular/material/menu';
 import { DOCUMENT } from '@angular/common';
@@ -44,6 +44,8 @@ export class HomeComponent implements OnInit {
   public onHoverEntry: Entry = null;
 
   public inPlayback: Track = null;
+
+  public newUpdateInfo: UpdateRelease = null;
 
   public get inPlaybackTrackId(): string {
     if(!this.inPlayback) {
@@ -124,6 +126,30 @@ export class HomeComponent implements OnInit {
     Wails.Events.On("ytd:show:dialog:settings", () => {
       this._ngZone.run(() => {
         this.openSettings();
+      })
+    });
+
+    Wails.Events.On("ytd:app:update:available", (release: ReleaseEventPayload) => {
+      console.log('ON UPDATE', release)
+      this._ngZone.run(() => {
+        this.newUpdateInfo = UpdateRelease.fromJSON(release);
+        this._cdr.detectChanges();
+      })
+    });
+
+    Wails.Events.On("ytd:app:update:changelog", (release: ReleaseEventPayload) => {
+      console.log('ON UPDATE', release)
+      this._ngZone.run(() => {
+        this.newUpdateInfo = UpdateRelease.fromJSON(release);
+        this.openUpdate();
+        this._cdr.detectChanges();
+      })
+    });
+
+    Wails.Events.On("ytd:app:update:apply", (release: ReleaseEventPayload) => {
+      console.log('ON UPDATE', release)
+      this._ngZone.run(() => {
+        this.newUpdateInfo = UpdateRelease.fromJSON(release);
       })
     });
 
@@ -252,6 +278,24 @@ export class HomeComponent implements OnInit {
     });
 
     return dialogRef
+  }
+
+  openUpdate(): void {
+    const dialogRef = this._dialog.open(UpdaterComponent, {
+      autoFocus: false,
+      panelClass: ['updater-dialog',  'with-header-dialog'],
+      width: '600px',
+      maxHeight: '700px',
+      data: { release: this.newUpdateInfo, oldVersion: window.APP_STATE.appVersion }
+    });
+
+    dialogRef.afterClosed().subscribe(async (result) => {
+      if(!result) {
+        return;
+      }
+
+
+    });
   }
 
   trackById(idx: number, entry: Entry): string {

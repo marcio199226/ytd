@@ -26,6 +26,15 @@
     </div>
   </div>
   <mat-icon class="clickable white" title="Settings" (click)="openSettings()">settings</mat-icon>
+  <mat-icon
+    class="clickable white" t
+    title="New update is available"
+    matBadge="*"
+    matBadgePosition="after"
+    matBadgeOverlap="false"
+    matBadgeSize="small"
+    (click)="openUpdate()"
+    *ngIf="newUpdateInfo">update</mat-icon>
 </header>
 
 <div class="entries" fxLayout="row wrap" fxLayoutAlign="center start" fxLayoutGap="10px">
