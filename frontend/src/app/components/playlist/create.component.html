@@ -1,0 +1,23 @@
+<div class="dialog-content-wrapper">
+  <mat-toolbar>
+    <mat-toolbar-row fxFlex fxLayout="row" fxLayoutAlign="space-between center">
+      <span class="title dialog-title">
+        Create new playlist
+      </span>
+      <button mat-icon-button (click)="close()" >
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-toolbar-row>
+  </mat-toolbar>
+
+  <div mat-dialog-content>
+    <mat-form-field appearance="fill">
+      <mat-label>Playlist name</mat-label>
+      <input matInput [(ngModel)]="model.name" required>
+      <mat-error>Cannot be empty</mat-error>
+    </mat-form-field>
+  </div>
+  <div mat-dialog-actions>
+    <button mat-flat-button color="primary" (click)="create()" [disabled]="!model.name">Create</button>
+  </div>
+</div>

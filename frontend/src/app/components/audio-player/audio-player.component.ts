@@ -116,9 +116,6 @@ export class AudioPlayerComponent implements OnInit {
   ngDoCheck(): void {
     if (this.audio && this.audio.readyState === 4 && !this.canPlay) {
       this.canPlay = true;
-      const s = parseInt((this.audio.duration % 60).toString(), 10);
-      const m = parseInt(((this.audio.duration / 60) % 60).toString(), 10);
-      this.elapsedTime = s < 10 ? m + ':0' + s : m + ':' + s;
       this._cdr.detectChanges();
     }
   }

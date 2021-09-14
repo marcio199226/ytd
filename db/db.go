@@ -7,6 +7,7 @@ import (
 
 	"log"
 
+	"github.com/pkg/errors"
 	"github.com/xujiajun/nutsdb"
 
 	. "ytd/models"
@@ -14,6 +15,7 @@ import (
 
 const entriesBucketName = "entriesBucket"
 const settingBucketName = "settingsBucket"
+const offlinePlaylistsBucketName = "offlinePlaylistsBucket"
 
 var db *nutsdb.DB
 
@@ -87,6 +89,69 @@ func DbDeleteEntry(Key string) error {
 		func(tx *nutsdb.Tx) error {
 			key := []byte(Key)
 			if err := tx.Delete(entriesBucketName, key); err != nil {
+				return err
+			}
+			return nil
+		})
+	return err
+}
+
+func DbGetAllOfflinePlaylists() []OfflinePlaylist {
+	data := []OfflinePlaylist{}
+
+	if err := db.View(
+		func(tx *nutsdb.Tx) error {
+			entries, err := tx.GetAll(offlinePlaylistsBucketName)
+			if err != nil {
+				return err
+			}
+
+			for _, entry := range entries {
+
+				playlist := &OfflinePlaylist{}
+				json.Unmarshal(entry.Value, playlist)
+				data = append(data, *playlist)
+			}
+
+			return nil
+		}); err != nil {
+		log.Println(err)
+	} else {
+		return data
+	}
+	return data
+}
+
+func DbAddOfflinePlaylist(Key string, value interface{}, removeIfExists bool) error {
+	if removeIfExists {
+		err := DbRemoveOfflinePlaylist(Key)
+		if err != nil {
+			return errors.Wrap(err, "DbAddOfflinePlaylist removeIfExists")
+		}
+	}
+
+	err := db.Update(
+		func(tx *nutsdb.Tx) error {
+
+			keyBytes := []byte(Key)
+			valueBytes, err := json.Marshal(value)
+			if err != nil {
+				return err
+			}
+
+			if err := tx.Put(offlinePlaylistsBucketName, keyBytes, valueBytes, 0); err != nil {
+				return err
+			}
+			return nil
+		})
+	return err
+}
+
+func DbRemoveOfflinePlaylist(Key string) error {
+	err := db.Update(
+		func(tx *nutsdb.Tx) error {
+			key := []byte(Key)
+			if err := tx.Delete(offlinePlaylistsBucketName, key); err != nil {
 				return err
 			}
 			return nil

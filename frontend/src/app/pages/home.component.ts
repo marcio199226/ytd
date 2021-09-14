@@ -6,6 +6,7 @@ import {
   ElementRef,
   Inject,
   NgZone,
+  OnDestroy,
   OnInit,
   ViewChild,
   ViewEncapsulation,
@@ -21,6 +22,11 @@ import { debounceTime, distinctUntilChanged, filter } from 'rxjs/operators';
 import { MatMenu } from '@angular/material/menu';
 import { DOCUMENT } from '@angular/common';
 import { SnackbarService } from 'app/services/snackbar.service';
+import { MediaMatcher } from '@angular/cdk/layout';
+import { OfflinePlaylist } from 'app/models/offline-playlist';
+import { AddToPlaylistComponent, CreatePlaylistComponent } from 'app/components/playlist';
+import { ConfirmationDialogComponent } from 'app/components/confirmation-dialog/confirmation-dialog.component';
+import to from 'await-to-js';
 
 const minMax = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min)) + min;
@@ -33,13 +39,15 @@ const minMax = (min: number, max: number) => {
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
   public searchInput: FormControl;
 
   public urlInput: FormControl;
 
   public entries: Entry[] = [];
   public filteredEntries: Entry[] = [];
+
+  public offlinePlaylists: OfflinePlaylist[] = [];
 
   public onHoverEntry: Entry = null;
 
@@ -79,6 +87,8 @@ export class HomeComponent implements OnInit {
 
   public menuIsOpened: boolean = false;
 
+  public mobileQuery: MediaQueryList;
+
   constructor(
     private _cdr: ChangeDetectorRef,
     private _appRef: ApplicationRef,
@@ -86,15 +96,21 @@ export class HomeComponent implements OnInit {
     @Inject(DOCUMENT) private _document: Document,
     private _dialog: MatDialog,
     private _snackbar: SnackbarService,
+    private _media: MediaMatcher,
     private _audioPlayerService: AudioPlayerService
   ) {
     this.searchInput = new FormControl('');
     this.urlInput = new FormControl('');
+
+    this.mobileQuery = this._media.matchMedia('(max-width: 1024px)');
+    this._mobileQueryListener = () => this._cdr.detectChanges();
+    this.mobileQuery.addEventListener("change", this._mobileQueryListener);
   }
 
   ngOnInit(): void {
-    this.entries = (window.APP_STATE as AppState).entries;
+    this.entries = window.APP_STATE.entries;
     this.filteredEntries = this.entries;
+    this.offlinePlaylists = window.APP_STATE.offlinePlaylists;
 
     Wails.Events.On("ytd:track", (payload: Entry) => {
       console.log("ytd:track", payload)
@@ -392,6 +408,111 @@ export class HomeComponent implements OnInit {
     }
   }
 
+  addToPlaylist(entry: Entry): void {
+    const foundInPlaylists = this.offlinePlaylists.filter(op => op.tracksIds.indexOf(entry.track.id) > -1);
+    const dialogRef = this._dialog.open(AddToPlaylistComponent, {
+      autoFocus: false,
+      panelClass: ['add-to-playlist-dialog',  'with-header-dialog'],
+      maxWidth: '500px',
+      maxHeight: '500px',
+      data: { entry, playlists: this.offlinePlaylists, foundInPlaylists }
+    });
+
+    dialogRef.afterClosed().subscribe(async (result) => {
+      if(!result) {
+        return;
+      }
+
+      const { action, selectedPlaylists } = result;
+      if(!action) {
+        console.log('selectedPlaylists', selectedPlaylists)
+        const playlists: OfflinePlaylist[] = selectedPlaylists.map((uuid: string) => this.offlinePlaylists.find(op => op.uuid === uuid))
+        playlists.forEach(p => p.tracksIds.push(entry.track.id));
+        console.log(playlists)
+        const [err, added] = await to(window.backend.main.OfflinePlaylistService.AddTrackToPlaylist(playlists))
+
+        if(err) {
+          this._snackbar.openError("Error while adding track to playlist");
+          return;
+        }
+
+        return;
+      }
+
+      switch(action) {
+        case 'createNew':
+          this.createPlaylist();
+      }
+
+    });
+  }
+
+  createPlaylist(): void {
+    const dialogRef = this._dialog.open(CreatePlaylistComponent, {
+      autoFocus: false,
+      panelClass: ['create-playlist-dialog',  'with-header-dialog'],
+      width: '300px',
+      maxHeight: '500px',
+      data: { playlists: this.offlinePlaylists }
+    });
+
+    dialogRef.afterClosed().subscribe(async (result) => {
+      if(!result) {
+        return;
+      }
+
+      const { playlist } = result;
+
+      const [err, createdPlaylist] = await to(window.backend.main.OfflinePlaylistService.CreateNewPlaylist(playlist.name))
+      console.log('createdPlaylist', createdPlaylist)
+      if(err) {
+        this._snackbar.openError("Error while creating playlist");
+        return
+      }
+
+      this._snackbar.openSuccess("Playlist created");
+      this.offlinePlaylists.push(createdPlaylist);
+      this._cdr.detectChanges();
+    });
+  }
+
+  removePlaylist(playlist: OfflinePlaylist): void {
+    const dialogRef = this._dialog.open(ConfirmationDialogComponent, {
+      autoFocus: false,
+      panelClass: ['with-header-dialog'],
+      width: '300px',
+      data: {
+        title: 'Delete playlist',
+        text: `Are you sure you would to remove <strong>${playlist.name}</strong> playlist?`
+       }
+    });
+
+    dialogRef.afterClosed().subscribe(async (result) => {
+      if(!result) {
+        return;
+      }
+
+      // call remove from backend and update list
+      console.log("remove playlist", playlist)
+      const [err, isRemoved] = await to(window.backend.main.OfflinePlaylistService.RemovePlaylist(playlist.uuid))
+      if(err || !isRemoved) {
+        console.log(err, isRemoved)
+        this._snackbar.openError("Error while removing playlist");
+        return
+      }
+
+      this._snackbar.openSuccess("Playlist has been deleted");
+      this.offlinePlaylists = this.offlinePlaylists.filter(p => p.uuid !== playlist.uuid)
+      this._cdr.detectChanges();
+
+    });
+  }
+
+  async exportPlaylist(playlist: OfflinePlaylist): Promise<void> {
+    const [err, dir] = await to(window.backend.main.OfflinePlaylistService.ExportPlaylist(playlist.uuid))
+    console.log('exportPlaylist', err, dir)
+  }
+
   async remove(entry: Entry, i: number): Promise<void> {
     try {
       await window.backend.main.AppState.RemoveEntry(entry);
@@ -432,5 +553,11 @@ export class HomeComponent implements OnInit {
       });
       this._cdr.detectChanges();
     });
+  }
+
+  private _mobileQueryListener: () => void;
+
+  ngOnDestroy(): void {
+    this.mobileQuery.removeEventListener("change", this._mobileQueryListener);
   }
 }

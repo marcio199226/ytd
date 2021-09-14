@@ -29,23 +29,27 @@ import (
 var wailsRuntime *wails.Runtime
 
 type AppState struct {
-	runtime    *wails.Runtime
-	db         *nutsdb.DB
-	plugins    []Plugin
-	Entries    []GenericEntry `json:"entries"`
-	Config     *AppConfig     `json:"config"`
-	Stats      *AppStats
-	AppVersion string `json:"appVersion"`
+	runtime          *wails.Runtime
+	db               *nutsdb.DB
+	plugins          []Plugin
+	Entries          []GenericEntry    `json:"entries"`
+	OfflinePlaylists []OfflinePlaylist `json:"offlinePlaylists"`
+	Config           *AppConfig        `json:"config"`
+	Stats            *AppStats
+	AppVersion       string `json:"appVersion"`
 
-	isInForeground  bool
-	canStartAtLogin bool
-	tray            TrayMenu
-	updater         *Updater
+	isInForeground         bool
+	canStartAtLogin        bool
+	tray                   TrayMenu
+	updater                *Updater
+	offlinePlaylistService *OfflinePlaylistService
 }
 
 func (state *AppState) PreWailsInit() {
 	state.db = InitializeDb()
 	state.Entries = DbGetAllEntries()
+	state.OfflinePlaylists = DbGetAllOfflinePlaylists()
+	state.offlinePlaylistService = &OfflinePlaylistService{}
 	state.Config = state.Config.Init()
 	state.AppVersion = version
 
@@ -57,6 +61,7 @@ func (state *AppState) PreWailsInit() {
 func (state *AppState) WailsInit(runtime *wails.Runtime) {
 	// Save runtime
 	state.runtime = runtime
+	state.offlinePlaylistService.runtime = runtime
 	// Do some other initialisation
 	state.Stats = &AppStats{}
 	appState = state
@@ -151,6 +156,10 @@ func (state *AppState) WailsInit(runtime *wails.Runtime) {
 }
 
 func (state *AppState) WailsShutdown() {
+	err := state.db.Merge()
+	if err != nil {
+		fmt.Println("WailsShutdown db.Merge() failed", err)
+	}
 	CloseDb()
 }
 

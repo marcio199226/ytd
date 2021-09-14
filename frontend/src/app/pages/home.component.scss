@@ -2,6 +2,53 @@
 @import '~@angular/material/theming';
 
 app-home {
+  .left-sidenav {
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+
+    .mat-drawer {
+      width: 250px;
+      padding: 20px 10px;
+      background-color: rgba(0,0,0,0.4);
+      border-right: none;
+      color: white;
+    }
+
+    .mat-drawer-container {
+    }
+
+    .offline-playlists {
+      .title {
+        font-weight: 200;
+        margin-bottom: 0px;
+      }
+
+      hr {
+        margin-top: 0px;
+        margin-bottom: 12px;
+        width: 100%;
+      }
+
+      .playlists {
+        padding-left: 6px;
+
+        &.playing {
+          padding: 5px 8px;
+          border-radius: 8px;
+          background-color: rgba(0,0,0,0.2);
+        }
+
+        .playlist {
+          .name {
+            font-size: 1.1rem;
+            font-weight: 300;
+          }
+        }
+      }
+    }
+  }
+
   header {
     width: 100%;
     height: 96px;

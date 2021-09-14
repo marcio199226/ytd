@@ -1,0 +1,10 @@
+create-playlist {
+  [mat-dialog-content] {
+    padding: 16px 16px 0px !important;
+    margin: 0;
+
+    .mat-form-field {
+      width: 100%;
+    }
+  }
+}

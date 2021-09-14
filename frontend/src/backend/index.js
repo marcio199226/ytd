@@ -137,6 +137,64 @@ const backend = {
       "StartDownload": (arg1) => {
         return window.backend.main.AppState.StartDownload(arg1);
       },
+      /**
+       * Update
+       * @param {boolean} arg1 - Go Type: bool
+       * @returns {Promise<void>} 
+       */
+      "Update": (arg1) => {
+        return window.backend.main.AppState.Update(arg1);
+      },
+    }
+    "OfflinePlaylistService": {
+      /**
+       * AddTrackToPlaylist
+       * @param {Array.<any>} arg1 - Go Type: []map[string]interface {}
+       * @returns {Promise<boolean|Error>}  - Go Type: bool
+       */
+      "AddTrackToPlaylist": (arg1) => {
+        return window.backend.main.OfflinePlaylistService.AddTrackToPlaylist(arg1);
+      },
+      /**
+       * CreateNewPlaylist
+       * @param {string} arg1 - Go Type: string
+       * @returns {Promise<any|Error>}  - Go Type: models.OfflinePlaylist
+       */
+      "CreateNewPlaylist": (arg1) => {
+        return window.backend.main.OfflinePlaylistService.CreateNewPlaylist(arg1);
+      },
+      /**
+       * ExportPlaylist
+       * @param {string} arg1 - Go Type: string
+       * @returns {Promise<string|Error>}  - Go Type: string
+       */
+      "ExportPlaylist": (arg1) => {
+        return window.backend.main.OfflinePlaylistService.ExportPlaylist(arg1);
+      },
+      /**
+       * RemovePlaylist
+       * @param {string} arg1 - Go Type: string
+       * @returns {Promise<boolean|Error>}  - Go Type: bool
+       */
+      "RemovePlaylist": (arg1) => {
+        return window.backend.main.OfflinePlaylistService.RemovePlaylist(arg1);
+      },
+      /**
+       * RemoveTrackFromPlaylist
+       * @param {string} arg1 - Go Type: string
+       * @returns {Promise<boolean|Error>}  - Go Type: bool
+       */
+      "RemoveTrackFromPlaylist": (arg1) => {
+        return window.backend.main.OfflinePlaylistService.RemoveTrackFromPlaylist(arg1);
+      },
+      /**
+       * WailsInit
+       * @param {any} arg1 - Go Type: *runtime.Runtime
+       * @returns {Promise<Error>}  - Go Type: error
+       */
+      "WailsInit": (arg1) => {
+        return window.backend.main.OfflinePlaylistService.WailsInit(arg1);
+      },
     }
   }
 

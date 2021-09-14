@@ -1,0 +1,33 @@
+<div class="dialog-content-wrapper">
+  <mat-toolbar>
+    <mat-toolbar-row fxFlex fxLayout="row" fxLayoutAlign="space-between center">
+      <span class="title dialog-title">
+        Add to playlist
+      </span>
+      <button mat-icon-button (click)="close()" >
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-toolbar-row>
+  </mat-toolbar>
+
+  <div mat-dialog-content>
+    <div class="playlists" fxLayout="column" fxLayoutGap="12px" *ngFor="let p of data.playlists">
+      <div class="playlist">
+        <mat-checkbox
+          [checked]="isSelectedPlaylist(p.uuid)"
+          [disabled]="alreadyInPlaylist[p.uuid]"
+          (change)="add($event, p)"
+          matTooltip="Track is already in this playlist"
+          matTooltipPosition="right"
+          [matTooltipDisabled]="!alreadyInPlaylist[p.uuid]">
+          {{ p.name }}
+        </mat-checkbox>
+      </div>
+    </div>
+    <div *ngIf="!data.playlists.length">No playlists, please create one</div>
+  </div>
+  <div mat-dialog-actions>
+    <button mat-flat-button color="primary" (click)="createNew()">Create new playlist</button>
+    <button mat-flat-button color="primary" (click)="apply()">Add</button>
+  </div>
+</div>

@@ -9,6 +9,8 @@ import (
 	"os"
 	"os/signal"
 	"os/user"
+	"runtime"
+	"runtime/debug"
 	"sync"
 	"time"
 
@@ -34,10 +36,29 @@ var static embed.FS
 var appState *AppState
 var newEntries = make(chan GenericEntry)
 
+func panicHandler() {
+	if panicPayload := recover(); panicPayload != nil {
+
+		stack := string(debug.Stack())
+		fmt.Fprintln(os.Stderr, "")
+		fmt.Fprintln(os.Stderr, "================================================================================")
+		fmt.Fprintln(os.Stderr, "Ytd has encountered a fatal error. This is a bug!")
+		fmt.Fprintln(os.Stderr, "We would appreciate a report: https://github.com/seashell/drago/issues/")
+		fmt.Fprintln(os.Stderr, "Please provide all of the below text in your report.")
+		fmt.Fprintln(os.Stderr, "================================================================================")
+
+		fmt.Fprintf(os.Stderr, "Drago Version:       %s\n", version)
+		fmt.Fprintf(os.Stderr, "Go Version:          %s\n", runtime.Version())
+		fmt.Fprintf(os.Stderr, "Go Compiler:         %s\n", runtime.Compiler)
+		fmt.Fprintf(os.Stderr, "Architecture:        %s\n", runtime.GOARCH)
+		fmt.Fprintf(os.Stderr, "Operating System:    %s\n", runtime.GOOS)
+		fmt.Fprintf(os.Stderr, "Panic:               %s\n\n", panicPayload)
+		fmt.Fprintln(os.Stderr, stack)
+	}
+}
+
 func cors(fs http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// do your cors stuff
-		// return if you do not want the FileServer handle a specific request
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		fs.ServeHTTP(w, r)
 	}
@@ -105,6 +126,7 @@ func main() {
 		http.ListenAndServe(":8080", nil)
 	}()
 
+	defer panicHandler()
 	app.PreWailsInit()
 	err := wails.Run(&options.App{
 		Width:             1024,
@@ -126,6 +148,7 @@ func main() {
 		Title: "ytd",
 		Bind: []interface{}{
 			app,
+			app.offlinePlaylistService,
 		},
 		Frameless: false,
 	})

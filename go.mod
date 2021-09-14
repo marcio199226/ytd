@@ -7,7 +7,7 @@ require (
 	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/frankban/quicktest v1.13.1 // indirect
 	github.com/go-ole/go-ole v1.2.5 // indirect
-	github.com/google/uuid v1.3.0 // indirect
+	github.com/google/uuid v1.3.0
 	github.com/kkdai/youtube/v2 v2.7.2
 	github.com/klauspost/compress v1.13.4 // indirect
 	github.com/leaanthony/go-ansi-parser v1.2.0 // indirect

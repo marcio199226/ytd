@@ -1,0 +1,10 @@
+.add-to-playlist-dialog {
+  .mat-dialog-container {
+    background: url("http://localhost:8080/static/frontend/dist/assets/bg.png");
+    background-repeat: no-repeat;
+
+    .mat-toolbar {
+      background: transparent;
+    }
+  }
+}

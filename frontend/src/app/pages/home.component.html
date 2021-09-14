@@ -1,4 +1,5 @@
 <header fxLayout="row wrap" fxLayoutAlign="center center" fxLayoutGap="10px">
+  <mat-icon class="clickable white" title="Open left menu" (click)="drawer.toggle()" *ngIf="mobileQuery.matches">menu</mat-icon>
   <div class="input-wrapper paste" #pasteWrapper *ngIf="!isClipboardWatchEnabled">
     <div class="input" fxFlex fxLayout="row" fxLayoutAlign="start center">
       <mat-icon class="clickable" (click)="addToDownload()" title="Download from clipboard">content_paste</mat-icon>
@@ -37,77 +38,104 @@
     *ngIf="newUpdateInfo">update</mat-icon>
 </header>
 
-<div class="entries" fxLayout="row wrap" fxLayoutAlign="center start" fxLayoutGap="10px">
-  <mat-menu #menu="matMenu">
-    <ng-template matMenuContent let-entry="entry" let-idx="idx">
-      <button mat-menu-item (click)="remove(entry, idx)">Remove {{ entry.type }}</button>
-      <button mat-menu-item *ngIf="entry.track.status === 'failed'">Download</button>
-    </ng-template>
-  </mat-menu>
-  <div
-    fxFlex
-    class="entry"
-    [class.lastOfRow]="(idx + 1) % 4 === 0"
-    [class.playing]="inPlaybackTrackId === entry.track?.id"
-    [class.downloading]="entry.track.status === 'downloading'"
-    [class.converting]="entry.track.converting.status === 'converting'"
-    [ngClass]="entry.type"
-    *ngFor="let entry of filteredEntries; trackBy: trackById; let idx = index;"
-    (mouseenter.silent)="onMouseEnter($event, entry)"
-    (mouseleave.silent)="onMouseLeave($event, entry)">
-    <div class="bg" [ngStyle]="{'background': getBgUrl(entry)}"></div>
-    <div class="title">{{ entry.type === 'track' ? entry.track.name : entry.playlist.name }}</div>
-    <div class="fg">
-      <div class="wrapper">
-        <ng-container *ngIf="entry.track.status === 'downloaded' && entry.track.converting.status !== 'converting'">
-          <mat-icon class="clickable" title="Add to playlist">add</mat-icon>
-          <mat-icon class="clickable play" (click)="playback(entry)" title="Play">play_circle_filled</mat-icon>
-          <mat-icon class="clickable stop" (click)="stop(entry)" title="Stop">stop</mat-icon>
-          <mat-icon class="clickable"
-            [matMenuTriggerFor]="menu"
-            [matMenuTriggerData]="{entry, idx}"
-            (menuOpened)="menuOpened()"
-            (menuClosed)="menuClosed()"
-            title="More">
-            more_horiz
-          </mat-icon>
-        </ng-container>
-        <ng-container *ngIf="entry.track.status === 'failed'">
-          <mat-icon class="clickable m-auto"
-            [matMenuTriggerFor]="menu"
-            [matMenuTriggerData]="{entry}"
-            (menuOpened)="menuOpened()"
-            (menuClosed)="menuClosed()">
-            more_horiz
-          </mat-icon>
-        </ng-container>
-        <ng-container *ngIf="entry.track.status === 'processing'">
-          <mat-icon class="clickable m-auto" title="Start download" (click)="startDownload(entry)">
-            file_download
-          </mat-icon>
-        </ng-container>
-        <ng-container *ngIf="entry.track.status === 'downloading'">
-          <div class="progress-container">
-            <div class="spinner-container">
-              <span>{{ entry.track.downloadProgress }}%</span>
-              <mat-progress-spinner mode="determinate" [value]="entry.track.downloadProgress"></mat-progress-spinner>
-            </div>
-          </div>
-        </ng-container>
-        <ng-container *ngIf="entry.track.converting.status === 'converting'">
-          <div fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="4px" fxFlex>
-            <span>Converting to mp3...</span>
-            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-          </div>
-        </ng-container>
+<mat-drawer-container class="left-sidenav" [hasBackdrop]="mobileQuery.matches">
+  <mat-drawer [autoFocus]="false" [opened]="!mobileQuery.matches" #drawer [mode]="mobileQuery.matches ? 'over' : 'side'">
+    <div class="offline-playlists">
+      <div class="title" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="6px">
+        <mat-icon>queue_music</mat-icon>
+        <span fxFlex>Playlists</span>
+        <span>({{ offlinePlaylists.length }})</span>
+      </div>
+      <hr />
+      <div class="playlists" [class.playing]="" fxLayout="column" fxLayoutGap="8px">
+        <div class="playlist" fxLayout="row" fxLayoutAlign="space-between center" *ngFor="let p of offlinePlaylists">
+          <span class="name clickable" fxFlex>
+            {{ p.name }} ({{ p.tracksIds?.length || 0 }})
+          </span>
+          <span class="actions" fxLayout="row" fxLayoutGap="4px">
+            <mat-icon class="clickable" title="Playback playlist">play_circle_filled</mat-icon>
+            <mat-icon class="clickable" title="Export playlist tracks to directory" (click)="exportPlaylist(p)">folder</mat-icon>
+            <mat-icon class="clickable" title="Remove playlist" (click)="removePlaylist(p)">delete</mat-icon>
+          </span>
+        </div>
       </div>
     </div>
-  </div>
+  </mat-drawer>
+  <mat-drawer-content>
+    <div class="entries" fxLayout="row wrap" fxLayoutAlign="center start" fxLayoutGap="10px">
+      <mat-menu #menu="matMenu">
+        <ng-template matMenuContent let-entry="entry" let-idx="idx">
+          <button mat-menu-item (click)="remove(entry, idx)">Remove {{ entry.type }}</button>
+          <button mat-menu-item *ngIf="entry.track.status === 'failed'">Download</button>
+        </ng-template>
+      </mat-menu>
+      <div
+        fxFlex
+        class="entry"
+        [class.lastOfRow]="(idx + 1) % 4 === 0"
+        [class.playing]="inPlaybackTrackId === entry.track?.id"
+        [class.downloading]="entry.track.status === 'downloading'"
+        [class.converting]="entry.track.converting.status === 'converting'"
+        [ngClass]="entry.type"
+        *ngFor="let entry of filteredEntries; trackBy: trackById; let idx = index;"
+        (mouseenter.silent)="onMouseEnter($event, entry)"
+        (mouseleave.silent)="onMouseLeave($event, entry)">
+        <div class="bg" [ngStyle]="{'background': getBgUrl(entry)}"></div>
+        <div class="title">{{ entry.type === 'track' ? entry.track.name : entry.playlist.name }}</div>
+        <div class="fg">
+          <div class="wrapper">
+            <ng-container *ngIf="entry.track.status === 'downloaded' && entry.track.converting.status !== 'converting'">
+              <mat-icon class="clickable" title="Add to playlist" (click)="addToPlaylist(entry)">playlist_add</mat-icon>
+              <mat-icon class="clickable play" (click)="playback(entry)" title="Play">play_circle_filled</mat-icon>
+              <mat-icon class="clickable stop" (click)="stop(entry)" title="Stop">stop</mat-icon>
+              <mat-icon class="clickable"
+                [matMenuTriggerFor]="menu"
+                [matMenuTriggerData]="{entry, idx}"
+                (menuOpened)="menuOpened()"
+                (menuClosed)="menuClosed()"
+                title="More">
+                more_horiz
+              </mat-icon>
+            </ng-container>
+            <ng-container *ngIf="entry.track.status === 'failed'">
+              <mat-icon class="clickable m-auto"
+                [matMenuTriggerFor]="menu"
+                [matMenuTriggerData]="{entry}"
+                (menuOpened)="menuOpened()"
+                (menuClosed)="menuClosed()">
+                more_horiz
+              </mat-icon>
+            </ng-container>
+            <ng-container *ngIf="entry.track.status === 'processing'">
+              <mat-icon class="clickable m-auto" title="Start download" (click)="startDownload(entry)">
+                file_download
+              </mat-icon>
+            </ng-container>
+            <ng-container *ngIf="entry.track.status === 'downloading'">
+              <div class="progress-container">
+                <div class="spinner-container">
+                  <span>{{ entry.track.downloadProgress }}%</span>
+                  <mat-progress-spinner mode="determinate" [value]="entry.track.downloadProgress"></mat-progress-spinner>
+                </div>
+              </div>
+            </ng-container>
+            <ng-container *ngIf="entry.track.converting.status === 'converting'">
+              <div fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="4px" fxFlex>
+                <span>Converting to mp3...</span>
+                <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </div>
 
-  <div *ngIf="!isSearching && !filteredEntries.length">
-    You have not downloaded tracks, start to download some
-  </div>
-  <div *ngIf="isSearching && !filteredEntries.length">
-    There are no tracks for your searching
-  </div>
-</div>
+      <div *ngIf="!isSearching && !filteredEntries.length">
+        You have not downloaded tracks, start to download some
+      </div>
+      <div *ngIf="isSearching && !filteredEntries.length">
+        There are no tracks for your searching
+      </div>
+    </div>
+  </mat-drawer-content>
+
+</mat-drawer-container>

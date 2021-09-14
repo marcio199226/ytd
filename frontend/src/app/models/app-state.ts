@@ -1,4 +1,5 @@
 import { Entry } from './entry';
+import { OfflinePlaylist } from './offline-playlist';
 
 export interface AppConfig {
   BaseSaveDir: string;
@@ -20,6 +21,7 @@ export interface AppConfig {
 
 export interface AppState {
   entries: Entry[];
+  offlinePlaylists: OfflinePlaylist[];
   config: AppConfig;
   appVersion: string;
 }
@@ -43,6 +45,13 @@ export interface BackendCallbacks {
       Update: (restart: boolean) => Promise<any>;
       ShowWindow: () => Promise<any>;
       ForceQuit: () => Promise<any>;
+    },
+    OfflinePlaylistService: {
+      CreateNewPlaylist: (name: string) =>  Promise<OfflinePlaylist>;
+      RemovePlaylist: (uuid: string) => Promise<boolean>;
+      RemoveTrackFromPlaylist: (id: string) => Promise<boolean>;
+      AddTrackToPlaylist: (playlists: OfflinePlaylist[]) => Promise<boolean>;
+      ExportPlaylist: (uuid: string) => Promise<string>;
     }
   }
 }

@@ -10,6 +10,7 @@ import { HomeComponent } from './pages/home.component';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatButtonModule } from '@angular/material/button';
 import { MatBadgeModule } from '@angular/material/badge';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -19,10 +20,14 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSliderModule}  from '@angular/material/slider';
+import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatSnackBarModule, MAT_SNACK_BAR_DEFAULT_OPTIONS } from '@angular/material/snack-bar';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { NG_EVENT_PLUGINS } from '@tinkoff/ng-event-plugins';
 import { AudioPlayerComponent, SettingsComponent, UpdaterComponent} from './components';
+import { AddToPlaylistComponent, CreatePlaylistComponent } from './components/playlist';
+import { ConfirmationDialogComponent } from './components/confirmation-dialog/confirmation-dialog.component';
 
 
 @NgModule({
@@ -31,7 +36,10 @@ import { AudioPlayerComponent, SettingsComponent, UpdaterComponent} from './comp
     HomeComponent,
     AudioPlayerComponent,
     SettingsComponent,
-    UpdaterComponent
+    UpdaterComponent,
+    AddToPlaylistComponent,
+    CreatePlaylistComponent,
+    ConfirmationDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -41,8 +49,9 @@ import { AudioPlayerComponent, SettingsComponent, UpdaterComponent} from './comp
     FormsModule,
     ReactiveFormsModule,
     FlexLayoutModule,
-    MatButtonModule,
     MatBadgeModule,
+    MatButtonModule,
+    MatCheckboxModule,
     MatDialogModule,
     MatFormFieldModule,
     MatIconModule,
@@ -52,8 +61,10 @@ import { AudioPlayerComponent, SettingsComponent, UpdaterComponent} from './comp
     MatProgressSpinnerModule,
     MatSlideToggleModule,
     MatSliderModule,
+    MatSidenavModule,
     MatSnackBarModule,
-    MatToolbarModule
+    MatToolbarModule,
+    MatTooltipModule
   ],
   providers: [
     {provide: APP_BASE_HREF, useValue : '/' },

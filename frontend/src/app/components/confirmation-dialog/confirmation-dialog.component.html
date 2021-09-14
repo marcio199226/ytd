@@ -1,0 +1,20 @@
+<div class="dialog-content-wrapper">
+  <mat-toolbar>
+    <mat-toolbar-row fxFlex fxLayout="row" fxLayoutAlign="space-between center">
+      <span class="title dialog-title">
+        {{ data.title }}
+      </span>
+      <button mat-icon-button (click)="cancel()" >
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-toolbar-row>
+  </mat-toolbar>
+
+  <div mat-dialog-content>
+    <p [innerHTML]="data.text"></p>
+  </div>
+  <div mat-dialog-actions>
+    <button mat-button (click)="cancel()">{{ cancelBtnLabel || 'Cancel' }}</button>
+    <button mat-button (click)="delete()">{{ okBtnLabel || 'Yes' }}</button>
+  </div>
+</div>

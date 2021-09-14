@@ -1,0 +1,21 @@
+:host {
+  [mat-dialog-content] {
+    padding: 16px 16px 0px;
+
+    p {
+      text-align: center;
+    }
+  }
+
+  [mat-dialog-actions] {
+    justify-content: space-between;
+
+    button {
+      margin-left: 16px;
+
+      &:first-child {
+        margin-left: 0;
+      }
+    }
+  }
+}
