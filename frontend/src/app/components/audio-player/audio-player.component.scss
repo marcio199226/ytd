@@ -1,8 +1,58 @@
+
+body {
+  &.fullscreen {
+    audio-player {
+      .player {
+        width: 100%;
+        max-width: calc(100% - 250px - 32px);
+        left: 250px;
+        transform: none;
+        margin: 0 16px;
+
+        &[view="playlist"] {
+          max-width: calc(100% - 250px) !important;
+          border-radius: unset;
+          bottom: 0px;
+          margin: 0;
+          background: transparent;
+        }
+      }
+    }
+  }
+
+  &:not(.fullscreen) {
+    audio-player {
+      .player {
+        &[view="playlist"] {
+          width: 100%;
+          border-radius: unset;
+          bottom: 0px;
+          margin: 0;
+          background: transparent;
+        }
+      }
+    }
+  }
+}
+
+@keyframes player-slide-up {
+  0% {
+    height: 0;
+    opacity: 0;
+  }
+  25% {
+    height: 96px;
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
 audio-player {
   .player {
     width: calc(100% - 32px);
     max-width: calc(1024px - 32px);
-    height: 96px;
     display: flex;
     background: rgba(0, 0, 0, 0.85);
     position: fixed;
@@ -16,6 +66,12 @@ audio-player {
     box-sizing: border-box;
     z-index: 9999;
     color: #fff;
+    transition: all .5s ease-in-out;
+
+    &:not([hidden]) {
+      animation: 0.5s player-slide-up;
+      height: 96px;
+    }
 
     .close-player {
       margin-right: -10px;

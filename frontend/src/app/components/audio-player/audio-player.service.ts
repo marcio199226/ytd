@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { Track } from '@models';
 
 
@@ -29,6 +29,8 @@ export class AudioPlayerService {
 
   public onShuffleTrackCmd: BehaviorSubject<Track>;
 
+  public onClosePlayer: Subject<boolean>;
+
   public get trackId(): string {
     if(!this.track) {
       return null;
@@ -47,6 +49,7 @@ export class AudioPlayerService {
     this.onNextTrackCmd     = new BehaviorSubject(null);
     this.onShuffleTrack     = new BehaviorSubject(null);
     this.onShuffleTrackCmd  = new BehaviorSubject(null);
+    this.onClosePlayer      = new Subject();
 
     this.onPlaybackTrack.subscribe(track => {
       this.action = 'play';

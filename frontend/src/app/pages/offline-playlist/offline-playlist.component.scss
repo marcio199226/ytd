@@ -1,0 +1,133 @@
+@import "src/app/scss/breakpoints";
+@import '~@angular/material/theming';
+
+app-offline-playlist {
+  .tracks {
+    color: white;
+    height: 100%;
+    max-height: calc(100% - 96px - 96px);
+    overflow-y: scroll;
+
+    .track {
+      position: relative;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 8px 12px;
+      border-bottom: 1px inset rgba(255, 255, 255, 0.15);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.15);
+
+        .thumbnail {
+          background-color: rgba(0, 0, 0, 0.6);
+          z-index: -1;
+          opacity: 1 !important;
+        }
+
+        &.playing {
+          .thumbnail {
+            z-index: 0;
+          }
+
+          .stop {
+            display: block;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 35px;
+            height: 35px;
+            font-size: 35px;
+            line-height: 35px;
+          }
+
+          .equalizer {
+            display: none;
+          }
+        }
+
+        &:not(.playing) {
+          .thumbnail {
+            z-index: 0;
+
+            img:not(.equalizer) {
+              opacity: 0.25;
+            }
+          }
+
+          .play {
+            display: block !important;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 35px;
+            height: 35px;
+            font-size: 35px;
+            line-height: 35px;
+          }
+        }
+      }
+
+      &.playing {
+        .thumbnail {
+          img:not(.equalizer) {
+            opacity: 0.25;
+          }
+        }
+
+        .equalizer {
+          display: block;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 35px;
+          height: 35px;
+        }
+      }
+
+      &:not(.playing) {
+        .equalizer {
+          display: none;
+        }
+      }
+
+      &.paused {
+        .play {
+          display: block !important;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 35px;
+          height: 35px;
+          font-size: 35px;
+          line-height: 35px;
+        }
+      }
+
+      .idx {
+        margin: auto 15px auto 0px;
+      }
+
+      .thumbnail {
+        position: relative;
+        margin-right: 12px;
+        border-radius: 8px;
+        height: 70px;
+
+        img:not(.equalizer) {
+          width: 70px;
+          height: 70px;
+          border-radius: 8px;
+          object-fit: cover;
+        }
+
+        .mat-icon {
+          display: none;
+        }
+      }
+    }
+  }
+}

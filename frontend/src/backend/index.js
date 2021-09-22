@@ -172,6 +172,14 @@ const backend = {
         return window.backend.main.OfflinePlaylistService.ExportPlaylist(arg1);
       },
       /**
+       * GetPlaylists
+       * @param {boolean} arg1 - Go Type: bool
+       * @returns {Promise<Array.<any>|Error>}  - Go Type: []models.OfflinePlaylist
+       */
+      "GetPlaylists": (arg1) => {
+        return window.backend.main.OfflinePlaylistService.GetPlaylists(arg1);
+      },
+      /**
        * RemovePlaylist
        * @param {string} arg1 - Go Type: string
        * @returns {Promise<boolean|Error>}  - Go Type: bool
@@ -182,18 +190,11 @@ const backend = {
       /**
        * RemoveTrackFromPlaylist
        * @param {string} arg1 - Go Type: string
-       * @returns {Promise<boolean|Error>}  - Go Type: bool
+       * @param {any} arg2 - Go Type: models.OfflinePlaylist
+       * @returns {Promise<any|Error>}  - Go Type: models.OfflinePlaylist
        */
-      "RemoveTrackFromPlaylist": (arg1) => {
-        return window.backend.main.OfflinePlaylistService.RemoveTrackFromPlaylist(arg1);
-      },
-      /**
-       * WailsInit
-       * @param {any} arg1 - Go Type: *runtime.Runtime
-       * @returns {Promise<Error>}  - Go Type: error
-       */
-      "WailsInit": (arg1) => {
-        return window.backend.main.OfflinePlaylistService.WailsInit(arg1);
+      "RemoveTrackFromPlaylist": (arg1, arg2) => {
+        return window.backend.main.OfflinePlaylistService.RemoveTrackFromPlaylist(arg1, arg2);
       },
     }
   }

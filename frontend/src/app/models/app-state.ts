@@ -49,7 +49,7 @@ export interface BackendCallbacks {
     OfflinePlaylistService: {
       CreateNewPlaylist: (name: string) =>  Promise<OfflinePlaylist>;
       RemovePlaylist: (uuid: string) => Promise<boolean>;
-      RemoveTrackFromPlaylist: (id: string) => Promise<boolean>;
+      RemoveTrackFromPlaylist: (tid: string, playlist: OfflinePlaylist) => Promise<OfflinePlaylist>;
       AddTrackToPlaylist: (playlists: OfflinePlaylist[]) => Promise<boolean>;
       ExportPlaylist: (uuid: string) => Promise<string>;
     }

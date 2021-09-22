@@ -13,8 +13,9 @@
   <div mat-dialog-content>
     <mat-form-field appearance="fill">
       <mat-label>Playlist name</mat-label>
-      <input matInput [(ngModel)]="model.name" required>
+      <input matInput [(ngModel)]="model.name" (keyup.enter)="create()" required [autofocus]>
       <mat-error>Cannot be empty</mat-error>
+      <mat-hint>Press enter to create</mat-hint>
     </mat-form-field>
   </div>
   <div mat-dialog-actions>

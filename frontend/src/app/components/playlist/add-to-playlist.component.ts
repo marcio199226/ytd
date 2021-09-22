@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { Entry, UpdateRelease } from '@models';
+import { Entry } from '@models';
 import { OfflinePlaylist } from 'app/models/offline-playlist';
 
 @Component({
@@ -21,7 +21,6 @@ import { OfflinePlaylist } from 'app/models/offline-playlist';
 export class AddToPlaylistComponent implements OnInit {
 
   public selectedPlaylists: string[] = [];
-  public a: any = {};
   public alreadyInPlaylist: any = {};
 
   constructor(
@@ -43,15 +42,11 @@ export class AddToPlaylistComponent implements OnInit {
 
   add(change: MatCheckboxChange, playlist: OfflinePlaylist): void {
     if(change.checked) {
-      this.a[playlist.uuid] = {action: 'selected'};
       this.selectedPlaylists.push(playlist.uuid);
-      console.log(this.a)
       return;
     }
     const idx = this.selectedPlaylists.indexOf(playlist.uuid)
     this.selectedPlaylists.splice(idx, 1);
-    this.a[playlist.uuid] = {action: 'deselected'};
-    console.log(this.a)
   }
 
   createNew(): void {
@@ -59,7 +54,9 @@ export class AddToPlaylistComponent implements OnInit {
   }
 
   apply(): void {
-    this._dialogRef.close({ selectedPlaylists: this.selectedPlaylists });
+    const uuids = Object.keys(this.alreadyInPlaylist);
+    const diff = this.selectedPlaylists.filter(uuid => uuids.indexOf(uuid) === -1);
+    this._dialogRef.close({ selectedPlaylists: diff });
   }
 
   close(): void {

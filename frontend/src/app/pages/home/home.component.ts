@@ -8,13 +8,14 @@ import {
   NgZone,
   OnDestroy,
   OnInit,
+  TemplateRef,
   ViewChild,
   ViewEncapsulation,
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { AudioPlayerService } from 'app/components/audio-player/audio-player.service';
 import { Track, Entry, UpdateRelease, ReleaseEventPayload } from '@models';
-import { AppConfig, AppState } from '../models/app-state';
+import { AppConfig, AppState } from '../../models/app-state';
 import * as Wails from '@wailsapp/runtime';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { SettingsComponent, UpdaterComponent } from 'app/components';
@@ -27,10 +28,10 @@ import { OfflinePlaylist } from 'app/models/offline-playlist';
 import { AddToPlaylistComponent, CreatePlaylistComponent } from 'app/components/playlist';
 import { ConfirmationDialogComponent } from 'app/components/confirmation-dialog/confirmation-dialog.component';
 import to from 'await-to-js';
-
-const minMax = (min: number, max: number) => {
-  return Math.floor(Math.random() * (max - min)) + min;
-}
+import { ActivatedRoute, Router } from '@angular/router';
+import { MatDrawer } from '@angular/material/sidenav';
+import { minMax } from 'app/common/fn';
+import { OfflinePlaylistComponent } from '../offline-playlist/offline-playlist.component';
 
 @Component({
   selector: 'app-home',
@@ -73,6 +74,17 @@ export class HomeComponent implements OnInit, OnDestroy {
     return this.searchNativeInput.nativeElement === document.activeElement || !!this.searchInput.value;
   }
 
+  public get isOpenedOfflinePlaylist(): boolean {
+    return this._route.children.length !== 0;
+  }
+
+  public get isPlaylistInPlayback(): boolean {
+    if(!this._offlinePlaylistComponent) {
+      return false;
+    }
+    return this._offlinePlaylistComponent.inPlaybackTrackId !== null;
+  }
+
   @ViewChild('searchNativeInput')
   public searchNativeInput: ElementRef<HTMLInputElement> = null;
 
@@ -85,15 +97,24 @@ export class HomeComponent implements OnInit, OnDestroy {
   @ViewChild('menu')
   public matMenu: MatMenu = null;
 
+  @ViewChild('drawer')
+  public drawer: MatDrawer = null;
+
   public menuIsOpened: boolean = false;
 
   public mobileQuery: MediaQueryList;
+
+  private _mobileQueryListener: (event: MediaQueryListEvent) => void;
+
+  private _offlinePlaylistComponent: OfflinePlaylistComponent = null
 
   constructor(
     private _cdr: ChangeDetectorRef,
     private _appRef: ApplicationRef,
     private _ngZone: NgZone,
     @Inject(DOCUMENT) private _document: Document,
+    private _router: Router,
+    private _route: ActivatedRoute,
     private _dialog: MatDialog,
     private _snackbar: SnackbarService,
     private _media: MediaMatcher,
@@ -103,7 +124,17 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.urlInput = new FormControl('');
 
     this.mobileQuery = this._media.matchMedia('(max-width: 1024px)');
-    this._mobileQueryListener = () => this._cdr.detectChanges();
+    if(!this.mobileQuery.matches) {
+      this._document.body.classList.add('fullscreen');
+    }
+    this._mobileQueryListener = (e) => {
+      if(!e.matches) {
+        this._document.body.classList.add('fullscreen');
+      } else {
+        this._document.body.classList.remove('fullscreen');
+      }
+      this._cdr.detectChanges();
+    }
     this.mobileQuery.addEventListener("change", this._mobileQueryListener);
   }
 
@@ -129,7 +160,13 @@ export class HomeComponent implements OnInit, OnDestroy {
       this._cdr.detectChanges();
     });
 
-    Wails.Events.On("ytd:playlist", payload => console.log(payload))
+    Wails.Events.On("ytd:playlist", payload => console.log(payload));
+
+    Wails.Events.On("ytd:offline:playlists", offlinePlaylists => {
+      console.log("UPDATE offlinePlaylists", offlinePlaylists)
+      this.offlinePlaylists = offlinePlaylists;
+      this._cdr.detectChanges();
+    });
 
     Wails.Events.On("ytd:app:config", (config) => {
       this._ngZone.run(() => {
@@ -176,6 +213,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
 
     this._audioPlayerService.onStopCmdTrack.subscribe(track => {
+      console.log("ON STOPPP FROM HOMEEE", track)
       this.inPlayback = null;
       this._cdr.detectChanges();
     });
@@ -232,6 +270,16 @@ export class HomeComponent implements OnInit, OnDestroy {
 
 
     this._onSearch();
+  }
+
+  onRouterOutletActivate(cmp: any): void {
+    this._offlinePlaylistComponent = cmp;
+    this._cdr.detectChanges();
+  }
+
+  onRouterOutletDeactivate(e: any): void {
+    this._offlinePlaylistComponent = null;
+    this._cdr.detectChanges();
   }
 
   clearSearch(event: any): void {
@@ -424,11 +472,10 @@ export class HomeComponent implements OnInit, OnDestroy {
       }
 
       const { action, selectedPlaylists } = result;
+      console.log(selectedPlaylists)
       if(!action) {
-        console.log('selectedPlaylists', selectedPlaylists)
         const playlists: OfflinePlaylist[] = selectedPlaylists.map((uuid: string) => this.offlinePlaylists.find(op => op.uuid === uuid))
         playlists.forEach(p => p.tracksIds.push(entry.track.id));
-        console.log(playlists)
         const [err, added] = await to(window.backend.main.OfflinePlaylistService.AddTrackToPlaylist(playlists))
 
         if(err) {
@@ -436,7 +483,7 @@ export class HomeComponent implements OnInit, OnDestroy {
           return;
         }
 
-        return;
+        this._snackbar.openSuccess("Track has been added");
       }
 
       switch(action) {
@@ -462,17 +509,16 @@ export class HomeComponent implements OnInit, OnDestroy {
       }
 
       const { playlist } = result;
-
       const [err, createdPlaylist] = await to(window.backend.main.OfflinePlaylistService.CreateNewPlaylist(playlist.name))
-      console.log('createdPlaylist', createdPlaylist)
       if(err) {
         this._snackbar.openError("Error while creating playlist");
         return
       }
 
       this._snackbar.openSuccess("Playlist created");
-      this.offlinePlaylists.push(createdPlaylist);
-      this._cdr.detectChanges();
+      // notify go backend that new playlist has been created, this updates backend state.offlinePlaylists
+      // and then emit ytd:offline:playlists back to fe with offlinePlaylists to sync state between each other
+      Wails.Events.Emit("ytd:offline:playlists:created");
     });
   }
 
@@ -493,7 +539,6 @@ export class HomeComponent implements OnInit, OnDestroy {
       }
 
       // call remove from backend and update list
-      console.log("remove playlist", playlist)
       const [err, isRemoved] = await to(window.backend.main.OfflinePlaylistService.RemovePlaylist(playlist.uuid))
       if(err || !isRemoved) {
         console.log(err, isRemoved)
@@ -502,15 +547,55 @@ export class HomeComponent implements OnInit, OnDestroy {
       }
 
       this._snackbar.openSuccess("Playlist has been deleted");
-      this.offlinePlaylists = this.offlinePlaylists.filter(p => p.uuid !== playlist.uuid)
-      this._cdr.detectChanges();
-
+      // notify go backend that playlist has been deleted, this updates backend state.offlinePlaylists
+      // and then emit ytd:offline:playlists back to fe with offlinePlaylists to sync state between each other
+      Wails.Events.Emit("ytd:offline:playlists:removed");
     });
   }
 
   async exportPlaylist(playlist: OfflinePlaylist): Promise<void> {
     const [err, dir] = await to(window.backend.main.OfflinePlaylistService.ExportPlaylist(playlist.uuid))
     console.log('exportPlaylist', err, dir)
+  }
+
+  async playbackPlaylist(playlist: OfflinePlaylist): Promise<void> {
+    if(!playlist.tracksIds.length) {
+      this._snackbar.openWarning("Cannot reproduce empty playlist");
+      return;
+    }
+    if(this.mobileQuery.matches) {
+      await this.drawer.close();
+    }
+    const tracks = this.entries.filter(e => e.type === 'track' && playlist.tracksIds.indexOf(e.track.id) > -1).map(e => e.track);
+    this._router.navigate(['playlist', playlist.uuid], { relativeTo: this._route,  state: { playlist, tracks } });
+    this._audioPlayerService.onPlaybackTrack.next(tracks[0]);
+    this._cdr.detectChanges();
+  }
+
+  stopPlaylist(playlisy: OfflinePlaylist): void {
+    this._offlinePlaylistComponent.stop();
+    this._cdr.detectChanges();
+  }
+
+  isPlaylistDetailOpen(playlist: OfflinePlaylist): boolean {
+    if(!this._route.children.length) {
+      return false;
+    }
+    return this._route.children[0].snapshot.paramMap.get('playlist') === playlist.uuid;
+  }
+
+  async removeTrackFromPlaylist(trackId: string, playlist: OfflinePlaylist): Promise<void> {
+    const [err, updatedPlaylist] = await to(window.backend.main.OfflinePlaylistService.RemoveTrackFromPlaylist(trackId, playlist))
+    if(err) {
+      console.log(err, updatedPlaylist)
+      this._snackbar.openError("Error while removing track from playlist");
+      return
+    }
+
+    this._snackbar.openSuccess("Track has been deleted from playlist");
+    // notify go backend that playlist has been deleted, this updates backend state.offlinePlaylists
+    // and then emit ytd:offline:playlists back to fe with offlinePlaylists to sync state between each other
+    Wails.Events.Emit("ytd:offline:playlists:removedTrack");
   }
 
   async remove(entry: Entry, i: number): Promise<void> {
@@ -530,6 +615,11 @@ export class HomeComponent implements OnInit, OnDestroy {
       this._snackbar.openError(`Cannot delete`);
     }
   }
+
+  async openInYt(url: string): Promise<void> {
+    await window.backend.main.AppState.OpenUrl(url);
+  }
+
 
   private _onSearch(): void {
     this.searchInput.valueChanges
@@ -554,8 +644,6 @@ export class HomeComponent implements OnInit, OnDestroy {
       this._cdr.detectChanges();
     });
   }
-
-  private _mobileQueryListener: () => void;
 
   ngOnDestroy(): void {
     this.mobileQuery.removeEventListener("change", this._mobileQueryListener);

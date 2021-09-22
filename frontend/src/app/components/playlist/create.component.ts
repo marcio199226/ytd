@@ -35,6 +35,9 @@ export class CreatePlaylistComponent implements OnInit {
   }
 
   create(): void {
+    if(!this.model.name) {
+      return;
+    }
     this._dialogRef.close({ playlist: this.model });
   }
 

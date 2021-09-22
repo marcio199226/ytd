@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { HomeComponent } from './pages/home.component';
+import { HomeComponent } from './pages/home/home.component';
+import { OfflinePlaylistComponent } from './pages/offline-playlist/offline-playlist.component';
 
 const routes: Routes = [
   {
@@ -10,7 +11,13 @@ const routes: Routes = [
   },
   {
     path: 'home',
-    component: HomeComponent
+    component: HomeComponent,
+    children: [
+      {
+        path: 'playlist/:playlist',
+        component: OfflinePlaylistComponent
+      }
+    ]
   }
 ];
 

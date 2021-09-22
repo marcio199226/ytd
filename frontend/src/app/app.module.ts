@@ -6,7 +6,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HomeComponent } from './pages/home.component';
+import { HomeComponent, OfflinePlaylistComponent } from './pages';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatButtonModule } from '@angular/material/button';
 import { MatBadgeModule } from '@angular/material/badge';
@@ -28,18 +28,22 @@ import { NG_EVENT_PLUGINS } from '@tinkoff/ng-event-plugins';
 import { AudioPlayerComponent, SettingsComponent, UpdaterComponent} from './components';
 import { AddToPlaylistComponent, CreatePlaylistComponent } from './components/playlist';
 import { ConfirmationDialogComponent } from './components/confirmation-dialog/confirmation-dialog.component';
+import { AutofocusDirective } from './directives';
 
 
 @NgModule({
   declarations: [
     AppComponent,
     HomeComponent,
+    OfflinePlaylistComponent,
     AudioPlayerComponent,
     SettingsComponent,
     UpdaterComponent,
     AddToPlaylistComponent,
     CreatePlaylistComponent,
-    ConfirmationDialogComponent
+    ConfirmationDialogComponent,
+    // directives
+    AutofocusDirective
   ],
   imports: [
     BrowserModule,

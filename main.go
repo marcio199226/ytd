@@ -43,11 +43,11 @@ func panicHandler() {
 		fmt.Fprintln(os.Stderr, "")
 		fmt.Fprintln(os.Stderr, "================================================================================")
 		fmt.Fprintln(os.Stderr, "Ytd has encountered a fatal error. This is a bug!")
-		fmt.Fprintln(os.Stderr, "We would appreciate a report: https://github.com/seashell/drago/issues/")
+		fmt.Fprintln(os.Stderr, "We would appreciate a report: https://github.com/marcio199226/ytd/issues/")
 		fmt.Fprintln(os.Stderr, "Please provide all of the below text in your report.")
 		fmt.Fprintln(os.Stderr, "================================================================================")
 
-		fmt.Fprintf(os.Stderr, "Drago Version:       %s\n", version)
+		fmt.Fprintf(os.Stderr, "Ytd Version:       	 %s\n", version)
 		fmt.Fprintf(os.Stderr, "Go Version:          %s\n", runtime.Version())
 		fmt.Fprintf(os.Stderr, "Go Compiler:         %s\n", runtime.Compiler)
 		fmt.Fprintf(os.Stderr, "Architecture:        %s\n", runtime.GOARCH)

@@ -83,6 +83,10 @@ export class AudioPlayerComponent implements OnInit {
     this.audio.volume = this.volume;
 
     this.audio.ontimeupdate = (e) => {
+      if(!this.audio) {
+        return;
+      }
+
       const s = parseInt((this.audio.currentTime % 60).toString(), 10);
       const m = parseInt(((this.audio.currentTime / 60) % 60).toString(), 10);
       this.duration = this.audio.duration;
@@ -151,6 +155,7 @@ export class AudioPlayerComponent implements OnInit {
 
   replay(): void {
     this.audio.currentTime = 0;
+    this.audio.play();
   }
 
   shuffle(): void {
@@ -166,6 +171,7 @@ export class AudioPlayerComponent implements OnInit {
     this._audioPlayerService.onStopCmdTrack.next(this.track);
     this.audio = null;
     this.track = null;
+    this._audioPlayerService.onClosePlayer.next(true);
     this.document.body.classList.remove('player-visible');
   }
 

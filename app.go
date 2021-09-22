@@ -170,6 +170,22 @@ func (state *AppState) InitializeListeners() {
 			state.isInForeground = isInForeground.(bool)
 		}
 	})
+
+	state.runtime.Events.On("ytd:offline:playlists:addedTrack", func(optionalData ...interface{}) {
+		state.OfflinePlaylists, _ = state.offlinePlaylistService.GetPlaylists(true)
+	})
+
+	state.runtime.Events.On("ytd:offline:playlists:removedTrack", func(optionalData ...interface{}) {
+		state.OfflinePlaylists, _ = state.offlinePlaylistService.GetPlaylists(true)
+	})
+
+	state.runtime.Events.On("ytd:offline:playlists:created", func(optionalData ...interface{}) {
+		state.OfflinePlaylists, _ = state.offlinePlaylistService.GetPlaylists(true)
+	})
+
+	state.runtime.Events.On("ytd:offline:playlists:removed", func(optionalData ...interface{}) {
+		state.OfflinePlaylists, _ = state.offlinePlaylistService.GetPlaylists(true)
+	})
 }
 
 func (state *AppState) GetAppConfig() *AppConfig {
@@ -532,7 +548,6 @@ func (state *AppState) RemoveEntry(record map[string]interface{}) error {
 			plugin := getPluginFor(entry.Source)
 			if plugin.IsTrackFileExists(entry.Track, "webm") {
 				err = os.Remove(fmt.Sprintf("%s/%s.webm", plugin.GetDir(), entry.Track.ID))
-				fmt.Println(err)
 				if err != nil && !os.IsNotExist(err) {
 					return err
 				}
@@ -540,11 +555,21 @@ func (state *AppState) RemoveEntry(record map[string]interface{}) error {
 			// remove mp3 if file has been already converted
 			if plugin.IsTrackFileExists(entry.Track, "mp3") {
 				err = os.Remove(fmt.Sprintf("%s/%s.mp3", plugin.GetDir(), entry.Track.ID))
-				fmt.Println(err)
 				if err != nil && !os.IsNotExist(err) {
 					return err
 				}
 			}
+
+			// remove track from playlists
+			for _, p := range state.OfflinePlaylists {
+				for _, tid := range p.TracksIds {
+					if tid == entry.Track.ID {
+						state.offlinePlaylistService.RemoveTrackFromPlaylist(tid, p)
+					}
+				}
+			}
+			state.OfflinePlaylists, _ = state.offlinePlaylistService.GetPlaylists(true)
+			return nil
 		}
 	}
 	return err

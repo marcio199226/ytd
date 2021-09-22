@@ -47,26 +47,37 @@
         <span>({{ offlinePlaylists.length }})</span>
       </div>
       <hr />
-      <div class="playlists" [class.playing]="" fxLayout="column" fxLayoutGap="8px">
-        <div class="playlist" fxLayout="row" fxLayoutAlign="space-between center" *ngFor="let p of offlinePlaylists">
-          <span class="name clickable" fxFlex>
-            {{ p.name }} ({{ p.tracksIds?.length || 0 }})
-          </span>
-          <span class="actions" fxLayout="row" fxLayoutGap="4px">
-            <mat-icon class="clickable" title="Playback playlist">play_circle_filled</mat-icon>
-            <mat-icon class="clickable" title="Export playlist tracks to directory" (click)="exportPlaylist(p)">folder</mat-icon>
-            <mat-icon class="clickable" title="Remove playlist" (click)="removePlaylist(p)">delete</mat-icon>
-          </span>
+      <div class="playlists" fxLayout="column" fxLayoutGap="8px">
+        <div class="playlist" [class.playing]="isPlaylistDetailOpen(p)" fxLayout="column" fxLayoutGap="8px" *ngFor="let p of offlinePlaylists">
+          <div fxLayout="row" fxLayoutAlign="space-between center">
+            <span class="name clickable" fxFlex>
+              {{ p.name }} ({{ p.tracksIds?.length || 0 }})
+            </span>
+            <span class="actions" fxLayout="row" fxLayoutGap="4px">
+              <mat-icon class="clickable" title="Playback playlist" (click)="playbackPlaylist(p)" *ngIf="!isPlaylistDetailOpen(p) || !isPlaylistInPlayback">play_circle_filled</mat-icon>
+              <mat-icon class="clickable" title="Playback playlist" (click)="stopPlaylist(p)" *ngIf="isPlaylistDetailOpen(p) && isPlaylistInPlayback">pause</mat-icon>
+              <mat-icon class="clickable" title="Export playlist tracks to directory" (click)="exportPlaylist(p)">folder</mat-icon>
+              <mat-icon class="clickable" title="Remove playlist" (click)="removePlaylist(p)">delete</mat-icon>
+            </span>
+          </div>
         </div>
       </div>
     </div>
   </mat-drawer>
   <mat-drawer-content>
-    <div class="entries" fxLayout="row wrap" fxLayoutAlign="center start" fxLayoutGap="10px">
+    <router-outlet (activate)="onRouterOutletActivate($event)" (deactivate)="onRouterOutletDeactivate($event)"></router-outlet>
+    <div class="entries" fxLayout="row wrap" fxLayoutAlign="center start" fxLayoutGap="10px" *ngIf="!isOpenedOfflinePlaylist">
       <mat-menu #menu="matMenu">
         <ng-template matMenuContent let-entry="entry" let-idx="idx">
-          <button mat-menu-item (click)="remove(entry, idx)">Remove {{ entry.type }}</button>
+          <button mat-menu-item (click)="remove(entry, idx)">
+            <mat-icon>delete</mat-icon>
+            Remove {{ entry.type }}
+          </button>
           <button mat-menu-item *ngIf="entry.track.status === 'failed'">Download</button>
+          <button mat-menu-item (click)="openInYt(entry.track.url)">
+            <mat-icon>open_in_browser</mat-icon>
+            Open on youtube
+          </button>
         </ng-template>
       </mat-menu>
       <div
@@ -139,3 +150,13 @@
   </mat-drawer-content>
 
 </mat-drawer-container>
+
+<ng-template #playlistContent let-data>
+  <ul>
+    <li *ngFor="let t of data.tracks">
+      {{ t.track.id }} - {{ t.track.name }}
+      <mat-icon (click)="removeTrackFromPlaylist(t.track.id, data.playlist)">delete</mat-icon>
+    </li>
+  </ul>
+  {{ data.playlist | json }}
+</ng-template>

@@ -1,0 +1,36 @@
+<mat-menu #menu="matMenu">
+  <ng-template matMenuContent let-playlist="playlist" let-track="track">
+    <button mat-menu-item (click)="removeTrackFromPlaylist(track.id, playlist)">
+      <mat-icon>delete</mat-icon>
+      Remove from playlist
+    </button>
+    <button mat-menu-item>
+      <mat-icon>open_in_browser</mat-icon>
+      Open on youtube
+    </button>
+  </ng-template>
+</mat-menu>
+<div class="tracks" fxLayout="column" fxLayoutAlign="start start">
+  <div class="track" [class.playing]="inPlaybackTrackId === track.id" [class.paused]="inPauseTrack?.id === track.id" fxLayout="row" *ngFor="let track of tracks; trackBy: trackById; let idx = index">
+    <div class="idx">{{ idx + 1 }}.</div>
+    <div class="thumbnail">
+      <img [src]="track.thumbnails[3]" />
+      <img class="equalizer" src="assets/playing-wave.gif" />
+      <mat-icon class="play clickable" (click)="playback(track)">play_circle_filled</mat-icon>
+      <mat-icon class="stop clickable" (click)="stop(track)">pause</mat-icon>
+    </div>
+    <div class="name" fxLayout="column" fxLayoutGap="8px" fxLayoutAlign="center start" fxFlex="1 1 100%">
+      <div class="author">{{ track.author }}</div>
+      <div class="title">{{ track.name }}</div>
+    </div>
+    <div class="time"></div>
+    <div class="menu" fxLayoutAlign="center center">
+      <mat-icon class="clickable"
+        [matMenuTriggerFor]="menu"
+        [matMenuTriggerData]="{playlist, track, idx}"
+        title="More">
+        more_horiz
+      </mat-icon>
+    </div>
+  </div>
+</div>
