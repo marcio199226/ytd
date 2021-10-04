@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	db "ytd/db"
 	. "ytd/models"
 
@@ -40,11 +39,7 @@ func (p *OfflinePlaylistService) RemoveTrackFromPlaylist(tid string, playlist Of
 			break
 		}
 	}
-	fmt.Println("============PLAYLIST BEFORE REMOVE==============")
-	fmt.Println(playlist)
 	playlist.TracksIds = append(playlist.TracksIds[:idx], playlist.TracksIds[idx+1:]...)
-	fmt.Println("============PLAYLIST==============")
-	fmt.Println(playlist)
 	err := db.DbAddOfflinePlaylist(playlist.UUID, playlist, true)
 	if err != nil {
 		return OfflinePlaylist{}, err

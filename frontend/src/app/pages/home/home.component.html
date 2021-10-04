@@ -150,13 +150,3 @@
   </mat-drawer-content>
 
 </mat-drawer-container>
-
-<ng-template #playlistContent let-data>
-  <ul>
-    <li *ngFor="let t of data.tracks">
-      {{ t.track.id }} - {{ t.track.name }}
-      <mat-icon (click)="removeTrackFromPlaylist(t.track.id, data.playlist)">delete</mat-icon>
-    </li>
-  </ul>
-  {{ data.playlist | json }}
-</ng-template>
