@@ -9,7 +9,7 @@ app-home {
 
     .mat-drawer {
       width: 250px;
-      height: calc(768px - 96px);
+      height: calc(100% - 96px);
       padding: 20px 10px;
       background-color: rgba(0,0,0,0.4);
       border-right: none;
