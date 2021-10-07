@@ -4,6 +4,12 @@ Dekstop app for downloading audio tracks from youtube built with wails & angular
 
 **(*) please note this is an alpha version in case of malfunction please open an issue**
 
+## Install
+[Download from releases page](https://github.com/marcio199226/ytd/releases)
+
+Supported platfroms for now
+- Macos (tested on 11.5.x apple m1)
+
 ## Main features:
 - check for updates & app update
 - clipboard watch (once yt link is copied it will be automatically downloaded, **can be disabled**)
