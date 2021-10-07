@@ -63,6 +63,11 @@
         </div>
       </div>
     </div>
+    <div class="footer" fxLayout="column" fxLayoutGap="4px" fxLayoutAlign="start center">
+      <mat-icon svgIcon="github" class="clickable" (click)="openGithubProfile()"></mat-icon>
+      <div class="version clickable" (click)="openReleasePage()">{{ appVersion }}</div>
+      <div>Made with ❤️ by marcio199226</div>
+    </div>
   </mat-drawer>
   <mat-drawer-content>
     <router-outlet (activate)="onRouterOutletActivate($event)" (deactivate)="onRouterOutletDeactivate($event)"></router-outlet>

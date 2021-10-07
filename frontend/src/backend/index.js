@@ -166,10 +166,19 @@ const backend = {
       /**
        * ExportPlaylist
        * @param {string} arg1 - Go Type: string
-       * @returns {Promise<string|Error>}  - Go Type: string
+       * @param {string} arg2 - Go Type: string
+       * @returns {Promise<boolean|Error>}  - Go Type: bool
        */
-      "ExportPlaylist": (arg1) => {
-        return window.backend.main.OfflinePlaylistService.ExportPlaylist(arg1);
+      "ExportPlaylist": (arg1, arg2) => {
+        return window.backend.main.OfflinePlaylistService.ExportPlaylist(arg1, arg2);
+      },
+      /**
+       * GetPlaylistByUUID
+       * @param {string} arg1 - Go Type: string
+       * @returns {Promise<any>}  - Go Type: models.OfflinePlaylist
+       */
+      "GetPlaylistByUUID": (arg1) => {
+        return window.backend.main.OfflinePlaylistService.GetPlaylistByUUID(arg1);
       },
       /**
        * GetPlaylists

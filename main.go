@@ -36,7 +36,7 @@ var static embed.FS
 var appState *AppState
 var newEntries = make(chan GenericEntry)
 
-func panicHandler() {
+func panicHandler() error {
 	if panicPayload := recover(); panicPayload != nil {
 
 		stack := string(debug.Stack())
@@ -54,7 +54,9 @@ func panicHandler() {
 		fmt.Fprintf(os.Stderr, "Operating System:    %s\n", runtime.GOOS)
 		fmt.Fprintf(os.Stderr, "Panic:               %s\n\n", panicPayload)
 		fmt.Fprintln(os.Stderr, stack)
+		return fmt.Errorf("panic: %s", panicPayload)
 	}
+	return nil
 }
 
 func cors(fs http.Handler) http.HandlerFunc {

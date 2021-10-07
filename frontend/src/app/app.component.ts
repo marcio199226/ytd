@@ -1,5 +1,9 @@
-import { ApplicationRef, ChangeDetectorRef, Component } from '@angular/core';
+import { ApplicationRef, ChangeDetectorRef, Component, NgZone } from '@angular/core';
+import { MatIconRegistry } from '@angular/material/icon';
+import { DomSanitizer } from '@angular/platform-browser';
 import * as Wails from '@wails/runtime';
+import { RegisterCustomIcons } from './common/custom-icons';
+import { LoaderService, LoaderEventBackend } from './services/loader.service';
 
 @Component({
   selector: 'app-root,[id="app"]',
@@ -10,9 +14,15 @@ export class AppComponent {
   title = 'frontend';
 
   constructor(
+    private _ngZone: NgZone,
     private _cdr: ChangeDetectorRef,
     private _appRef: ApplicationRef,
-  ) {}
+    private _loader: LoaderService,
+    private _matIconRegistry: MatIconRegistry,
+    private _domSanitizer: DomSanitizer
+  ) {
+    RegisterCustomIcons(this._matIconRegistry, this._domSanitizer);
+  }
 
   ngOnInit() {
     window.addEventListener('focus', () => Wails.Events.Emit("ytd:app:focused"));
@@ -25,6 +35,14 @@ export class AppComponent {
         // run tick such us I encoutered some issues ex open settings from ytd tray -> settings when windows is not visible
         this._appRef.tick();
       }
+    });
+
+    Wails.Events.On("ytd:loader:show", (payload: LoaderEventBackend) => {
+      this._loader.show(payload.label, null , payload.templateName);
+    });
+
+    Wails.Events.On("ytd:loader:hide", () => {
+      this._loader.hide();
     });
   }
 }

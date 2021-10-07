@@ -26,6 +26,5 @@ require (
 	github.com/xujiajun/nutsdb v0.6.0
 	golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d // indirect
 	golang.org/x/sys v0.0.0-20210817190340-bfb29a6856f2 // indirect
-	gopkg.in/tucnak/telebot.v2 v2.3.5
 	nhooyr.io/websocket v1.8.7 // indirect
 )

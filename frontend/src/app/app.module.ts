@@ -2,6 +2,7 @@ import { APP_BASE_HREF, CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -10,6 +11,7 @@ import { HomeComponent, OfflinePlaylistComponent } from './pages';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatButtonModule } from '@angular/material/button';
 import { MatBadgeModule } from '@angular/material/badge';
+import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -25,9 +27,8 @@ import { MatSnackBarModule, MAT_SNACK_BAR_DEFAULT_OPTIONS } from '@angular/mater
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { NG_EVENT_PLUGINS } from '@tinkoff/ng-event-plugins';
-import { AudioPlayerComponent, SettingsComponent, UpdaterComponent} from './components';
+import { AudioPlayerComponent, LoaderOverlayComponent, SettingsComponent, UpdaterComponent, ConfirmationDialogComponent } from './components';
 import { AddToPlaylistComponent, CreatePlaylistComponent } from './components/playlist';
-import { ConfirmationDialogComponent } from './components/confirmation-dialog/confirmation-dialog.component';
 import { AutofocusDirective } from './directives';
 
 
@@ -42,12 +43,14 @@ import { AutofocusDirective } from './directives';
     AddToPlaylistComponent,
     CreatePlaylistComponent,
     ConfirmationDialogComponent,
+    LoaderOverlayComponent,
     // directives
     AutofocusDirective
   ],
   imports: [
     BrowserModule,
     CommonModule,
+    HttpClientModule,
     AppRoutingModule,
     BrowserAnimationsModule,
     FormsModule,
@@ -55,6 +58,7 @@ import { AutofocusDirective } from './directives';
     FlexLayoutModule,
     MatBadgeModule,
     MatButtonModule,
+    MatCardModule,
     MatCheckboxModule,
     MatDialogModule,
     MatFormFieldModule,

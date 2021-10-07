@@ -1,13 +1,15 @@
 package main
 
 import (
+	"fmt"
+	"io"
+	"os"
 	db "ytd/db"
 	. "ytd/models"
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	"github.com/wailsapp/wails/v2"
-	"github.com/wailsapp/wails/v2/pkg/options/dialog"
 )
 
 type OfflinePlaylistService struct {
@@ -63,19 +65,25 @@ func (p *OfflinePlaylistService) AddTrackToPlaylist(payload []map[string]interfa
 	return true, nil
 }
 
-func (p *OfflinePlaylistService) ExportPlaylist(uuid string) (string, error) {
-	selectedDirectory, err := p.runtime.Dialog.OpenDirectory(&dialog.OpenDialog{
-		AllowFiles:           false,
-		CanCreateDirectories: true,
-		AllowDirectories:     true,
-		Title:                "Choose directory",
-	})
-
-	if err != nil {
-		return "", errors.Wrap(err, "OfflinePlaylistService ExportPlaylist()")
+func (p *OfflinePlaylistService) ExportPlaylist(uuid string, path string) (bool, error) {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return false, err
 	}
 
-	return selectedDirectory, nil
+	playlist := p.GetPlaylistByUUID(uuid)
+	copied := 0
+	for idx, id := range playlist.TracksIds {
+		fmt.Printf("Copy track %s to path %s \n\n", fmt.Sprintf("%s/%s/%s.webm", appState.Config.BaseSaveDir, "youtube", id), path)
+		err := copyFile(fmt.Sprintf("%s/%s/%s.mp3", appState.Config.BaseSaveDir, "youtube", id), fmt.Sprintf("%s/%s.mp3", path, id))
+		copied++
+		ShowLoader(p.runtime, fmt.Sprintf("Exporting...%d/%d", idx+1, len(playlist.TracksIds)))
+		if err != nil {
+			fmt.Printf("Error while copying track: %s \n\n", err)
+			copied--
+		}
+	}
+
+	return copied == len(playlist.TracksIds), nil
 }
 
 func (p *OfflinePlaylistService) GetPlaylists(emitEvent bool) ([]OfflinePlaylist, error) {
@@ -84,4 +92,51 @@ func (p *OfflinePlaylistService) GetPlaylists(emitEvent bool) ([]OfflinePlaylist
 		p.runtime.Events.Emit("ytd:offline:playlists", playlists)
 	}
 	return playlists, nil
+}
+
+func (p *OfflinePlaylistService) GetPlaylistByUUID(uuid string) OfflinePlaylist {
+	playlists, _ := p.GetPlaylists(false)
+	for _, playlist := range playlists {
+		if playlist.UUID == uuid {
+			return playlist
+		}
+	}
+	return OfflinePlaylist{}
+}
+
+func copyFile(src string, dst string) error {
+	var err error
+	var srcfd *os.File
+	var dstfd *os.File
+	var srcinfo os.FileInfo
+
+	if srcfd, err = os.Open(src); err != nil {
+		return errors.Wrap(err, "copyFile os.Open(src)")
+	}
+	defer srcfd.Close()
+
+	if _, err := os.Stat(dst); os.IsNotExist(err) {
+		// dst does not exist so create it
+		if dstfd, err = os.Create(dst); err != nil {
+			return errors.Wrap(err, "copyFile os.Create(dst)")
+		}
+		defer dstfd.Close()
+	} else {
+		if dstfd, err = os.Open(dst); err != nil {
+			return errors.Wrap(err, "copyFile os.Open(dst)")
+		}
+		defer dstfd.Close()
+	}
+
+	fmt.Println(dstfd, srcfd)
+	if _, err = io.Copy(dstfd, srcfd); err != nil {
+		return errors.Wrap(err, "copyFile io.Copy(dstfd, srcfd)")
+	}
+	if srcinfo, err = os.Stat(src); err != nil {
+		return errors.Wrap(err, "copyFile os.Stat(src)")
+	}
+	if err = os.Chmod(dst, srcinfo.Mode()); err != nil {
+		return errors.Wrap(err, "copyFile os.Chmod(dst, srcinfo.Mode())")
+	}
+	return nil
 }

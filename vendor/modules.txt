@@ -134,9 +134,6 @@ golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
 golang.org/x/sys/windows
 golang.org/x/sys/windows/registry
-# gopkg.in/tucnak/telebot.v2 v2.3.5
-## explicit
-gopkg.in/tucnak/telebot.v2
 # nhooyr.io/websocket v1.8.7
 ## explicit
 nhooyr.io/websocket

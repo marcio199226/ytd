@@ -32,6 +32,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatDrawer } from '@angular/material/sidenav';
 import { minMax } from 'app/common/fn';
 import { OfflinePlaylistComponent } from '../offline-playlist/offline-playlist.component';
+import { LoaderService } from 'app/services/loader.service';
 
 @Component({
   selector: 'app-home',
@@ -85,6 +86,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     return this._offlinePlaylistComponent.inPlaybackTrackId !== null;
   }
 
+  public get appVersion(): string {
+    return window.APP_STATE.appVersion;
+  }
+
   @ViewChild('searchNativeInput')
   public searchNativeInput: ElementRef<HTMLInputElement> = null;
 
@@ -117,6 +122,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     private _route: ActivatedRoute,
     private _dialog: MatDialog,
     private _snackbar: SnackbarService,
+    private _loader: LoaderService,
     private _media: MediaMatcher,
     private _audioPlayerService: AudioPlayerService
   ) {
@@ -554,8 +560,46 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   async exportPlaylist(playlist: OfflinePlaylist): Promise<void> {
-    const [err, dir] = await to(window.backend.main.OfflinePlaylistService.ExportPlaylist(playlist.uuid))
-    console.log('exportPlaylist', err, dir)
+    console.log('exportPlaylist', playlist)
+    if(!playlist.tracksIds.length) {
+      this._snackbar.openWarning("Cannot export empty playlist");
+      return;
+    }
+
+    const [err, dirResult] = await to<string, Error>(window.wails.Dialog.Open({
+      DefaultDirectory:     playlist.name,
+      AllowFiles:           false,
+      CanCreateDirectories: true,
+      AllowDirectories:     true,
+      Title:                "Choose directory",
+    }))
+    const dir: string[] = JSON.parse(dirResult);
+    console.log('exportPlaylist dir', err, dirResult, dir)
+
+    if(err) {
+      this._snackbar.openError(`Error while choosing export path: ${err}`);
+      return;
+    }
+
+    if(!dir.length) {
+      return;
+    }
+
+    this._loader.show("Exporting....");
+/*     Wails.Events.On("ytd:offline:playlists:export:progress", (payload) => {
+      console.log('ytd:offline:playlists:export:progress', payload)
+      this._loader.show(`Exporting...${payload.current}/${payload.total}`);
+    }); */
+    const [exportErr, exportResult] = await to(window.backend.main.OfflinePlaylistService.ExportPlaylist(playlist.uuid, dir[0]))
+    this._loader.hide();
+
+    if(exportErr) {
+      console.log('exportPlaylist go call results in error', exportErr, exportResult);
+      this._snackbar.openError("Something went wrong while exporting");
+      return;
+    }
+
+    this._snackbar.openSuccess("Export has been ✅");
   }
 
   async playbackPlaylist(playlist: OfflinePlaylist): Promise<void> {
@@ -620,6 +664,13 @@ export class HomeComponent implements OnInit, OnDestroy {
     await window.backend.main.AppState.OpenUrl(url);
   }
 
+  async openGithubProfile(): Promise<void> {
+    await window.backend.main.AppState.OpenUrl('https://github.com/marcio199226/ytd');
+  }
+
+  async openReleasePage(): Promise<void> {
+    await window.backend.main.AppState.OpenUrl(`https://github.com/marcio199226/ytd/releases/tag/${this.appVersion}`);
+  }
 
   private _onSearch(): void {
     this.searchInput.valueChanges

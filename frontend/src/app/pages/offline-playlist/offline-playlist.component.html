@@ -15,7 +15,7 @@
     <div class="idx">{{ idx + 1 }}.</div>
     <div class="thumbnail">
       <img [src]="track.thumbnails[3]" />
-      <img class="equalizer" src="assets/playing-wave.gif" />
+      <img class="equalizer" src="http://localhost:8080/static/frontend/dist/assets/playing-wave.gif" />
       <mat-icon class="play clickable" (click)="playback(track)">play_circle_filled</mat-icon>
       <mat-icon class="stop clickable" (click)="stop(track)">pause</mat-icon>
     </div>

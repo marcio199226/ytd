@@ -9,16 +9,33 @@ app-home {
 
     .mat-drawer {
       width: 250px;
+      height: calc(768px - 96px);
       padding: 20px 10px;
       background-color: rgba(0,0,0,0.4);
       border-right: none;
       color: white;
+
+      .mat-drawer-inner-container {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .footer {
+        .version {
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
     }
 
     .mat-drawer-container {
     }
 
     .offline-playlists {
+      flex: 1;
+      overflow-y: auto;
+
       .title {
         font-weight: 200;
         margin-bottom: 0px;
