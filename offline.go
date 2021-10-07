@@ -73,7 +73,6 @@ func (p *OfflinePlaylistService) ExportPlaylist(uuid string, path string) (bool,
 	playlist := p.GetPlaylistByUUID(uuid)
 	copied := 0
 	for idx, id := range playlist.TracksIds {
-		fmt.Printf("Copy track %s to path %s \n\n", fmt.Sprintf("%s/%s/%s.webm", appState.Config.BaseSaveDir, "youtube", id), path)
 		err := copyFile(fmt.Sprintf("%s/%s/%s.mp3", appState.Config.BaseSaveDir, "youtube", id), fmt.Sprintf("%s/%s.mp3", path, id))
 		copied++
 		ShowLoader(p.runtime, fmt.Sprintf("Exporting...%d/%d", idx+1, len(playlist.TracksIds)))
@@ -128,7 +127,6 @@ func copyFile(src string, dst string) error {
 		defer dstfd.Close()
 	}
 
-	fmt.Println(dstfd, srcfd)
 	if _, err = io.Copy(dstfd, srcfd); err != nil {
 		return errors.Wrap(err, "copyFile io.Copy(dstfd, srcfd)")
 	}

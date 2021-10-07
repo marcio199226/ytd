@@ -560,7 +560,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   async exportPlaylist(playlist: OfflinePlaylist): Promise<void> {
-    console.log('exportPlaylist', playlist)
     if(!playlist.tracksIds.length) {
       this._snackbar.openWarning("Cannot export empty playlist");
       return;
@@ -574,7 +573,6 @@ export class HomeComponent implements OnInit, OnDestroy {
       Title:                "Choose directory",
     }))
     const dir: string[] = JSON.parse(dirResult);
-    console.log('exportPlaylist dir', err, dirResult, dir)
 
     if(err) {
       this._snackbar.openError(`Error while choosing export path: ${err}`);
@@ -586,10 +584,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
 
     this._loader.show("Exporting....");
-/*     Wails.Events.On("ytd:offline:playlists:export:progress", (payload) => {
-      console.log('ytd:offline:playlists:export:progress', payload)
-      this._loader.show(`Exporting...${payload.current}/${payload.total}`);
-    }); */
     const [exportErr, exportResult] = await to(window.backend.main.OfflinePlaylistService.ExportPlaylist(playlist.uuid, dir[0]))
     this._loader.hide();
 
