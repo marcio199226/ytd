@@ -1,0 +1,24 @@
+language-switcher {
+  .mat-icon {
+    color: white;
+  }
+
+  .mat-form-field {
+    &.hide {
+      visibility: hidden;
+      width: 0;
+      height: 0;
+    }
+
+    .mat-form-field-underline {
+      background-color: white;
+    }
+
+    .mat-form-field-label,
+    .mat-select-value,
+    .mat-select-arrow {
+      color: white;
+    }
+  }
+}
+

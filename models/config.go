@@ -52,6 +52,7 @@ type AppConfig struct {
 	RunInBackgroundOnClose      bool
 	CheckForUpdates             bool
 	StartAtLogin                bool
+	Language                    string
 	Telegram                    TelegramConfig
 	Proxy                       interface{}
 }
@@ -69,6 +70,7 @@ func NewAppConfig(watch bool, dldOnCopy bool, cDownloads bool, cPlaylistDownload
 		RunInBackgroundOnClose:      false,
 		CheckForUpdates:             false,
 		StartAtLogin:                false,
+		Language:                    "en",
 		Telegram:                    TelegramConfig{Share: false, Username: ""},
 	}
 }
@@ -89,6 +91,7 @@ func (cfg *AppConfig) Init() *AppConfig {
 	cfg.RunInBackgroundOnClose = getConfigValue(defaultAppCfg, "RunInBackgroundOnClose").(bool)
 	cfg.CheckForUpdates = getConfigValue(defaultAppCfg, "CheckForUpdates").(bool)
 	cfg.StartAtLogin = getConfigValue(defaultAppCfg, "StartAtLogin").(bool)
+	cfg.Language = getConfigValue(defaultAppCfg, "Language").(string)
 	cfg.Telegram = getConfigValue(defaultAppCfg, "Telegram").(TelegramConfig)
 
 	return cfg
@@ -118,6 +121,8 @@ func (cfg *AppConfig) Set(name string, val interface{}) error {
 		cfg.SetCheckForUpdates(val)
 	case "StartAtLogin":
 		cfg.SetStartAtLogin(val)
+	case "Language":
+		cfg.SetLanguage(val)
 	case "Telegram":
 		cfg.SetTelegram(val)
 	}
@@ -177,6 +182,11 @@ func (cfg *AppConfig) SetCheckForUpdates(val interface{}) error {
 
 func (cfg *AppConfig) SetStartAtLogin(val interface{}) error {
 	cfg.StartAtLogin = val.(bool)
+	return nil
+}
+
+func (cfg *AppConfig) SetLanguage(val interface{}) error {
+	cfg.Language = val.(string)
 	return nil
 }
 

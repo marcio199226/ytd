@@ -1,0 +1,101 @@
+msgid ""
+msgstr ""
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: \n"
+"X-Generator: xgotext\n"
+
+#: app.go:345
+msgid "%s is the latest version."
+msgstr ""
+
+#: app.go:419
+msgid "App has been started in background"
+msgstr ""
+
+#: tray.go:104
+msgid "Cannot enable start at login"
+msgstr ""
+
+#: tray.go:71
+msgid "Check for updates"
+msgstr ""
+
+#: app.go:185
+msgid "Choose directory"
+msgstr ""
+
+#: tray.go:43
+msgid "Clipboard watch"
+msgstr ""
+
+#: offline.go:80
+msgid "Exporting...%d/%d"
+msgstr ""
+
+#: app.go:358
+msgid "New version available: %s"
+msgstr ""
+
+#: app.go:405
+msgid "Please restart ytd for the changes to take effect."
+msgstr ""
+
+#: tray.go:142
+msgid "Quit app"
+msgstr ""
+
+#: tray.go:57
+msgid "Run in background on close"
+msgstr ""
+
+#: tray.go:121
+msgid "Settings"
+msgstr ""
+
+#: tray.go:129
+msgid "Show app"
+msgstr ""
+
+#: tray.go:86
+msgid "Start at login (system startup)"
+msgstr ""
+
+#: app.go:329
+msgid "Update check failed"
+msgstr ""
+
+#: app.go:388
+msgid "Update not successful"
+msgstr ""
+
+#: app.go:404
+msgid "Update successful"
+msgstr ""
+
+#: app.go:360
+msgid "Update"
+msgstr ""
+
+#: app.go:359
+msgid "Would you like to update?"
+msgstr ""
+
+#: app.go:344
+msgid "You're up to date"
+msgstr ""
+
+#: tray.go:137
+msgid "ytd (%s)"
+msgstr ""
+
+#: app.go:415
+#: tray.go:99
+msgid "⚠ Start at Login unavailable"
+msgstr ""
+
+#: app.go:365
+msgid "⚠️ ytd (%s) (new version %s)"
+msgstr ""

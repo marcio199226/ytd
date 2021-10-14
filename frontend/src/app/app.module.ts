@@ -2,7 +2,7 @@ import { APP_BASE_HREF, CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -13,13 +13,14 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatDialogModule, MAT_DIALOG_DEFAULT_OPTIONS } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSliderModule}  from '@angular/material/slider';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -27,10 +28,23 @@ import { MatSnackBarModule, MAT_SNACK_BAR_DEFAULT_OPTIONS } from '@angular/mater
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { NG_EVENT_PLUGINS } from '@tinkoff/ng-event-plugins';
-import { AudioPlayerComponent, LoaderOverlayComponent, SettingsComponent, UpdaterComponent, ConfirmationDialogComponent } from './components';
-import { AddToPlaylistComponent, CreatePlaylistComponent } from './components/playlist';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+import {
+  AudioPlayerComponent,
+  LoaderOverlayComponent,
+  SettingsComponent,
+  UpdaterComponent,
+  ConfirmationDialogComponent,
+  AddToPlaylistComponent,
+  CreatePlaylistComponent,
+  LanguageSwitcherComponent
+} from './components';
 import { AutofocusDirective } from './directives';
 
+export function HttpLoaderFactory(http: HttpClient) {
+  return new TranslateHttpLoader(http, 'http://localhost:8080/static/frontend/dist/assets/i18n/', '.json');
+}
 
 @NgModule({
   declarations: [
@@ -42,6 +56,7 @@ import { AutofocusDirective } from './directives';
     UpdaterComponent,
     AddToPlaylistComponent,
     CreatePlaylistComponent,
+    LanguageSwitcherComponent,
     ConfirmationDialogComponent,
     LoaderOverlayComponent,
     // directives
@@ -55,6 +70,14 @@ import { AutofocusDirective } from './directives';
     BrowserAnimationsModule,
     FormsModule,
     ReactiveFormsModule,
+    TranslateModule.forRoot({
+      defaultLanguage: 'en',
+      loader: {
+        provide: TranslateLoader,
+        useFactory: HttpLoaderFactory,
+        deps: [HttpClient]
+      }
+    }),
     FlexLayoutModule,
     MatBadgeModule,
     MatButtonModule,
@@ -67,6 +90,7 @@ import { AutofocusDirective } from './directives';
     MatMenuModule,
     MatProgressBarModule,
     MatProgressSpinnerModule,
+    MatSelectModule,
     MatSlideToggleModule,
     MatSliderModule,
     MatSidenavModule,
@@ -77,7 +101,15 @@ import { AutofocusDirective } from './directives';
   providers: [
     {provide: APP_BASE_HREF, useValue : '/' },
     NG_EVENT_PLUGINS,
-    { provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: { duration: 5000 } }
+    { provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: { duration: 5000 } },
+    {
+      provide: MAT_DIALOG_DEFAULT_OPTIONS,
+      useValue: {
+        backdropClass: 'blurred-backdrop-bg',
+        hasBackdrop: true,
+        autoFocus: false
+      }
+    },
   ],
   bootstrap: [AppComponent]
 })

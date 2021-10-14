@@ -17,6 +17,7 @@ import (
 	. "ytd/models"
 	. "ytd/plugins"
 
+	"github.com/leonelquinteros/gotext"
 	"github.com/mitchellh/mapstructure"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/mac"
@@ -33,8 +34,8 @@ type AppState struct {
 	Entries          []GenericEntry    `json:"entries"`
 	OfflinePlaylists []OfflinePlaylist `json:"offlinePlaylists"`
 	Config           *AppConfig        `json:"config"`
-	Stats            *AppStats
-	AppVersion       string `json:"appVersion"`
+	Stats            *AppStats         `json:"stats"`
+	AppVersion       string            `json:"appVersion"`
 
 	isInForeground         bool
 	canStartAtLogin        bool
@@ -50,6 +51,9 @@ func (state *AppState) PreWailsInit() {
 	state.offlinePlaylistService = &OfflinePlaylistService{}
 	state.Config = state.Config.Init()
 	state.AppVersion = version
+
+	// configure i18n paths
+	gotext.Configure("/Users/oskarmarciniak/projects/golang/ytd/i18n", state.Config.Language, "default")
 
 	if _, err := mac.StartsAtLogin(); err == nil {
 		state.canStartAtLogin = true
@@ -144,6 +148,13 @@ func (state *AppState) WailsShutdown() {
 	CloseDb()
 }
 
+func (state *AppState) ReloadNewLanguage() {
+	gotext.Configure("/Users/oskarmarciniak/projects/golang/ytd/i18n", state.Config.Language, "default")
+	// re render tray to take effect for new language translations
+	state.tray.reRenderTray(func() {})
+	// do other stuff if needed to reload translations from some ui native elements
+}
+
 func (state *AppState) InitializeListeners() {
 	state.runtime.Events.On("ytd:app:foreground", func(optionalData ...interface{}) {
 		var json map[string]interface{} = optionalData[0].(map[string]interface{})
@@ -178,7 +189,7 @@ func (state *AppState) SelectDirectory() (string, error) {
 		AllowFiles:           false,
 		CanCreateDirectories: true,
 		AllowDirectories:     true,
-		Title:                "Choose directory",
+		Title:                gotext.Get("Choose directory"),
 	})
 	return selectedDirectory, err
 }
@@ -322,7 +333,7 @@ func (state *AppState) checkForUpdates() {
 	if err != nil {
 		_, err := state.runtime.Dialog.Message(&dialog.MessageDialog{
 			Type:         dialog.ErrorDialog,
-			Title:        "Update check failed",
+			Title:        gotext.Get("Update check failed"),
 			Message:      err.Error(),
 			Buttons:      []string{"OK"},
 			CancelButton: "OK",
@@ -337,8 +348,8 @@ func (state *AppState) checkForUpdates() {
 	if !hasUpdate {
 		_, err := state.runtime.Dialog.Message(&dialog.MessageDialog{
 			Type:         dialog.InfoDialog,
-			Title:        "You're up to date",
-			Message:      fmt.Sprintf("%s is the latest version.", latest.TagName),
+			Title:        gotext.Get("You're up to date"),
+			Message:      fmt.Sprintf(gotext.Get("%s is the latest version.", latest.TagName)),
 			Buttons:      []string{"OK"},
 			CancelButton: "OK",
 		})
@@ -351,14 +362,14 @@ func (state *AppState) checkForUpdates() {
 
 	clickedAction, _ := state.runtime.Dialog.Message(&dialog.MessageDialog{
 		Type:         dialog.InfoDialog,
-		Title:        fmt.Sprintf("New version available: %s", latest.TagName),
-		Message:      "Would you like to update?",
-		Buttons:      []string{"OK", "Changelog", "Update"},
+		Title:        fmt.Sprintf(gotext.Get("New version available: %s", latest.TagName)),
+		Message:      gotext.Get("Would you like to update?"),
+		Buttons:      []string{"OK", "Changelog", gotext.Get("Update")},
 		CancelButton: "OK",
 	})
 
 	state.tray.reRenderTray(func() {
-		state.tray.versionMenuItem.Label = fmt.Sprintf("⚠️ ytd (%s) (new version %s)", version, latest.TagName)
+		state.tray.versionMenuItem.Label = fmt.Sprintf(gotext.Get("⚠️ ytd (%s) (new version %s)", version, latest.TagName))
 	})
 
 	switch clickedAction {
@@ -381,7 +392,7 @@ func (state *AppState) Update(restart bool) {
 	if err != nil {
 		_, err := state.runtime.Dialog.Message(&dialog.MessageDialog{
 			Type:         dialog.WarningDialog,
-			Title:        "Update not successful",
+			Title:        gotext.Get("Update not successful"),
 			Message:      err.Error(),
 			Buttons:      []string{"OK"},
 			CancelButton: "OK",
@@ -397,8 +408,8 @@ func (state *AppState) Update(restart bool) {
 	// err = u.Restart()
 	state.runtime.Dialog.Message(&dialog.MessageDialog{
 		Type:         dialog.InfoDialog,
-		Title:        "Update successful",
-		Message:      "Please restart ytd for the changes to take effect.",
+		Title:        gotext.Get("Update successful"),
+		Message:      gotext.Get("Please restart ytd for the changes to take effect."),
 		Buttons:      []string{"OK"},
 		CancelButton: "OK",
 	})
@@ -408,11 +419,11 @@ func (state *AppState) checkStartsAtLogin() {
 	startsAtLogin, err := mac.StartsAtLogin()
 	if err != nil {
 		state.tray.reRenderTray(func() {
-			state.tray.startAtLoginMenuItem.Label = "⚠ Start at Login unavailable"
+			state.tray.startAtLoginMenuItem.Label = gotext.Get("⚠ Start at Login unavailable")
 			state.tray.startAtLoginMenuItem.Disabled = true
 		})
 	} else if startsAtLogin {
-		mac.ShowNotification("Ytd", "App has been started in background", "", "")
+		mac.ShowNotification("Ytd", gotext.Get("App has been started in background"), "", "")
 		state.tray.reRenderTray(func() {
 			state.tray.startAtLoginMenuItem.Checked = true
 			state.tray.startAtLoginMenuItem.Disabled = false

@@ -30,6 +30,7 @@ export class SettingsComponent implements OnInit {
 	  RunInBackgroundOnClose: null,
 	  CheckForUpdates: null,
 	  StartAtLogin: null,
+    Language: null,
     Telegram: {
       Share: null,
       Username: null

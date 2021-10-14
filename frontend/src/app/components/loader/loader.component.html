@@ -18,13 +18,13 @@
     <div class="sk-cube sk-cube8"></div>
     <div class="sk-cube sk-cube9"></div>
   </div>
-  <div class="label" *ngIf="label">{{ label }}</div>
+  <div class="label" *ngIf="label">{{ label | translate }}</div>
 </ng-template>
 
 <ng-template #cardLoaderTpl let-label="label">
   <mat-card class="card-tpl">
     <mat-card-header *ngIf="label">
-      <mat-card-title>{{ label }}</mat-card-title>
+      <mat-card-title>{{ label | translate }}</mat-card-title>
     </mat-card-header>
     <mat-card-content>
       <mat-progress-bar mode="indeterminate"></mat-progress-bar>

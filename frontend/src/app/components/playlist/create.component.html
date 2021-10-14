@@ -2,7 +2,7 @@
   <mat-toolbar>
     <mat-toolbar-row fxFlex fxLayout="row" fxLayoutAlign="space-between center">
       <span class="title dialog-title">
-        Create new playlist
+        {{ 'PLAYLISTS.CREATE' | translate }}
       </span>
       <button mat-icon-button (click)="close()" >
         <mat-icon>close</mat-icon>
@@ -12,13 +12,15 @@
 
   <div mat-dialog-content>
     <mat-form-field appearance="fill">
-      <mat-label>Playlist name</mat-label>
+      <mat-label>{{ 'PLAYLISTS.NAME' | translate }}</mat-label>
       <input matInput [(ngModel)]="model.name" (keyup.enter)="create()" required [autofocus]>
-      <mat-error>Cannot be empty</mat-error>
-      <mat-hint>Press enter to create</mat-hint>
+      <mat-error>{{ 'FORMS.VALIDATION.EMPTY' | translate }}</mat-error>
+      <mat-hint>{{ 'PLAYLISTS.PRESS_ENTER_HINT' | translate }}</mat-hint>
     </mat-form-field>
   </div>
   <div mat-dialog-actions>
-    <button mat-flat-button color="primary" (click)="create()" [disabled]="!model.name">Create</button>
+    <button mat-flat-button color="primary" (click)="create()" [disabled]="!model.name">
+      {{ 'FORMS.BTNS.CREATE' | translate }}
+    </button>
   </div>
 </div>

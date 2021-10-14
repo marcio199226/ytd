@@ -7,6 +7,7 @@ import (
 	db "ytd/db"
 	. "ytd/models"
 
+	"github.com/leonelquinteros/gotext"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	"github.com/wailsapp/wails/v2"
@@ -75,7 +76,9 @@ func (p *OfflinePlaylistService) ExportPlaylist(uuid string, path string) (bool,
 	for idx, id := range playlist.TracksIds {
 		err := copyFile(fmt.Sprintf("%s/%s/%s.mp3", appState.Config.BaseSaveDir, "youtube", id), fmt.Sprintf("%s/%s.mp3", path, id))
 		copied++
-		ShowLoader(p.runtime, fmt.Sprintf("Exporting...%d/%d", idx+1, len(playlist.TracksIds)))
+		ShowLoader(p.runtime, fmt.Sprintf(
+			gotext.Get("Exporting...%d/%d", idx+1, len(playlist.TracksIds))),
+		)
 		if err != nil {
 			fmt.Printf("Error while copying track: %s \n\n", err)
 			copied--

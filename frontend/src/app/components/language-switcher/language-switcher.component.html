@@ -1,0 +1,9 @@
+<mat-icon class="clickable" (click)="triggerSelect()" title="{{ 'LANGUAGE.ICON_DESC' | translate }}">translate</mat-icon>
+<mat-form-field class="lang-switch hide">
+  <mat-label></mat-label>
+  <mat-select #matSelect [(ngModel)]="model.lang" (selectionChange)="changeLanguage($event)">
+    <mat-option *ngFor="let lang of langs" [value]="lang">
+      {{ langTransMap[lang] | translate }}
+    </mat-option>
+  </mat-select>
+</mat-form-field>

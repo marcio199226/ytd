@@ -33,6 +33,7 @@ import { MatDrawer } from '@angular/material/sidenav';
 import { minMax } from 'app/common/fn';
 import { OfflinePlaylistComponent } from '../offline-playlist/offline-playlist.component';
 import { LoaderService } from 'app/services/loader.service';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-home',
@@ -124,6 +125,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     private _snackbar: SnackbarService,
     private _loader: LoaderService,
     private _media: MediaMatcher,
+    private _trans: TranslateService,
     private _audioPlayerService: AudioPlayerService
   ) {
     this.searchInput = new FormControl('');
@@ -149,15 +151,18 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.filteredEntries = this.entries;
     this.offlinePlaylists = window.APP_STATE.offlinePlaylists;
 
+    // subscribe to events coming from backend
     Wails.Events.On("ytd:track", (payload: Entry) => {
-      console.log("ytd:track", payload)
-      const entry = this.entries.find(e => e.track.id === payload.track.id);
-      if(entry) {
-        entry.track = payload.track;
-      } else {
-        this.entries.unshift(payload);
-      }
-      this._cdr.detectChanges();
+      this._ngZone.run(() => {
+        console.log("ytd:track", payload)
+        const entry = this.entries.find(e => e.track.id === payload.track.id);
+        if(entry) {
+          entry.track = payload.track;
+        } else {
+          this.entries.unshift(payload);
+        }
+        this._cdr.detectChanges();
+      });
     });
 
     Wails.Events.On("ytd:track:progress", ({ id, progress }) => {
@@ -169,15 +174,17 @@ export class HomeComponent implements OnInit, OnDestroy {
     Wails.Events.On("ytd:playlist", payload => console.log(payload));
 
     Wails.Events.On("ytd:offline:playlists", offlinePlaylists => {
-      console.log("UPDATE offlinePlaylists", offlinePlaylists)
-      this.offlinePlaylists = offlinePlaylists;
-      this._cdr.detectChanges();
+      this._ngZone.run(() => {
+        console.log("UPDATE offlinePlaylists", offlinePlaylists)
+        this.offlinePlaylists = offlinePlaylists;
+        this._cdr.detectChanges();
+      });
     });
 
     Wails.Events.On("ytd:app:config", (config) => {
       this._ngZone.run(() => {
         window.APP_STATE.config = config;
-        this._snackbar.openSuccess("Settings has been saved");
+        this._snackbar.openSuccess("SETTINGS.SAVED");
         this._cdr.detectChanges();
       });
     });
@@ -189,7 +196,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
 
     Wails.Events.On("ytd:app:update:available", (release: ReleaseEventPayload) => {
-      console.log('ON UPDATE', release)
       this._ngZone.run(() => {
         this.newUpdateInfo = UpdateRelease.fromJSON(release);
         this._cdr.detectChanges();
@@ -197,7 +203,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
 
     Wails.Events.On("ytd:app:update:changelog", (release: ReleaseEventPayload) => {
-      console.log('ON UPDATE', release)
       this._ngZone.run(() => {
         this.newUpdateInfo = UpdateRelease.fromJSON(release);
         this.openUpdate();
@@ -206,7 +211,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
 
     Wails.Events.On("ytd:app:update:apply", (release: ReleaseEventPayload) => {
-      console.log('ON UPDATE', release)
       this._ngZone.run(() => {
         this.newUpdateInfo = UpdateRelease.fromJSON(release);
       })
@@ -228,7 +232,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       const trackIdx = this.entries.findIndex(e => e.track && e.track.id === currentTrack.id);
 
       if(trackIdx - 1 < 0) {
-        this._snackbar.openWarning("Cannot playback prev track")
+        this._snackbar.openWarning("PLAYER.CANNOT_PLAY_PREV")
         return;
       }
 
@@ -249,7 +253,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this._audioPlayerService.onNextTrackCmd.pipe(filter(track => track !== null)).subscribe(currentTrack => {
       const trackIdx = this.entries.findIndex(e => e.track && e.track.id === currentTrack.id);
       if(trackIdx + 1 >= this.entries.length) {
-        this._snackbar.openWarning("Cannot playback next track")
+        this._snackbar.openWarning("PLAYER.CANNOT_PLAY_NEXT")
         return;
       }
 
@@ -296,7 +300,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   openSettings(): MatDialogRef<SettingsComponent, any> {
     console.log('window.APP_STATE.config', window.APP_STATE.config)
     const dialogRef = this._dialog.open(SettingsComponent, {
-      autoFocus: false,
       panelClass: ['settings-dialog',  'with-header-dialog'],
       width: '600px',
       maxHeight: '700px',
@@ -338,12 +341,12 @@ export class HomeComponent implements OnInit, OnDestroy {
 
         // if no errors save new config without retrieve it from backend again (we load app state only once when app is launched)
         window.APP_STATE.config = config;
-        this._snackbar.openSuccess("Settings has been saved");
+        this._snackbar.openSuccess("SETTINGS.SAVED");
         Wails.Events.Emit("ytd:app:tray:update")
         this._cdr.detectChanges();
       } catch(e) {
         console.log(e)
-        this._snackbar.openError("An error occured while saving settings");
+        this._snackbar.openError("SETTINGS.KO");
       }
     });
 
@@ -403,7 +406,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   playback(entry: Entry): void {
     if(window.wails.System.Platform() ==='darwin' && !entry.track.isConvertedToMp3) {
-      const ref = this._snackbar.openWarning("Cannot playback on MacOs, you should enable \"Convert to mp3\" option", "Open settings")
+      const ref = this._snackbar.openWarning("SETTINGS.MACOS_MISSING_CONVERT_TO_MP3_OPTIONS", "SETTINGS.OPEN_DIALOG_BTN")
       ref.onAction().subscribe(() => this.openSettings());
       return;
     }
@@ -437,7 +440,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     const isSupported = await window.backend.main.AppState.IsSupportedUrl(url);
     if(!isSupported) {
-      this._snackbar.openWarning('Unsupported url');
+      this._snackbar.openWarning("SETTINGS.MANUAL_MODE.UNSUPPORTED_URL");
       return
     }
 
@@ -445,18 +448,18 @@ export class HomeComponent implements OnInit, OnDestroy {
       await window.backend.main.AppState.AddToDownload(url, false)
       this.urlInput.setValue('');
       this.pasteInput.nativeElement.blur();
-      this.pasteWrapper.nativeElement.classList.remove('focused');
-      this._snackbar.openSuccess('Track added to download');
+      this.pasteWrapper.nativeElement.classList.remove("focused");
+      this._snackbar.openSuccess("SETTINGS.MANUAL_MODE.TRACK_ADDED");
     } catch(e) {
       console.log(e);
-      this._snackbar.openError('Error while adding track to downloads');
+      this._snackbar.openError("SETTINGS.MANUAL_MODE.TRACK_ADD_KO");
     }
   }
 
   async startDownload(entry: Entry): Promise<void> {
     try {
       await window.backend.main.AppState.StartDownload(entry);
-      this._snackbar.openSuccess("Started downloading");
+      this._snackbar.openSuccess("HOME.STARTED_DOWNLOAD_TRACK");
     } catch(e) {
       this._snackbar.openError(e);
     }
@@ -485,11 +488,11 @@ export class HomeComponent implements OnInit, OnDestroy {
         const [err, added] = await to(window.backend.main.OfflinePlaylistService.AddTrackToPlaylist(playlists))
 
         if(err) {
-          this._snackbar.openError("Error while adding track to playlist");
+          this._snackbar.openError("PLAYLISTS.ADD_TRACK_KO");
           return;
         }
 
-        this._snackbar.openSuccess("Track has been added");
+        this._snackbar.openSuccess("PLAYLISTS.ADD_TRACK_OK");
       }
 
       switch(action) {
@@ -502,7 +505,6 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   createPlaylist(): void {
     const dialogRef = this._dialog.open(CreatePlaylistComponent, {
-      autoFocus: false,
       panelClass: ['create-playlist-dialog',  'with-header-dialog'],
       width: '300px',
       maxHeight: '500px',
@@ -517,11 +519,11 @@ export class HomeComponent implements OnInit, OnDestroy {
       const { playlist } = result;
       const [err, createdPlaylist] = await to(window.backend.main.OfflinePlaylistService.CreateNewPlaylist(playlist.name))
       if(err) {
-        this._snackbar.openError("Error while creating playlist");
+        this._snackbar.openError("PLAYLISTS.CREATED_KO");
         return
       }
 
-      this._snackbar.openSuccess("Playlist created");
+      this._snackbar.openSuccess("PLAYLISTS.CREATED_OK");
       // notify go backend that new playlist has been created, this updates backend state.offlinePlaylists
       // and then emit ytd:offline:playlists back to fe with offlinePlaylists to sync state between each other
       Wails.Events.Emit("ytd:offline:playlists:created");
@@ -534,8 +536,8 @@ export class HomeComponent implements OnInit, OnDestroy {
       panelClass: ['with-header-dialog'],
       width: '300px',
       data: {
-        title: 'Delete playlist',
-        text: `Are you sure you would to remove <strong>${playlist.name}</strong> playlist?`
+        title: "PLAYLISTS.REMOVE_DIALOG.TITLE",
+        text: this._trans.instant("PLAYLISTS.REMOVE_DIALOG.DESC", { name: playlist.name })
        }
     });
 
@@ -548,11 +550,11 @@ export class HomeComponent implements OnInit, OnDestroy {
       const [err, isRemoved] = await to(window.backend.main.OfflinePlaylistService.RemovePlaylist(playlist.uuid))
       if(err || !isRemoved) {
         console.log(err, isRemoved)
-        this._snackbar.openError("Error while removing playlist");
+        this._snackbar.openError("PLAYLISTS.REMOVE_DIALOG.KO");
         return
       }
 
-      this._snackbar.openSuccess("Playlist has been deleted");
+      this._snackbar.openSuccess("PLAYLISTS.REMOVE_DIALOG.OK");
       // notify go backend that playlist has been deleted, this updates backend state.offlinePlaylists
       // and then emit ytd:offline:playlists back to fe with offlinePlaylists to sync state between each other
       Wails.Events.Emit("ytd:offline:playlists:removed");
@@ -561,7 +563,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   async exportPlaylist(playlist: OfflinePlaylist): Promise<void> {
     if(!playlist.tracksIds.length) {
-      this._snackbar.openWarning("Cannot export empty playlist");
+      this._snackbar.openWarning("HOME.PLAYLISTS.CANNOT_EXPORT_EMPTY");
       return;
     }
 
@@ -570,12 +572,12 @@ export class HomeComponent implements OnInit, OnDestroy {
       AllowFiles:           false,
       CanCreateDirectories: true,
       AllowDirectories:     true,
-      Title:                "Choose directory",
+      Title:                this._trans.instant("HOME.PLAYLISTS.CHOOSE_EXPORT_DIRECTORY"),
     }))
     const dir: string[] = JSON.parse(dirResult);
 
     if(err) {
-      this._snackbar.openError(`Error while choosing export path: ${err}`);
+      this._snackbar.openError("HOME.PLAYLISTS.CHOOSE_EXPORT_DIRECTORY_KO", null, null, { error: err });
       return;
     }
 
@@ -583,22 +585,22 @@ export class HomeComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this._loader.show("Exporting....");
+    this._loader.show("HOME.PLAYLISTS.LOADER.EXPORTING");
     const [exportErr, exportResult] = await to(window.backend.main.OfflinePlaylistService.ExportPlaylist(playlist.uuid, dir[0]))
     this._loader.hide();
 
     if(exportErr) {
       console.log('exportPlaylist go call results in error', exportErr, exportResult);
-      this._snackbar.openError("Something went wrong while exporting");
+      this._snackbar.openError("HOME.PLAYLISTS.EXPORTED_KO");
       return;
     }
 
-    this._snackbar.openSuccess("Export has been ✅");
+    this._snackbar.openSuccess("HOME.PLAYLISTS.EXPORTED_OK");
   }
 
   async playbackPlaylist(playlist: OfflinePlaylist): Promise<void> {
     if(!playlist.tracksIds.length) {
-      this._snackbar.openWarning("Cannot reproduce empty playlist");
+      this._snackbar.openWarning("PLAYLISTS.CANNOT_PLAYBACK_EMPTY");
       return;
     }
     if(this.mobileQuery.matches) {
@@ -626,11 +628,11 @@ export class HomeComponent implements OnInit, OnDestroy {
     const [err, updatedPlaylist] = await to(window.backend.main.OfflinePlaylistService.RemoveTrackFromPlaylist(trackId, playlist))
     if(err) {
       console.log(err, updatedPlaylist)
-      this._snackbar.openError("Error while removing track from playlist");
+      this._snackbar.openError("PLAYLISTS.REMOVE_TRACK.KO");
       return
     }
 
-    this._snackbar.openSuccess("Track has been deleted from playlist");
+    this._snackbar.openSuccess("PLAYLISTS.REMOVE_TRACK.OK");
     // notify go backend that playlist has been deleted, this updates backend state.offlinePlaylists
     // and then emit ytd:offline:playlists back to fe with offlinePlaylists to sync state between each other
     Wails.Events.Emit("ytd:offline:playlists:removedTrack");
@@ -639,7 +641,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   async remove(entry: Entry, i: number): Promise<void> {
     try {
       await window.backend.main.AppState.RemoveEntry(entry);
-      this._snackbar.openSuccess(`${entry.type} has been removed`);
+      this._snackbar.openSuccess(`HOME.REMOVED.OK_${entry.type.toUpperCase()}`);
       const idx = this.entries.findIndex(e => {
         if(entry.type === 'playlist') {
           return e.playlist.id === entry.playlist.id;
@@ -650,7 +652,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.filteredEntries = this.entries;
       //this._cdr.detectChanges();
     } catch(e) {
-      this._snackbar.openError(`Cannot delete`);
+      this._snackbar.openError(`HOME.REMOVED.KO_${entry.type.toUpperCase()}`);
     }
   }
 

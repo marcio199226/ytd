@@ -90,6 +90,13 @@ const backend = {
         return window.backend.main.AppState.ReadSettingValue(arg1);
       },
       /**
+       * ReloadNewLanguage
+       * @returns {Promise<void>} 
+       */
+      "ReloadNewLanguage": () => {
+        return window.backend.main.AppState.ReloadNewLanguage();
+      },
+      /**
        * RemoveEntry
        * @param {any} arg1 - Go Type: map[string]interface {}
        * @returns {Promise<Error>}  - Go Type: error

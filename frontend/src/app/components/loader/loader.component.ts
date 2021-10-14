@@ -1,6 +1,7 @@
-import { Component, OnInit, OnDestroy, TemplateRef, ChangeDetectionStrategy, ChangeDetectorRef, QueryList, ViewChildren, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, TemplateRef, ChangeDetectionStrategy, ChangeDetectorRef, QueryList, ViewChildren, ViewChild, AfterViewInit, Inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { LoaderService, LoaderState } from 'app/services/loader.service';
+import { DOCUMENT } from '@angular/common';
 
 @Component({
   selector: 'loader-overlay',
@@ -26,13 +27,19 @@ export class LoaderOverlayComponent implements OnInit, AfterViewInit, OnDestroy 
 
   constructor(
     private _cdr: ChangeDetectorRef,
-    private _loaderService: LoaderService
+    private _loaderService: LoaderService,
+    @Inject(DOCUMENT) private _document: Document
   ) { }
 
   ngOnInit(): void {
     this.subscription = this._loaderService.loaderState$.subscribe(
       state => {
         this.loadingState = state;
+        if(state.isLoading) {
+          this._document.body.classList.add('loading');
+        } else {
+          this._document.body.classList.remove('loading');
+        }
         this._cdr.detectChanges();
       }
     );

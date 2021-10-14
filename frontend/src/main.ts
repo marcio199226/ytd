@@ -24,8 +24,8 @@ if (environment.production) {
 
 Wails.Init(() => {
   // fetch app data from backend before ng app will be bootstraped
-  Wails.Events.On('ytd:onload', ({ entries, config, offlinePlaylists, appVersion }) => {
-    window.APP_STATE = { entries, config, offlinePlaylists, appVersion };
+  Wails.Events.On('ytd:onload', (payload: AppState) => {
+    window.APP_STATE = payload;
     platformBrowserDynamic().bootstrapModule(AppModule, { ngZoneEventCoalescing: true, ngZoneRunCoalescing: true })
       .then(ngModule => Wails.Events.Emit('frontend:ready')) // notify wails about angular ready state
       .catch(err => console.error(err));

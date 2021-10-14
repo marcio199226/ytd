@@ -1,0 +1,54 @@
+msgid ""
+msgstr ""
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: \n"
+"X-Generator: xgotext\n"
+
+#: tray.go:104
+msgid "Cannot enable start at login"
+msgstr ""
+
+#: tray.go:71
+msgid "Check for updates"
+msgstr ""
+
+#: main.go:93
+#: tray.go:142
+msgid "Quit app"
+msgstr ""
+
+
+#: tray.go:121
+msgid "Settings"
+msgstr ""
+
+#: tray.go:129
+msgid "Show app"
+msgstr ""
+
+#: tray.go:86
+msgid "Start at login (system startup)"
+msgstr ""
+
+#: tray.go:43
+msgid "TRAY_CLIPBOAR_WATCH"
+msgstr ""
+
+#: main.go:93
+msgid "TRAY_QUIT"
+msgstr ""
+
+#: tray.go:57
+msgid "TRAY_RUN_IN_BG_ON_CLOSE"
+msgstr ""
+
+#: tray.go:137
+msgid "ytd (%s)"
+msgstr ""
+
+#: tray.go:99
+msgid "⚠ Start at Login unavailable"
+msgstr ""

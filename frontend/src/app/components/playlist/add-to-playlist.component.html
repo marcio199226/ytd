@@ -2,7 +2,7 @@
   <mat-toolbar>
     <mat-toolbar-row fxFlex fxLayout="row" fxLayoutAlign="space-between center">
       <span class="title dialog-title">
-        Add to playlist
+        {{ 'PLAYLISTS.ADD_TRACK' | translate }}
       </span>
       <button mat-icon-button (click)="close()" >
         <mat-icon>close</mat-icon>
@@ -17,17 +17,23 @@
           [checked]="isSelectedPlaylist(p.uuid)"
           [disabled]="alreadyInPlaylist[p.uuid]"
           (change)="add($event, p)"
-          matTooltip="Track is already in this playlist"
+          matTooltip="{{ 'PLAYLISTS.ALREADY_IN_PLAYLIST' | translate }}"
           matTooltipPosition="right"
           [matTooltipDisabled]="!alreadyInPlaylist[p.uuid]">
           {{ p.name }}
         </mat-checkbox>
       </div>
     </div>
-    <div *ngIf="!data.playlists.length">No playlists, please create one</div>
+    <div *ngIf="!data.playlists.length">
+      {{ 'PLAYLISTS.NO_PLAYLISTS' | translate }}
+    </div>
   </div>
   <div mat-dialog-actions>
-    <button mat-flat-button color="primary" (click)="createNew()">Create new playlist</button>
-    <button mat-flat-button color="primary" (click)="apply()">Add</button>
+    <button mat-flat-button color="primary" (click)="createNew()">
+      {{ 'PLAYLISTS.CREATE' | translate }}
+    </button>
+    <button mat-flat-button color="primary" (click)="apply()">
+      {{ 'PLAYLISTS.ADD_BTN' | translate }}
+    </button>
   </div>
 </div>

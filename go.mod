@@ -13,6 +13,7 @@ require (
 	github.com/leaanthony/go-ansi-parser v1.2.0 // indirect
 	github.com/leaanthony/slicer v1.6.0 // indirect
 	github.com/leaanthony/webview2runtime v1.2.0 // indirect
+	github.com/leonelquinteros/gotext v1.5.0
 	github.com/logrusorgru/aurora v2.0.3+incompatible // indirect
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/mholt/archiver v3.1.1+incompatible

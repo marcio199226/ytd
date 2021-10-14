@@ -2,11 +2,11 @@
   <ng-template matMenuContent let-playlist="playlist" let-track="track">
     <button mat-menu-item (click)="removeTrackFromPlaylist(track.id, playlist)">
       <mat-icon>delete</mat-icon>
-      Remove from playlist
+      {{ 'PLAYLISTS.REMOVE_TRACK' | translate }}
     </button>
     <button mat-menu-item>
       <mat-icon>open_in_browser</mat-icon>
-      Open on youtube
+      {{ 'HOME.OPEN_IN_YT' | translate }}
     </button>
   </ng-template>
 </mat-menu>

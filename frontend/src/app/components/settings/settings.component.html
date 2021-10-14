@@ -2,7 +2,7 @@
   <mat-toolbar>
     <mat-toolbar-row fxFlex fxLayout="row" fxLayoutAlign="space-between center">
       <span class="title dialog-title">
-        Settings
+        {{ 'SETTINGS.TITLE' | translate }}
       </span>
       <button mat-icon-button (click)="close()" >
         <mat-icon>close</mat-icon>
@@ -12,64 +12,66 @@
 
   <div mat-dialog-content fxLayout="column" fxLayoutGap="12px">
     <mat-form-field appearance="fill">
-      <mat-label>Save tracks to directory</mat-label>
+      <mat-label>{{ 'SETTINGS.SAVE_DIRECTORY' | translate }}</mat-label>
       <input matInput readonly [(ngModel)]="model.BaseSaveDir" required>
       <button mat-icon-button matSuffix (click)="changeBaseSaveDir()">
         <mat-icon>edit</mat-icon>
       </button>
-      <mat-hint>Directory where all tracks will be saved</mat-hint>
+      <mat-hint>{{ 'SETTINGS.SAVE_DIRECTORY_HINT' | translate }}</mat-hint>
     </mat-form-field>
     <mat-form-field appearance="fill">
-      <mat-label>Max simultaneous downloads</mat-label>
+      <mat-label>{{ 'SETTINGS.MAX_SIM_DOWNLOADS' | translate }}</mat-label>
       <input matInput type="number" min="0" max="10" [(ngModel)]="model.MaxParrallelDownloads">
-      <mat-hint>Max number of tracks that will be downloaded simultaneously</mat-hint>
+      <mat-hint>{{ 'SETTINGS.MAX_SIM_DOWNLOADS_HINT' | translate }}</mat-hint>
     </mat-form-field>
     <mat-slide-toggle [(ngModel)]="model.ClipboardWatch">
-      Clipboard watch
+      {{ 'SETTINGS.CLIBOARD_WATCH' | translate }}
     </mat-slide-toggle>
     <mat-slide-toggle [(ngModel)]="model.DownloadOnCopy" [disabled]="!model.ClipboardWatch">
-      Download on copy
+      {{ 'SETTINGS.DOWNLOAD_ON_COPY' | translate }}
     </mat-slide-toggle>
     <mat-slide-toggle [(ngModel)]="model.ConcurrentDownloads">
-      Concurrent downloads
+      {{ 'SETTINGS.CONCURRENT_DOWNLOADS' | translate }}
     </mat-slide-toggle>
     <mat-slide-toggle [(ngModel)]="model.ConcurrentPlaylistDownloads">
-      Concurrent playlist downloads
+      {{ 'SETTINGS.CONCURRENT_PLAYLIST_DOWNLOADS' | translate }}
     </mat-slide-toggle>
     <div class="toggle-wrapper" fxLayout="column" fxLayoutGap="5px">
       <mat-slide-toggle [(ngModel)]="model.ConvertToMp3" [disabled]="!isFfmpegAvailable">
-        Convert to mp3 in background
+        {{ 'SETTINGS.CONVERT_TO_MP3' | translate }}
       </mat-slide-toggle>
       <div class="warning" *ngIf="!isFfmpegAvailable">
-        You have to install ffmpeg tool on your system to enable this option
+        {{ 'SETTINGS.MISSING_FFMPEG' | translate }}
       </div>
     </div>
     <div class="toggle-wrapper" fxLayout="column" fxLayoutGap="5px">
       <mat-slide-toggle [(ngModel)]="model.CleanWebmFiles" [disabled]="!isFfmpegAvailable || !model.ConvertToMp3">
-        Remove webm files after converting to mp3 (disk space saving)
+        {{ 'SETTINGS.REMOVE_WEBM_AFTER_CONVERTING' | translate }}
       </mat-slide-toggle>
       <div class="warning" *ngIf="!model.ConvertToMp3">
-        You have to enable "Convert to mp3" option before
+        {{ 'SETTINGS.MUST_ENABLE_CONVERT_TO_MP3' | translate }}
       </div>
     </div>
-    <div class="toggle-wrapper" fxLayout="column" fxLayoutGap="5px">
+    <div class="toggle-wrapper" fxLayout="column" fxLayoutGap="5px" hidden>
       <mat-slide-toggle [(ngModel)]="model.Telegram.Share" [disabled]="!isFfmpegAvailable || !model.ConvertToMp3">
-        Share downloaded tracks with your devices through telegram
+        {{ 'SETTINGS.TELEGRAM_SHARE' | translate }}
       </mat-slide-toggle>
       <div class="warning" *ngIf="!model.ConvertToMp3">
-        You have to enable "Convert to mp3" option before
+        {{ 'SETTINGS.MUST_ENABLE_CONVERT_TO_MP3' | translate }}
       </div>
       <mat-form-field appearance="fill" *ngIf="model.Telegram.Share">
-        <mat-label>Insert your telegram username</mat-label>
+        <mat-label>{{ 'SETTINGS.TELEGRAM_USERNAME' | translate }}</mat-label>
         <input matInput [(ngModel)]="model.Telegram.Username" required>
         <span matPrefix class="at">@</span>
-        <mat-hint>
+        <mat-hint >
           You have to set <span class="open-link" title="Click for more details" (click)="openUrl('https://telegram.org/faq?setln=en#q-what-are-usernames-how-do-i-get-one')">username</span> into telegram's settings</mat-hint>
-        <mat-error>Cannot be empty if enabled</mat-error>
+        <mat-error>{{ 'SETTINGS.TELEGRAM_USERNAMNE_EMPTY' | translate }}</mat-error>
       </mat-form-field>
     </div>
   </div>
   <div mat-dialog-actions>
-    <button mat-flat-button color="primary" (click)="save()">Save</button>
+    <button mat-flat-button color="primary" (click)="save()">
+      {{ 'SETTINGS.SAVE' | translate }}
+    </button>
   </div>
 </div>

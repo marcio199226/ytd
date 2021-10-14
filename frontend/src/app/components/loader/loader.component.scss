@@ -1,3 +1,7 @@
+body.loading {
+  filter: blur(2px);
+}
+
 .loader-overlay {
   &::before {
     content: "";

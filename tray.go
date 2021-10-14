@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/leonelquinteros/gotext"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/mac"
 	"github.com/wailsapp/wails/v2/pkg/menu"
@@ -39,7 +40,7 @@ func (tray *TrayMenu) createTrayMenu() *menu.Menu {
 	m := &menu.Menu{}
 	m.Append(&menu.MenuItem{
 		Type:    menu.CheckboxType,
-		Label:   "Clipboard watch",
+		Label:   gotext.Get("Clipboard watch"),
 		Checked: appState.Config.ClipboardWatch,
 		Click: func(ctx *menu.CallbackData) {
 			watch, err := appState.ReadSettingBoolValue("ClipboardWatch")
@@ -53,7 +54,7 @@ func (tray *TrayMenu) createTrayMenu() *menu.Menu {
 	})
 	m.Append(&menu.MenuItem{
 		Type:    menu.CheckboxType,
-		Label:   "Run in background on close", // hide window on close
+		Label:   gotext.Get("Run in background on close"), // hide window on close
 		Checked: appState.Config.RunInBackgroundOnClose,
 		Click: func(ctx *menu.CallbackData) {
 			watch, err := appState.ReadSettingBoolValue("RunInBackgroundOnClose")
@@ -67,7 +68,7 @@ func (tray *TrayMenu) createTrayMenu() *menu.Menu {
 	})
 	tray.updateMenuItem = &menu.MenuItem{
 		Type:    menu.CheckboxType,
-		Label:   "Check for updates", // hide window on close
+		Label:   gotext.Get("Check for updates"), // hide window on close
 		Checked: appState.Config.CheckForUpdates,
 		Click: func(ctx *menu.CallbackData) {
 			watch, err := appState.ReadSettingBoolValue("CheckForUpdates")
@@ -82,7 +83,7 @@ func (tray *TrayMenu) createTrayMenu() *menu.Menu {
 	m.Append(tray.updateMenuItem)
 	tray.startAtLoginMenuItem = &menu.MenuItem{
 		Type:     menu.CheckboxType,
-		Label:    "Start at login (system startup)",
+		Label:    gotext.Get("Start at login (system startup)"),
 		Checked:  appState.canStartAtLogin && appState.Config.StartAtLogin,
 		Disabled: !appState.canStartAtLogin,
 		Click: func(ctx *menu.CallbackData) {
@@ -95,12 +96,12 @@ func (tray *TrayMenu) createTrayMenu() *menu.Menu {
 			notAvailable := mac.StartAtLogin(!enabled)
 			if notAvailable != nil {
 				tray.reRenderTray(func() {
-					tray.startAtLoginMenuItem.Label = "⚠ Start at Login unavailable"
+					tray.startAtLoginMenuItem.Label = gotext.Get("⚠ Start at Login unavailable")
 					tray.startAtLoginMenuItem.Disabled = true
 				})
 				appState.runtime.Dialog.Message(&dialog.MessageDialog{
 					Type:         dialog.ErrorDialog,
-					Title:        "Cannot enable start at login",
+					Title:        gotext.Get("Cannot enable start at login"),
 					Message:      notAvailable.Error(),
 					Buttons:      []string{"OK"},
 					CancelButton: "OK",
@@ -117,7 +118,7 @@ func (tray *TrayMenu) createTrayMenu() *menu.Menu {
 	m.Append(menu.Separator())
 	m.Append(&menu.MenuItem{
 		Type:  menu.TextType,
-		Label: "Settings",
+		Label: gotext.Get("Settings"),
 		Click: func(ctx *menu.CallbackData) {
 			appState.ShowWindow()
 			appState.runtime.Events.Emit("ytd:show:dialog:settings")
@@ -125,7 +126,7 @@ func (tray *TrayMenu) createTrayMenu() *menu.Menu {
 	})
 	m.Append(&menu.MenuItem{
 		Type:  menu.TextType,
-		Label: "Show app",
+		Label: gotext.Get("Show app"),
 		Click: func(ctx *menu.CallbackData) {
 			appState.ShowWindow()
 		},
@@ -133,12 +134,12 @@ func (tray *TrayMenu) createTrayMenu() *menu.Menu {
 	tray.versionMenuItem = &menu.MenuItem{
 		Type:     menu.TextType,
 		Disabled: true,
-		Label:    fmt.Sprintf("ytd (%s)", version),
+		Label:    fmt.Sprint(gotext.Get("ytd (%s)", version)),
 	}
 	m.Append(tray.versionMenuItem)
 	m.Append(&menu.MenuItem{
 		Type:        menu.TextType,
-		Label:       "Quit app",
+		Label:       gotext.Get("Quit app"),
 		Accelerator: keys.CmdOrCtrl("q"),
 		Hidden:      false,
 		Click: func(ctx *menu.CallbackData) {

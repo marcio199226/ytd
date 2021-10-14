@@ -1,4 +1,4 @@
-<header fxLayout="row wrap" fxLayoutAlign="center center" fxLayoutGap="10px">
+<header fxLayout="row wrap" fxLayoutAlign="space-between center" fxLayoutGap="10px">
   <mat-icon class="clickable white" title="Open left menu" (click)="drawer.toggle()" *ngIf="mobileQuery.matches">menu</mat-icon>
   <div class="input-wrapper paste" #pasteWrapper *ngIf="!isClipboardWatchEnabled">
     <div class="input" fxFlex fxLayout="row" fxLayoutAlign="start center">
@@ -6,36 +6,40 @@
       <input
         #pasteInput
         [formControl]="urlInput"
-        placeholder="Paste here track url"
+        placeholder="{{ 'HOME.PASTE_TRACK_URL' | translate }}"
         (focus.silent)="pasteWrapper.classList.add('focused')"
         (blur.silent)="pasteWrapper.classList.remove('focused')"
         (keydown.enter)="addToDownload()"
       />
     </div>
   </div>
-  <div class="input-wrapper">
-    <div class="input" fxFlex fxLayout="row" fxLayoutAlign="start center">
-      <mat-icon>search</mat-icon>
-      <input #searchNativeInput [formControl]="searchInput" placeholder="Search">
-      <mat-icon
-        *ngIf="searchInput.value && searchInput.value !== ''"
-        class="clear-search"
-        (click)="clearSearch($event)"
-        title="Clear">
-        close
-      </mat-icon>
+  <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="4px" fxFlex>
+    <div class="input-wrapper">
+      <div class="input" fxFlex fxLayout="row" fxLayoutAlign="start center">
+        <mat-icon>search</mat-icon>
+        <input #searchNativeInput [formControl]="searchInput" placeholder="{{ 'HOME.SEARCH' | translate }}">
+        <mat-icon
+          *ngIf="searchInput.value && searchInput.value !== ''"
+          class="clear-search"
+          (click)="clearSearch($event)"
+          title="{{ 'HOME.CLEAR' | translate }}">
+          close
+        </mat-icon>
+      </div>
     </div>
+    <mat-icon class="clickable white" title="Settings" (click)="openSettings()">settings</mat-icon>
+    <mat-icon
+      class="clickable white"
+      title="{{ 'HOME.NEW_UPDATE_AVAILABLE' | translate }}"
+      matBadge="*"
+      matBadgePosition="after"
+      matBadgeOverlap="false"
+      matBadgeSize="small"
+      (click)="openUpdate()"
+      *ngIf="newUpdateInfo">update</mat-icon>
   </div>
-  <mat-icon class="clickable white" title="Settings" (click)="openSettings()">settings</mat-icon>
-  <mat-icon
-    class="clickable white" t
-    title="New update is available"
-    matBadge="*"
-    matBadgePosition="after"
-    matBadgeOverlap="false"
-    matBadgeSize="small"
-    (click)="openUpdate()"
-    *ngIf="newUpdateInfo">update</mat-icon>
+
+  <language-switcher></language-switcher>
 </header>
 
 <mat-drawer-container class="left-sidenav" [hasBackdrop]="mobileQuery.matches">
@@ -43,7 +47,7 @@
     <div class="offline-playlists">
       <div class="title" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="6px">
         <mat-icon>queue_music</mat-icon>
-        <span fxFlex>Playlists</span>
+        <span fxFlex>{{ 'HOME.PLAYLISTS.LABEL' | translate }}</span>
         <span>({{ offlinePlaylists.length }})</span>
       </div>
       <hr />
@@ -54,10 +58,10 @@
               {{ p.name }} ({{ p.tracksIds?.length || 0 }})
             </span>
             <span class="actions" fxLayout="row" fxLayoutGap="4px">
-              <mat-icon class="clickable" title="Playback playlist" (click)="playbackPlaylist(p)" *ngIf="!isPlaylistDetailOpen(p) || !isPlaylistInPlayback">play_circle_filled</mat-icon>
-              <mat-icon class="clickable" title="Playback playlist" (click)="stopPlaylist(p)" *ngIf="isPlaylistDetailOpen(p) && isPlaylistInPlayback">pause</mat-icon>
-              <mat-icon class="clickable" title="Export playlist tracks to directory" (click)="exportPlaylist(p)">folder</mat-icon>
-              <mat-icon class="clickable" title="Remove playlist" (click)="removePlaylist(p)">delete</mat-icon>
+              <mat-icon class="clickable" title="{{ 'HOME.PLAYLISTS.PLAYBACK' | translate }}" (click)="playbackPlaylist(p)" *ngIf="!isPlaylistDetailOpen(p) || !isPlaylistInPlayback">play_circle_filled</mat-icon>
+              <mat-icon class="clickable" title="{{ 'HOME.PLAYLISTS.PAUSE' | translate }}" (click)="stopPlaylist(p)" *ngIf="isPlaylistDetailOpen(p) && isPlaylistInPlayback">pause</mat-icon>
+              <mat-icon class="clickable" title="{{ 'HOME.PLAYLISTS.EXPORT' | translate }}" (click)="exportPlaylist(p)">folder</mat-icon>
+              <mat-icon class="clickable" title="{{ 'HOME.PLAYLISTS.REMOVE' | translate }}" (click)="removePlaylist(p)">delete</mat-icon>
             </span>
           </div>
         </div>
@@ -76,12 +80,12 @@
         <ng-template matMenuContent let-entry="entry" let-idx="idx">
           <button mat-menu-item (click)="remove(entry, idx)">
             <mat-icon>delete</mat-icon>
-            Remove {{ entry.type }}
+            {{ ('HOME.REMOVE.' + entry.type.toUpperCase()) | translate }}
           </button>
           <button mat-menu-item *ngIf="entry.track.status === 'failed'">Download</button>
           <button mat-menu-item (click)="openInYt(entry.track.url)">
             <mat-icon>open_in_browser</mat-icon>
-            Open on youtube
+            {{ 'HOME.OPEN_ON_YT' | translate }}
           </button>
         </ng-template>
       </mat-menu>
@@ -101,9 +105,9 @@
         <div class="fg">
           <div class="wrapper">
             <ng-container *ngIf="entry.track.status === 'downloaded' && entry.track.converting.status !== 'converting'">
-              <mat-icon class="clickable" title="Add to playlist" (click)="addToPlaylist(entry)">playlist_add</mat-icon>
-              <mat-icon class="clickable play" (click)="playback(entry)" title="Play">play_circle_filled</mat-icon>
-              <mat-icon class="clickable stop" (click)="stop(entry)" title="Stop">stop</mat-icon>
+              <mat-icon class="clickable" title="{{ 'HOME.PLAYLISTS.ADD_TRACK' | translate }}" (click)="addToPlaylist(entry)">playlist_add</mat-icon>
+              <mat-icon class="clickable play" (click)="playback(entry)" title="{{ 'PLAYER.PLAY' | translate }}">play_circle_filled</mat-icon>
+              <mat-icon class="clickable stop" (click)="stop(entry)" title="{{ 'PLAYER.STOP' | translate }}">stop</mat-icon>
               <mat-icon class="clickable"
                 [matMenuTriggerFor]="menu"
                 [matMenuTriggerData]="{entry, idx}"
@@ -123,7 +127,7 @@
               </mat-icon>
             </ng-container>
             <ng-container *ngIf="entry.track.status === 'processing'">
-              <mat-icon class="clickable m-auto" title="Start download" (click)="startDownload(entry)">
+              <mat-icon class="clickable m-auto" title="{{ 'HOME.START_DOWNLOAD_TRACK' | translate }}" (click)="startDownload(entry)">
                 file_download
               </mat-icon>
             </ng-container>
@@ -137,7 +141,7 @@
             </ng-container>
             <ng-container *ngIf="entry.track.converting.status === 'converting'">
               <div fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="4px" fxFlex>
-                <span>Converting to mp3...</span>
+                <span>{{ 'HOME.CONVERTING_MP3' | translate }}</span>
                 <mat-progress-bar mode="indeterminate"></mat-progress-bar>
               </div>
             </ng-container>
@@ -146,10 +150,10 @@
       </div>
 
       <div *ngIf="!isSearching && !filteredEntries.length">
-        You have not downloaded tracks, start to download some
+        {{ 'HOME.NO_DOWNLOAED_TRACKS' | translate }}
       </div>
       <div *ngIf="isSearching && !filteredEntries.length">
-        There are no tracks for your searching
+        {{ 'HOME.NO_SEARCH_RESULTS' | translate }}
       </div>
     </div>
   </mat-drawer-content>

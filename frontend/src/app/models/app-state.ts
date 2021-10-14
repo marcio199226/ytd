@@ -13,10 +13,15 @@ export interface AppConfig {
 	RunInBackgroundOnClose: boolean;
 	CheckForUpdates: boolean;
 	StartAtLogin: boolean;
+  Language: string;
   Telegram: {
     Share: boolean;
     Username: string
   }
+}
+
+export interface AppStats {
+  DownloadingCount: number;
 }
 
 export interface AppState {
@@ -24,6 +29,7 @@ export interface AppState {
   offlinePlaylists: OfflinePlaylist[];
   config: AppConfig;
   appVersion: string;
+  stats: AppStats;
 }
 
 
@@ -42,6 +48,7 @@ export interface BackendCallbacks {
       RemoveEntry: (entry: Entry) => Promise<any>;
       IsFFmpegInstalled: () => Promise<boolean>;
       OpenUrl: (url: string) => Promise<any>;
+      ReloadNewLanguage: () => Promise<void>;
       Update: (restart: boolean) => Promise<any>;
       ShowWindow: () => Promise<any>;
       ForceQuit: () => Promise<any>;

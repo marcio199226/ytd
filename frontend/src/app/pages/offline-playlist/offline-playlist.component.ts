@@ -88,7 +88,7 @@ export class OfflinePlaylistComponent implements OnInit, OnDestroy {
       const trackIdx = this.tracks.findIndex(track => track.id === currentTrack.id);
 
       if(trackIdx - 1 < 0) {
-        this._snackbar.openWarning("Cannot playback prev track")
+        this._snackbar.openWarning("PLAYER.CANNOT_PLAY_PREV")
         return;
       }
 
@@ -110,7 +110,7 @@ export class OfflinePlaylistComponent implements OnInit, OnDestroy {
     this._audioPlayerService.onNextTrackCmd.pipe(filter(track => track !== null), takeUntil(this._unsubscribe)).subscribe(currentTrack => {
       const trackIdx = this.tracks.findIndex(track => track.id === currentTrack.id);
       if(trackIdx + 1 >= this.tracks.length) {
-        this._snackbar.openWarning("Cannot playback next track")
+        this._snackbar.openWarning("PLAYER.CANNOT_PLAY_NEXT")
         return;
       }
 
@@ -143,7 +143,7 @@ export class OfflinePlaylistComponent implements OnInit, OnDestroy {
 
   playback(track: Track): void {
     if(window.wails.System.Platform() ==='darwin' && !track.isConvertedToMp3) {
-      const ref = this._snackbar.openWarning("Cannot playback on MacOs, you should enable \"Convert to mp3\" option")
+      const ref = this._snackbar.openWarning("SETTINGS.MACOS_MISSING_CONVERT_TO_MP3_OPTIONS")
       return;
     }
 
@@ -162,11 +162,11 @@ export class OfflinePlaylistComponent implements OnInit, OnDestroy {
     const [err, updatedPlaylist] = await to(window.backend.main.OfflinePlaylistService.RemoveTrackFromPlaylist(trackId, playlist))
     if(err) {
       console.log(err, updatedPlaylist)
-      this._snackbar.openError("Error while removing track from playlist");
+      this._snackbar.openError("PLAYLISTS.REMOVE_TRACK.KO");
       return
     }
 
-    this._snackbar.openSuccess("Track has been deleted from playlist");
+    this._snackbar.openSuccess("PLAYLISTS.REMOVE_TRACK.OK");
     // notify go backend that playlist has been deleted, this updates backend state.offlinePlaylists
     // and then emit ytd:offline:playlists back to fe with offlinePlaylists to sync state between each other
     Wails.Events.Emit("ytd:offline:playlists:removedTrack");

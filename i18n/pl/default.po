@@ -1,0 +1,105 @@
+msgid ""
+msgstr ""
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.0\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Language-Team: \n"
+"Last-Translator: \n"
+"Language: pl\n"
+
+#: app.go:345
+msgid "%s is the latest version."
+msgstr "Masz ostatnia wersje %s"
+
+#: app.go:419
+msgid "App has been started in background"
+msgstr "Aplikacja działa w tle"
+
+#: tray.go:104
+msgid "Cannot enable start at login"
+msgstr "Uruchom przy logowaniu (niedostępne)"
+
+#: tray.go:71
+msgid "Check for updates"
+msgstr "Sprawdź uaktualnienia"
+
+#: app.go:185
+msgid "Choose directory"
+msgstr "Wybierz folder"
+
+#: tray.go:43
+msgid "Clipboard watch"
+msgstr "Obserwuj schowek"
+
+#: offline.go:80
+msgid "Exporting...%d/%d"
+msgstr "Trwa eksportowanie…%d/%d"
+
+#: app.go:358
+msgid "New version available: %s"
+msgstr "Nowa wersja dostępna: %s"
+
+#: app.go:405
+msgid "Please restart ytd for the changes to take effect."
+msgstr "Uruchom ponownie żeby dokończyć aktualizacje"
+
+#: tray.go:142
+msgid "Quit app"
+msgstr "Wyjdź"
+
+#: tray.go:57
+msgid "Run in background on close"
+msgstr "Kontynuuj w tle kiedy zamkniesz"
+
+#: tray.go:121
+msgid "Settings"
+msgstr "Ustawienia"
+
+#: tray.go:129
+msgid "Show app"
+msgstr "Pokaz aplikacje"
+
+#: tray.go:86
+msgid "Start at login (system startup)"
+msgstr "Uruchom przy logowaniu do systemu"
+
+#: app.go:329
+msgid "Update check failed"
+msgstr "Sprawdzenie aktualizacji nie powiodło się"
+
+#: app.go:388
+msgid "Update not successful"
+msgstr "Aktualizacja nie powiodła się"
+
+#: app.go:404
+msgid "Update successful"
+msgstr "Aktualizacja powiodła się"
+
+#: app.go:360
+msgid "Update"
+msgstr "Aktualizuj"
+
+#: app.go:359
+msgid "Would you like to update?"
+msgstr "Chcesz zaktualizować aplikacje?"
+
+#: app.go:344
+msgid "You're up to date"
+msgstr "Masz ostatnia wersje"
+
+#: tray.go:137
+msgid "ytd (%s)"
+msgstr "ytd (%s)"
+
+#: app.go:415 tray.go:99
+msgid "⚠ Start at Login unavailable"
+msgstr "Uruchom przy logowaniu (niedostępne)"
+
+#: app.go:365
+msgid "⚠️ ytd (%s) (new version %s)"
+msgstr "⚠️ ytd (%s) (nowa wersja %s)"

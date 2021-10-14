@@ -1,6 +1,7 @@
 import { ApplicationRef, ChangeDetectorRef, Component, NgZone } from '@angular/core';
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
+import { TranslateService } from '@ngx-translate/core';
 import * as Wails from '@wails/runtime';
 import { RegisterCustomIcons } from './common/custom-icons';
 import { LoaderService, LoaderEventBackend } from './services/loader.service';
@@ -11,17 +12,19 @@ import { LoaderService, LoaderEventBackend } from './services/loader.service';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  title = 'frontend';
-
   constructor(
     private _ngZone: NgZone,
     private _cdr: ChangeDetectorRef,
     private _appRef: ApplicationRef,
     private _loader: LoaderService,
     private _matIconRegistry: MatIconRegistry,
-    private _domSanitizer: DomSanitizer
+    private _domSanitizer: DomSanitizer,
+    private _translateService: TranslateService
   ) {
     RegisterCustomIcons(this._matIconRegistry, this._domSanitizer);
+
+    this._translateService.addLangs(['en', 'it', 'pl']);
+    this._translateService.use(window.APP_STATE.config.Language || 'en');
   }
 
   ngOnInit() {
