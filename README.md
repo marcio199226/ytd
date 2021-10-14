@@ -48,6 +48,10 @@ Wails
 
 Open tab in chrome (preffered) and go to http://localhost:4200
 
+Extract translation for golang side:
+
+`xgotext -exclude "vendor,frontend" -in "/Users/oskarmarciniak/projects/golang/ytd" -out "/Users/oskarmarciniak/projects/golang/ytd/i18n"`
+
 #### Build binaries (Macos only at the moment)
 
 `wails build --platform darwin/arm64 --clean --package --production`
