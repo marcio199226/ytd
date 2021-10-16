@@ -14,7 +14,7 @@
     <p [innerHTML]="data.text | translate"></p>
   </div>
   <div mat-dialog-actions>
-    <button mat-button (click)="cancel()">{{ (cancelBtnLabel || 'Cancel') | translate }}</button>
-    <button mat-button (click)="delete()">{{ (okBtnLabel || 'Yes') | translate }}</button>
+    <button mat-button (click)="cancel()">{{ (data.cancelBtnLabel || cancelBtnLabel || 'FORMS.BTNS.CANCEL') | translate }}</button>
+    <button mat-button (click)="delete()">{{ (data.okBtnLabel || okBtnLabel || 'FORMS.BTNS.YES') | translate }}</button>
   </div>
 </div>

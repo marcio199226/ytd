@@ -1,136 +1,139 @@
 {
   "LANGUAGE": {
-    "EN": "English",
-    "PL": "Polish",
-    "IT": "Italian",
-    "ICON_DESC": "Change app language",
-    "SAVE_ERROR": "Cannot save language"
+    "EN": "Angielski",
+    "PL": "Polski",
+    "IT": "Włoski",
+    "ICON_DESC": "Zmień język",
+    "SAVE_ERROR": "Bład nie mozna zmienić języka"
   },
   "HOME": {
-    "SEARCH": "Search",
-    "PASTE_TRACK_URL": "Paste here track url",
-    "CLEAR": "Clear",
-    "NEW_UPDATE_AVAILABLE": "New update is available",
+    "SEARCH": "Szukaj",
+    "PASTE_TRACK_URL": "Wklej tutaj link",
+    "CLOSE": "Zamknij",
+    "NEW_UPDATE_AVAILABLE": "Nowa aktualizacja jest dostępna",
     "REMOVE": {
-      "TRACK": "Remove track",
-      "PLAYLIST": "Remove playlist"
+      "TRACK": "Usuń utwór",
+      "PLAYLIST": "Usuń listę odtwarzania"
     },
     "REMOVED": {
-      "OK_TRACK": "Track has been removed",
-      "OK_PLAYLIST": "Playlist has been removed",
-      "KO_TRACK": "Cannot delete track",
-      "KO_PLAYLIST": "Cannot delete playlist"
+      "OK_TRACK": "Utwór został usunięty",
+      "OK_PLAYLIST": "Lista odtwarzania została usunięta",
+      "KO_TRACK": "Błąd nie można usunąć utworu",
+      "KO_PLAYLIST": "Błąd nie można usunąć listy odtwarzania"
     },
-    "START_DOWNLOAD_TRACK": "Start download",
-    "STARTED_DOWNLOAD_TRACK": "Started downloading",
-    "CONVERTING_MP3": "Converting to mp3...",
-    "NO_DOWNLOAED_TRACKS": "You have not downloaded tracks, start to download some",
-    "NO_SEARCH_RESULTS": "There are no tracks for your searching",
-    "OPEN_ON_YT": "Open on youtube",
+    "START_DOWNLOAD_TRACK": "Rozpocznij pobieranie",
+    "STARTED_DOWNLOAD_TRACK": "Pobieranie rozpoczete",
+    "CONVERTING_MP3": "Trwa konwersja do mp3...",
+    "NO_DOWNLOAED_TRACKS": "Nie pobrałeś jeszcze zadnego utowru",
+    "NO_SEARCH_RESULTS": "Nie znaleziono zadnego utworu",
+    "OPEN_ON_YT": "Otwórz w youtube",
     "PLAYLISTS": {
       "LABEL": "Playlists",
-      "CREATE": "Create playlist",
-      "CREATED_OK": "Playlist created",
+      "CREATE": "Utwórz playlistę",
+      "CREATED_OK": "Lista odtwarzania ",
       "CREATED_KO": "Error while creating playlist",
-      "PLAYBACK": "Playback playlist",
-      "PAUSE": "Pause playlist",
-      "EXPORT": "Export",
-      "CANNOT_EXPORT_EMPTY": "Cannot export empty playlist",
-      "CHOOSE_EXPORT_DIRECTORY": "Choose directory",
-      "CHOOSE_EXPORT_DIRECTORY_KO": "Error while choosing export path: {{error}}",
-      "EXPORTED_OK": "Export has been ✅",
-      "EXPORTED_KO": "Something went wrong while exporting",
-      "REMOVE": "Remove playlist",
-      "ADD_TRACK": "Add to playlists",
-      "ALREADY_IN_PLAYLIST": "Track is already in this playlist",
-      "NO_PLAYLISTS": "No playlists, please create one",
-      "ADD_BTN": "Add",
-      "ADD_TRACK_OK": "Track has been added",
-      "ADD_TRACK_KO": "Error while adding track to playlist",
+      "PLAYBACK": "Odtwórz playliste",
+      "PAUSE": "Przerwij playliste",
+      "EXPORT": "Eksportuj",
+      "CANNOT_EXPORT_EMPTY": "Nie mozna eksportowac pustej listy odtwarzania ",
+      "CHOOSE_EXPORT_DIRECTORY": "Wybierz sciezkę",
+      "CHOOSE_EXPORT_DIRECTORY_KO": "Błąd: {{error}}",
+      "EXPORTED_OK": "Eksport zakończony ✅",
+      "EXPORTED_KO": "Błąd przy eksportowaniu",
+      "REMOVE": "Usuń playlistę",
+      "ADD_TRACK": "Dodaj do playlisty",
+      "ALREADY_IN_PLAYLIST": "Utwór jest juz na playliście",
+      "NO_PLAYLISTS": "Nie masz list odtwarzania",
+      "ADD_BTN": "Dodaj",
+      "ADD_TRACK_OK": "Utwór został dodany",
+      "ADD_TRACK_KO": "Nie mozna dodać utworu",
       "LOADER": {
-        "EXPORTING": "Exporting..."
+        "EXPORTING": "Eksportuje..."
       }
     }
   },
   "PLAYLISTS": {
-    "LABEL": "Playlists",
-    "CREATE": "Create new playlist",
-    "PLAYBACK": "Playback playlist",
-    "PAUSE": "Pause playlist",
-    "EXPORT": "Export",
-    "REMOVE": "Remove playlist",
-    "ADD_TRACK": "Add to playlists",
-    "ALREADY_IN_PLAYLIST": "Track is already in this playlist",
-    "NO_PLAYLISTS": "No playlists, please create one",
-    "NAME": "Playlist name",
-    "PRESS_ENTER_HINT": "Press enter to create",
-    "ADD_BTN": "Add",
-    "CREATE_BTN": "Create playlist",
-    "CANNOT_PLAYBACK_EMPTY": "Cannot reproduce empty playlist",
+    "LABEL": "Playlisty",
+    "CREATE": "Stwórz playlistę",
+    "PLAYBACK": "Odtwórz playlistę",
+    "PAUSE": "Przerwij playlistę",
+    "EXPORT": "Eksportuj",
+    "REMOVE": "Usuń playlistę",
+    "ADD_TRACK": "Dodaj do playlisty",
+    "ALREADY_IN_PLAYLIST": "Utwór jest juz na playliście",
+    "NO_PLAYLISTS": "Nie masz list odtwarzania",
+    "NAME": "Nazwa playlisty",
+    "PRESS_ENTER_HINT": "Naciśnij Enter, aby utworzyć",
+    "ADD_BTN": "Dodaj",
+    "CREATE_BTN": "Playlista została stworzona",
+    "CANNOT_PLAYBACK_EMPTY": "Nie mozna odtworzyć pustej playlisty",
     "REMOVE_DIALOG": {
-      "TITLE": "Delete playlist",
-      "DESC": "Are you sure you would to remove <strong>{{name}}</strong> playlist?",
-      "KO": "Error while removing playlist",
-      "OK": "Playlist has been deleted"
+      "TITLE": "Usuń playlistę",
+      "DESC": "Czy na pewno chcesz usunąć utwór z <strong>{{name}}</strong> playlisty?",
+      "KO": "Bład przy usuwaniu playlisty",
+      "OK": "Playlista została usunięta"
     },
     "REMOVE_TRACK": {
-      "TITLE": "Delete playlist",
+      "TITLE": "Usuń playlistę",
       "DESC": "Are you sure you would to remove <strong>{{name}}</strong> playlist?",
-      "OK": "Track has been deleted from playlist",
-      "KO": "Error while removing track from playlist"
+      "OK": "Utwór został usunięty",
+      "KO": "Błąd przy usuwaniu utwóru"
     }
   },
   "PLAYER" : {
-    "PLAY": "Play",
+    "PLAY": "Odtwórz",
     "STOP": "Stop",
-    "PAUSE": "Pause",
-    "CANNOT_PLAY_PREV": "Cannot playback prev track",
-    "CANNOT_PLAY_NEXT": "Cannot playback next track"
+    "PAUSE": "Pauza",
+    "CANNOT_PLAY_PREV": "Nie można odtworzyć poprzedniego utworu",
+    "CANNOT_PLAY_NEXT": "Nie można odtworzyć następnego utworu"
   },
   "SETTINGS": {
-    "TITLE": "Settings",
-    "SAVE_DIRECTORY": "Save tracks to directory",
-    "SAVE_DIRECTORY_HINT": "Directory where all tracks will be saved",
-    "MAX_SIM_DOWNLOADS": "Max simultaneous downloads",
-    "MAX_SIM_DOWNLOADS_HINT": "Max number of tracks that will be downloaded simultaneously",
-    "CLIBOARD_WATCH": "Clipboard watch",
-    "DOWNLOAD_ON_COPY": "Download on copy",
-    "CONCURRENT_DOWNLOADS": "Concurrent downloads",
-    "CONCURRENT_PLAYLIST_DOWNLOADS": "Concurrent playlist downloads",
-    "CONVERT_TO_MP3": "Convert to mp3 in background",
-    "MISSING_FFMPEG": "You have to install ffmpeg tool on your system to enable this option",
-    "REMOVE_WEBM_AFTER_CONVERTING": "Remove webm files after converting to mp3 (disk space saving)",
-    "MUST_ENABLE_CONVERT_TO_MP3": "You have to enable \"Convert to mp3\" option before",
-    "TELEGRAM_SHARE": "Share downloaded tracks with your devices through telegram",
-    "TELEGRAM_USERNAME": "Insert your telegram username",
+    "TITLE": "Ustawienia",
+    "SAVE_DIRECTORY": "Wybierz ścięzkę",
+    "SAVE_DIRECTORY_HINT": "Ściezka gdzie bedą zapisawane utwory",
+    "MAX_SIM_DOWNLOADS": "Liczba jednocześnych pobrań",
+    "MAX_SIM_DOWNLOADS_HINT": "Maksymalna liczba utworów, które zostaną pobrane jednocześnie",
+    "CLIBOARD_WATCH": "Nasłuchuj schwowek",
+    "DOWNLOAD_ON_COPY": "Pobierz przy kopiowaniu",
+    "CONCURRENT_DOWNLOADS": "Współbieżne pobieranie utworów",
+    "CONCURRENT_PLAYLIST_DOWNLOADS": "Współbieżne pobieranie playlist",
+    "CONVERT_TO_MP3": "Konwertuj do mp3 w tle",
+    "MISSING_FFMPEG": "Musisz najpierw zainstalować ffmpeg aby włączyć tę opcję",
+    "REMOVE_WEBM_AFTER_CONVERTING": "Usuń originalne pliki webm po konwersji (oszczędza miejsce na dysku)",
+    "MUST_ENABLE_CONVERT_TO_MP3": "Musisz wcześniej włączyć opcję \"Konwertuj na mp3\"",
+    "TELEGRAM_SHARE": "Udostępniaj utwory przez telegram",
+    "TELEGRAM_USERNAME": "Wprowadź swoją nazwę użytkownika telegramu",
     "TELEGRAM_ENABLE_USERNAME_LINK": "",
-    "TELEGRAM_USERNAMNE_EMPTY": "Cannot be empty if enabled",
-    "SAVE": "Save",
-    "SAVED": "Settings has been saved",
-    "SAVE_KO": "An error occured while saving settings",
-    "OPEN_DIALOG_BTN": "Open settings",
-    "MACOS_MISSING_CONVERT_TO_MP3_OPTIONS": "Cannot playback on MacOs, you should enable \"Convert to mp3\" option",
+    "TELEGRAM_USERNAMNE_EMPTY": "Pole nie moze by puste jeśli opcja jest włączona",
+    "SAVE": "Zapisz",
+    "SAVED": "Zapisano",
+    "SAVE_KO": "Błąd przy zapisywaniu ustawień",
+    "OPEN_DIALOG_BTN": "Ustawienia",
+    "MACOS_MISSING_CONVERT_TO_MP3_OPTIONS": "Bład przy odtwarzaniu na MacOs, należy włączyć opcję \"Konwertuj na mp3\"",
     "MANUAL_MODE": {
-      "UNSUPPORTED_URL": "Unsupported url",
-      "TRACK_ADDED": "Track added to download",
-      "TRACK_ADD_KO": "Error while adding track to downloads"
+      "UNSUPPORTED_URL": "Nieobsługiwany adres URL",
+      "TRACK_ADDED": "Utwór dodany do pobrania",
+      "TRACK_ADD_KO": "Bład przy dodawaniu utworu do listy pobierania"
     }
   },
   "UPDATER": {
-    "TITLE": "New update is available",
-    "DESC": "New version is available <strong>{{version}}</strong> (you have {{oldVersion}}). <br/>",
+    "TITLE": "Nowa aktualizacja jest dostępna",
+    "DESC": "Nowa aktualizacja jest dostępna <strong>{{version}}</strong> (uzywasz {{oldVersion}}). <br/>",
     "DOWNLOAD_MANUALLY_TITLE": "Download manually",
-    "DOWNLOAD_LINK": "Download & install manually <span class=\"open-link\">{{ name }}</span>",
-    "UPDATE_AND_RESTART_BTN": "Update & restart",
-    "UPDATE_BTN": "Update",
-    "LATER_BTN": "Later"
+    "DOWNLOAD_LINK": "Ściągnij & aktualizuj ręcznie <span class=\"open-link\">{{ name }}</span>",
+    "UPDATE_AND_RESTART_BTN": "Aktualizuj & uruchom ponownie",
+    "UPDATE_BTN": "Aktualizuj",
+    "LATER_BTN": "Pózniej"
   },
   "FORMS": {
     "BTNS": {
-      "CREATE": "Create"
+      "CREATE": "Stwórz",
+      "CANCEL": "Anuluj",
+      "YES": "Tak",
+      "No": "Nie"
     },
     "VALIDATION": {
-      "EMPTY": "Cannot be empty"
+      "EMPTY": "Pole obowiązkowe"
     }
   }
 }

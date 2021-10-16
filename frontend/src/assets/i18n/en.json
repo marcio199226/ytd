@@ -9,7 +9,7 @@
   "HOME": {
     "SEARCH": "Search",
     "PASTE_TRACK_URL": "Paste here track url",
-    "CLEAR": "Clear",
+    "CLOSE": "Close",
     "NEW_UPDATE_AVAILABLE": "New update is available",
     "REMOVE": {
       "TRACK": "Remove track",
@@ -127,7 +127,10 @@
   },
   "FORMS": {
     "BTNS": {
-      "CREATE": "Create"
+      "CREATE": "Create",
+      "CANCEL": "Cancel",
+      "YES": "Yes",
+      "No": "No"
     },
     "VALIDATION": {
       "EMPTY": "Cannot be empty"

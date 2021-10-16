@@ -301,7 +301,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     console.log('window.APP_STATE.config', window.APP_STATE.config)
     const dialogRef = this._dialog.open(SettingsComponent, {
       panelClass: ['settings-dialog',  'with-header-dialog'],
-      width: '600px',
+      width: '700px',
       maxHeight: '700px',
       data: { config: window.APP_STATE.config }
     });
