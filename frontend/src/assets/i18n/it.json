@@ -9,20 +9,20 @@
   "HOME": {
     "SEARCH": "Cerca",
     "PASTE_TRACK_URL": "Incolla l'url",
-    "CLOSE": "Clear",
+    "CLOSE": "Close",
     "NEW_UPDATE_AVAILABLE": "Nuovo aggiornamento disponibile",
     "REMOVE": {
       "TRACK": "Elimina brano",
       "PLAYLIST": "Elimina playlist"
     },
     "REMOVED": {
-      "OK_TRACK": "Il brano e' stata eliminata",
-      "OK_PLAYLIST": "La playlist e' stata eliminata",
+      "OK_TRACK": "Il brano è stata eliminata",
+      "OK_PLAYLIST": "La playlist è stata eliminata",
       "KO_TRACK": "Impossibile eliminare il brano",
       "KO_PLAYLIST": "Impossibile eliminare la playlist"
     },
     "START_DOWNLOAD_TRACK": "Avvia il download",
-    "STARTED_DOWNLOAD_TRACK": "Il download e' stato avviato",
+    "STARTED_DOWNLOAD_TRACK": "Il download è stato avviato",
     "CONVERTING_MP3": "Conversione a mp3...",
     "NO_DOWNLOAED_TRACKS": "Non hai scaricato ancora nulla, comincia ora",
     "NO_SEARCH_RESULTS": "Non ci sono canzoni che soddisfano la ricerca",
