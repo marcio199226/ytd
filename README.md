@@ -63,5 +63,6 @@ Extract translation for golang side:
 ## Roadmap
 - [ ] Chrome extension so tracks may be downloaded without user interaction (even without copy yt links)
 - [ ] Internalization
+- [ ] Share tracks through public webserver running locally
 - [ ] Share tracks through telegram (user could subscribe to ytd bot and then will be able to send downloaded tracks to yourself telegram account)
 - [ ] Download playlists from yt (exports them, search for playlist, playback playlist etc...)
