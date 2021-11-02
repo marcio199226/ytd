@@ -17,6 +17,10 @@ Supported platfroms for now
 - convert webm files to mp3
 - system tray with fast settings
 - in app player for single tracks and playlists (for now only for offline created playlists)
+- Internalization
+  - English
+  - Polish
+  - Italian 
 - clean and simple UI (I hope ;))
 - create offline playlist
   - playback playlist
@@ -62,7 +66,7 @@ Extract translation for golang side:
 
 ## Roadmap
 - [ ] Chrome extension so tracks may be downloaded without user interaction (even without copy yt links)
-- [ ] Internalization
+- [x] Internalization
 - [ ] Share tracks through public webserver running locally
 - [ ] Share tracks through telegram (user could subscribe to ytd bot and then will be able to send downloaded tracks to yourself telegram account)
 - [ ] Download playlists from yt (exports them, search for playlist, playback playlist etc...)
