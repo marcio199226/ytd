@@ -14,7 +14,7 @@ import {
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { AudioPlayerService } from 'app/components/audio-player/audio-player.service';
-import { Track, Entry, UpdateRelease, ReleaseEventPayload } from '@models';
+import { Track, Entry, UpdateRelease, ReleaseEventPayload, NgrokState } from '@models';
 import { AppConfig, AppState } from '../../models/app-state';
 import * as Wails from '@wailsapp/runtime';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -34,6 +34,7 @@ import { minMax } from 'app/common/fn';
 import { OfflinePlaylistComponent } from '../offline-playlist/offline-playlist.component';
 import { LoaderService } from 'app/services/loader.service';
 import { TranslateService } from '@ngx-translate/core';
+import { fakeAsync } from '@angular/core/testing';
 
 @Component({
   selector: 'app-home',
@@ -57,6 +58,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   public inPlayback: Track = null;
 
   public newUpdateInfo: UpdateRelease = null;
+
+  public ngrok: NgrokState = null;
 
   public get inPlaybackTrackId(): string {
     if(!this.inPlayback) {
@@ -89,6 +92,13 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   public get appVersion(): string {
     return window.APP_STATE.appVersion;
+  }
+
+  public get isNgrokRunning(): boolean {
+    if(!this.ngrok) {
+      return false;
+    }
+    return this.ngrok.status === 'running';
   }
 
   @ViewChild('searchNativeInput')
@@ -216,6 +226,14 @@ export class HomeComponent implements OnInit, OnDestroy {
       })
     });
 
+    Wails.Events.On("ytd:ngrok", (ngrok: NgrokState) => {
+      this._ngZone.run(() => {
+        this.ngrok = ngrok;
+        console.log("ytd:ngrok", ngrok)
+        this._cdr.detectChanges();
+      })
+    });
+
     // players commands
     this._audioPlayerService.onPlayCmdTrack.subscribe(track => {
       this.inPlayback = track;
@@ -303,7 +321,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       panelClass: ['settings-dialog',  'with-header-dialog'],
       width: '700px',
       maxHeight: '700px',
-      data: { config: window.APP_STATE.config }
+      data: { config: window.APP_STATE.config, isNgrokRunning: this.isNgrokRunning }
     });
 
     dialogRef.afterClosed().subscribe(async (result: { config: AppConfig }) => {
@@ -333,7 +351,9 @@ export class HomeComponent implements OnInit, OnDestroy {
               await window.backend.main.AppState.SaveSettingValue(key, `${value}`);
             break;
 
+            // struct configs
             case 'Telegram':
+            case 'PublicServer':
               await window.backend.main.AppState.SaveSettingValue(key, JSON.stringify(value));
             break;
           }
@@ -577,6 +597,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     const dir: string[] = JSON.parse(dirResult);
 
     if(err) {
+      console.log('err, dirResult', err, dirResult)
       this._snackbar.openError("HOME.PLAYLISTS.CHOOSE_EXPORT_DIRECTORY_KO", null, null, { error: err });
       return;
     }
@@ -591,7 +612,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     if(exportErr) {
       console.log('exportPlaylist go call results in error', exportErr, exportResult);
-      this._snackbar.openError("HOME.PLAYLISTS.EXPORTED_KO");
+      this._snackbar.openError("HOME.PLAYLISTS.EXPORTED_KO", null, null, { error: exportErr });
       return;
     }
 

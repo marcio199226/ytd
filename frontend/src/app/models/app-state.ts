@@ -16,7 +16,20 @@ export interface AppConfig {
   Language: string;
   Telegram: {
     Share: boolean;
-    Username: string
+    Username: string;
+  },
+  PublicServer: {
+    Enabled: boolean;
+    Ngrok: {
+      Authtoken: string;
+      Auth: {
+        Enabled: boolean;
+        Username: string;
+        Password: string;
+      },
+    },
+    VerifyAppKey: boolean;
+    AppKey: string;
   }
 }
 
@@ -59,6 +72,9 @@ export interface BackendCallbacks {
       RemoveTrackFromPlaylist: (tid: string, playlist: OfflinePlaylist) => Promise<OfflinePlaylist>;
       AddTrackToPlaylist: (playlists: OfflinePlaylist[]) => Promise<boolean>;
       ExportPlaylist: (uuid: string, path: string) => Promise<string>;
+    },
+    NgrokService: {
+      IsNgrokInstalled: () =>  Promise<boolean>;
     }
   }
 }

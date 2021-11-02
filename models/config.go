@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"sync"
 	_ "unsafe"
+
+	"github.com/wailsapp/wails/v2"
 )
 
 //go:noescape
@@ -40,7 +42,26 @@ type TelegramConfig struct {
 	Username string
 }
 
+type PublicServerConfig struct {
+	Enabled      bool
+	Ngrok        NgrokConfig
+	VerifyAppKey bool
+	AppKey       string
+}
+
+type NgrokConfig struct {
+	Authtoken string
+	Auth      NgrokAuthConfig
+}
+
+type NgrokAuthConfig struct {
+	Enabled  bool
+	Username string
+	Password string
+}
+
 type AppConfig struct {
+	runtime                     *wails.Runtime
 	ClipboardWatch              bool
 	DownloadOnCopy              bool
 	ConcurrentDownloads         bool
@@ -54,6 +75,7 @@ type AppConfig struct {
 	StartAtLogin                bool
 	Language                    string
 	Telegram                    TelegramConfig
+	PublicServer                PublicServerConfig
 	Proxy                       interface{}
 }
 
@@ -72,6 +94,7 @@ func NewAppConfig(watch bool, dldOnCopy bool, cDownloads bool, cPlaylistDownload
 		StartAtLogin:                false,
 		Language:                    "en",
 		Telegram:                    TelegramConfig{Share: false, Username: ""},
+		PublicServer:                PublicServerConfig{Enabled: false},
 	}
 }
 
@@ -93,8 +116,13 @@ func (cfg *AppConfig) Init() *AppConfig {
 	cfg.StartAtLogin = getConfigValue(defaultAppCfg, "StartAtLogin").(bool)
 	cfg.Language = getConfigValue(defaultAppCfg, "Language").(string)
 	cfg.Telegram = getConfigValue(defaultAppCfg, "Telegram").(TelegramConfig)
+	cfg.PublicServer = getConfigValue(defaultAppCfg, "PublicServer").(PublicServerConfig)
 
 	return cfg
+}
+
+func (cfg *AppConfig) SetRuntime(runtime *wails.Runtime) {
+	cfg.runtime = runtime
 }
 
 func (cfg *AppConfig) Set(name string, val interface{}) error {
@@ -125,6 +153,8 @@ func (cfg *AppConfig) Set(name string, val interface{}) error {
 		cfg.SetLanguage(val)
 	case "Telegram":
 		cfg.SetTelegram(val)
+	case "PublicServer":
+		cfg.SetPublicServer(val)
 	}
 	return nil
 }
@@ -197,6 +227,15 @@ func (cfg *AppConfig) SetTelegram(val interface{}) error {
 	return nil
 }
 
+func (cfg *AppConfig) SetPublicServer(val interface{}) error {
+	var config PublicServerConfig
+	json.Unmarshal([]byte(val.(string)), &config)
+	cfg.PublicServer = config
+
+	cfg.runtime.Events.Emit("ngrok:configured")
+	return nil
+}
+
 func getConfigValue(defaultAppCfg AppConfig, name string) interface{} {
 	var data interface{}
 	t := reflect.ValueOf(defaultAppCfg).FieldByName(name).Kind()
@@ -230,6 +269,11 @@ func getConfigValue(defaultAppCfg AppConfig, name string) interface{} {
 				var telegram TelegramConfig
 				json.Unmarshal([]byte(cfgVal), &telegram)
 				data = telegram
+
+			case "PublicServer":
+				var config PublicServerConfig
+				json.Unmarshal([]byte(cfgVal), &config)
+				data = config
 			}
 		}
 	}

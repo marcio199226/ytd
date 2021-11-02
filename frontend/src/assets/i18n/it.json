@@ -9,7 +9,7 @@
   "HOME": {
     "SEARCH": "Cerca",
     "PASTE_TRACK_URL": "Incolla l'url",
-    "CLOSE": "Close",
+    "CLOSE": "Chiudi",
     "NEW_UPDATE_AVAILABLE": "Nuovo aggiornamento disponibile",
     "REMOVE": {
       "TRACK": "Elimina brano",
@@ -39,7 +39,7 @@
       "CHOOSE_EXPORT_DIRECTORY": "Seleziona cartella",
       "CHOOSE_EXPORT_DIRECTORY_KO": "Errore durante l'esportazione: {{error}}",
       "EXPORTED_OK": "Export concluso ✅",
-      "EXPORTED_KO": "Qualcosa è andato storto durante l'esportazione",
+      "EXPORTED_KO": "Qualcosa è andato storto durante l'esportazione: {{error}}",
       "REMOVE": "Rimuovi playlist",
       "ADD_TRACK": "Aggiungi alla playlist",
       "ALREADY_IN_PLAYLIST": "Il brano risulta gia' presente nella playlist",

@@ -20,6 +20,23 @@ settings {
       background: transparent;
     }
 
+    .mat-tab-group {
+      .mat-tab-body {
+        margin-top: 10px;
+        max-height: 450px;
+      }
+
+      .mat-tab-label {
+        color: white;
+        opacity: 1;
+        flex: 1;
+
+        .mat-icon {
+          margin-right: 4px;
+        }
+      }
+    }
+
     .open-link {
       font-weight: bold;
       text-decoration: underline;
@@ -40,6 +57,31 @@ settings {
 
       .warning {
         font-weight: bold;
+      }
+    }
+
+    // public server settings tabs
+    .public-server {
+
+      .auth {
+        .mat-form-field {
+          .mat-form-field-infix {
+            width: auto;
+          }
+        }
+      }
+
+      .api-key {
+        width: 100%;
+      }
+
+      .mobile-app {
+        margin-top: 6px;
+        width: 100%;
+        box-sizing: border-box;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
       }
     }
   }

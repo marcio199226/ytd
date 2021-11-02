@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"embed"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -110,7 +112,7 @@ func main() {
 				change, ok := <-changes /*  */
 				if ok && change != "" {
 					log.Printf("change received: '%s'", change)
-					if appState.Config.ClipboardWatch {
+					if app.Config.ClipboardWatch {
 						app.AddToDownload(change, true)
 					}
 				} else {
@@ -125,6 +127,16 @@ func main() {
 		fs := http.StripPrefix("/static/", http.FileServer(http.FS(static)))
 		http.Handle("/tracks/", http.StripPrefix("/tracks/", http.FileServer(http.Dir(currentDir))))
 		http.Handle("/static/", cors(fs))
+		http.HandleFunc("/app/state", func(w http.ResponseWriter, r *http.Request) {
+			var buffer bytes.Buffer
+			w.Header().Set("Content-Type", "application/json")
+			err := json.NewEncoder(&buffer).Encode(&app)
+			if err != nil {
+				http.Error(w, err.Error(), 400)
+				return
+			}
+			w.Write(buffer.Bytes())
+		})
 		http.ListenAndServe(":8080", nil)
 	}()
 
@@ -151,6 +163,7 @@ func main() {
 		Bind: []interface{}{
 			app,
 			app.offlinePlaylistService,
+			app.ngrok,
 		},
 		Frameless: false,
 	})

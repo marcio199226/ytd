@@ -153,6 +153,44 @@ const backend = {
         return window.backend.main.AppState.Update(arg1);
       },
     }
+    "NgrokService": {
+      /**
+       * GetPublicUrl
+       * @returns {Promise<Error>}  - Go Type: error
+       */
+      "GetPublicUrl": () => {
+        return window.backend.main.NgrokService.GetPublicUrl();
+      },
+      /**
+       * IsNgrokInstalled
+       * @returns {Promise<string|Error>}  - Go Type: string
+       */
+      "IsNgrokInstalled": () => {
+        return window.backend.main.NgrokService.IsNgrokInstalled();
+      },
+      /**
+       * KillProcess
+       * @returns {Promise<Error>}  - Go Type: error
+       */
+      "KillProcess": () => {
+        return window.backend.main.NgrokService.KillProcess();
+      },
+      /**
+       * SetAuthToken
+       * @returns {Promise<Error>}  - Go Type: error
+       */
+      "SetAuthToken": () => {
+        return window.backend.main.NgrokService.SetAuthToken();
+      },
+      /**
+       * StartProcess
+       * @param {boolean} arg1 - Go Type: bool
+       * @returns {Promise<Error>}  - Go Type: error
+       */
+      "StartProcess": (arg1) => {
+        return window.backend.main.NgrokService.StartProcess(arg1);
+      },
+    }
     "OfflinePlaylistService": {
       /**
        * AddTrackToPlaylist

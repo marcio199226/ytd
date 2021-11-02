@@ -42,6 +42,7 @@ type AppState struct {
 	tray                   TrayMenu
 	updater                *Updater
 	offlinePlaylistService *OfflinePlaylistService
+	ngrok                  *NgrokService
 }
 
 func (state *AppState) PreWailsInit() {
@@ -49,6 +50,7 @@ func (state *AppState) PreWailsInit() {
 	state.Entries = DbGetAllEntries()
 	state.OfflinePlaylists = DbGetAllOfflinePlaylists()
 	state.offlinePlaylistService = &OfflinePlaylistService{}
+	state.ngrok = &NgrokService{}
 	state.Config = state.Config.Init()
 	state.AppVersion = version
 
@@ -64,6 +66,8 @@ func (state *AppState) WailsInit(runtime *wails.Runtime) {
 	// Save runtime
 	state.runtime = runtime
 	state.offlinePlaylistService.runtime = runtime
+	state.ngrok.runtime = runtime
+	state.Config.SetRuntime(runtime)
 	// Do some other initialisation
 	state.Stats = &AppStats{}
 	appState = state
@@ -138,10 +142,33 @@ func (state *AppState) WailsInit(runtime *wails.Runtime) {
 			time.Sleep(12 * time.Hour)
 		}
 	}()
+
+	if state.Config.PublicServer.Enabled {
+		ShowLoader(state.runtime, "Starting public server...")
+		result := state.ngrok.StartProcess(false)
+		if result.err != nil {
+			fmt.Println("----------------------------")
+			fmt.Println("LAUNCH AT START FAILED", result)
+			fmt.Println("----------------------------")
+			state.runtime.Events.Emit("ytd:notification", &NotificationEventPayload{Type: "error", Label: fmt.Sprintf("Cannot start ngrok: %s")})
+			state.runtime.Events.Emit("ytd:ngrok", NgrokStateEventPayload{Status: NgrokStatusError, ErrCode: result.errCode})
+			HideLoader(state.runtime)
+			return
+		}
+		fmt.Println("----------------------------")
+		fmt.Println("LAUNCHED WITH PUBLIC URL", result.publicUrl)
+		fmt.Println("----------------------------")
+		state.runtime.Events.Emit("ytd:ngrok", NgrokStateEventPayload{Status: result.status, Url: result.publicUrl})
+		HideLoader(state.runtime)
+	}
 }
 
 func (state *AppState) WailsShutdown() {
-	err := state.db.Merge()
+	err := state.ngrok.KillProcess()
+	if err != nil {
+		fmt.Println("WailsShutdown state.ngrok.KillProcess() failed", err)
+	}
+	err = state.db.Merge()
 	if err != nil {
 		fmt.Println("WailsShutdown db.Merge() failed", err)
 	}
@@ -177,6 +204,29 @@ func (state *AppState) InitializeListeners() {
 
 	state.runtime.Events.On("ytd:offline:playlists:removed", func(optionalData ...interface{}) {
 		state.OfflinePlaylists, _ = state.offlinePlaylistService.GetPlaylists(true)
+	})
+
+	state.runtime.Events.On("ngrok:configured", func(optionalData ...interface{}) {
+		fmt.Println("----------------------------")
+		fmt.Println("AAAAAAAAA ngrok:configured")
+		fmt.Println("----------------------------")
+		if state.Config.PublicServer.Enabled {
+			ShowLoader(state.runtime, "Configuring public server...")
+			result := state.ngrok.StartProcess(true)
+			if result.err != nil {
+				state.runtime.Events.Emit("ytd:notification", &NotificationEventPayload{Type: "error", Label: fmt.Sprintf("Cannot start ngrok: %s")})
+			}
+		}
+
+		if !state.Config.PublicServer.Enabled {
+			err := state.ngrok.KillProcess()
+			if err != nil {
+				fmt.Println("----------------------------")
+				fmt.Println("CANNOTTTT KILLLL", state.ngrok)
+				fmt.Println("----------------------------")
+				state.runtime.Events.Emit("ytd:notification", &NotificationEventPayload{Type: "error", Label: "Cannot close public server"})
+			}
+		}
 	})
 }
 

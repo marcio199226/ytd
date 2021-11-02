@@ -20,27 +20,27 @@ export class SnackbarService extends MatSnackBar {
   }
 
   public openSuccess(text: string, action: string = null, opts: MatSnackBarConfig = {}, transPayload: any = {}): MatSnackBarRef<SimpleSnackBar> {
-    const { panelClass, ...options } = opts;
+    const { panelClass, ...options } = opts || {};
     const classes: string[] = [panelClass as string, 'success'];
-    return this.open(this._trans.instant(text, transPayload), this._trans.instant(action), { panelClass: classes, ...options });
+    return this.open(this._trans.instant(text, transPayload), action ? this._trans.instant(action) : null, { panelClass: classes, ...options });
   }
 
   public openError(text: string, action: string  = null, opts: MatSnackBarConfig = {}, transPayload: any = {}): MatSnackBarRef<SimpleSnackBar> {
-    const { panelClass, ...options } = opts;
+    const { panelClass, ...options } = opts || {};
     const classes: string[] = [panelClass as string, 'error'];
-    return this.open(this._trans.instant(text, transPayload), this._trans.instant(action), { panelClass: classes, ...options });
+    return this.open(this._trans.instant(text, transPayload), action ? this._trans.instant(action) : null, { panelClass: classes, ...options });
   }
 
   public openInfo(text: string, action: string  = null, opts: MatSnackBarConfig = {}, transPayload: any = {}): MatSnackBarRef<SimpleSnackBar> {
-    const { panelClass, ...options } = opts;
+    const { panelClass, ...options } = opts || {};
     const classes: string[] = [panelClass as string, 'info'];
-    return this.open(this._trans.instant(text, transPayload), this._trans.instant(action), { panelClass: classes, ...options });
+    return this.open(this._trans.instant(text, transPayload), action ? this._trans.instant(action) : null, { panelClass: classes, ...options });
   }
 
   public openWarning(text: string, action: string  = null, opts: MatSnackBarConfig = {}, transPayload: any = {}): MatSnackBarRef<SimpleSnackBar> {
-    const { panelClass, ...options } = opts;
+    const { panelClass, ...options } = opts || {};
     const classes: string[] = [panelClass as string, 'warning'];
-    return this.open(this._trans.instant(text, transPayload), this._trans.instant(action), { panelClass: classes, ...options });
+    return this.open(this._trans.instant(text, transPayload), action ? this._trans.instant(action) : null, { panelClass: classes, ...options });
   }
 
   public openTplSuccess(tpl: TemplateRef<any>, opts: MatSnackBarConfig = {}): MatSnackBarRef<EmbeddedViewRef<any>> {

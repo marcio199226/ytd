@@ -47,5 +47,9 @@ export class AppComponent {
     Wails.Events.On("ytd:loader:hide", () => {
       this._loader.hide();
     });
+
+    Wails.Events.On("ytd:notification", payload => {
+      console.log('New notification from backend', payload)
+    })
   }
 }

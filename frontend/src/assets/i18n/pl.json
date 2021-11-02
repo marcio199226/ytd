@@ -39,7 +39,7 @@
       "CHOOSE_EXPORT_DIRECTORY": "Wybierz sciezkę",
       "CHOOSE_EXPORT_DIRECTORY_KO": "Błąd: {{error}}",
       "EXPORTED_OK": "Eksport zakończony ✅",
-      "EXPORTED_KO": "Błąd przy eksportowaniu",
+      "EXPORTED_KO": "Błąd przy eksportowaniu: {{error}}",
       "REMOVE": "Usuń playlistę",
       "ADD_TRACK": "Dodaj do playlisty",
       "ALREADY_IN_PLAYLIST": "Utwór jest juz na playliście",

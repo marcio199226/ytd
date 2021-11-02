@@ -7,10 +7,21 @@ type LoaderEventPayload struct {
 	TemplateName string `json:"templateName"`
 }
 
+type NotificationEventPayload struct {
+	Label string `json:"label"`
+	Type  string `json:"type"`
+}
+
+type NgrokStateEventPayload struct {
+	ErrCode string `json:"errCode"`
+	Status  string `json:"status"`
+	Url     string `json:"url "`
+}
+
 func ShowLoader(r *wails.Runtime, label string) {
 	r.Events.Emit("ytd:loader:show", LoaderEventPayload{Label: label, TemplateName: "card"})
 }
 
-func HideLoader(r *wails.Runtime, label string) {
+func HideLoader(r *wails.Runtime) {
 	r.Events.Emit("ytd:loader:hide")
 }

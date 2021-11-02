@@ -25,11 +25,13 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSliderModule}  from '@angular/material/slider';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatSnackBarModule, MAT_SNACK_BAR_DEFAULT_OPTIONS } from '@angular/material/snack-bar';
+import { MatTabsModule } from '@angular/material/tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { NG_EVENT_PLUGINS } from '@tinkoff/ng-event-plugins';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+import { QrCodeModule } from 'ng-qrcode';
 import {
   AudioPlayerComponent,
   LoaderOverlayComponent,
@@ -41,9 +43,11 @@ import {
   LanguageSwitcherComponent
 } from './components';
 import { AutofocusDirective } from './directives';
+import { environment } from 'environments/environment';
 
 export function HttpLoaderFactory(http: HttpClient) {
-  return new TranslateHttpLoader(http, 'http://localhost:8080/static/frontend/dist/assets/i18n/', '.json');
+  const assetsDir = environment.production ? 'http://localhost:8080/static/frontend/dist/assets/i18n/' : './assets/i18n/'
+  return new TranslateHttpLoader(http, assetsDir, '.json');
 }
 
 @NgModule({
@@ -79,6 +83,7 @@ export function HttpLoaderFactory(http: HttpClient) {
       }
     }),
     FlexLayoutModule,
+    QrCodeModule,
     MatBadgeModule,
     MatButtonModule,
     MatCardModule,
@@ -95,6 +100,7 @@ export function HttpLoaderFactory(http: HttpClient) {
     MatSliderModule,
     MatSidenavModule,
     MatSnackBarModule,
+    MatTabsModule,
     MatToolbarModule,
     MatTooltipModule
   ],

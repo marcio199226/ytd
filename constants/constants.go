@@ -9,4 +9,8 @@ const (
 	TrakcConverting        = "converting"
 	TrakcConverted         = "converted"
 	TrakcConvertFailed     = "failed"
+
+	NgrokStatusRunning = "running"
+	NgrokStatusError   = "error"
+	NgrokStatusTimeout = "timeout"
 )

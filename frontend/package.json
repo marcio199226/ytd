@@ -5,8 +5,9 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "npx ng build --single-bundle true --output-hashing none --aot --build-optimizer --optimization --allowed-common-js-dependencies",
+    "build:no:optimizers": "npx ng build --single-bundle true --output-hashing none --aot --build-optimizer=false --optimization=false --allowed-common-js-dependencies",
     "watch": "ng build --watch --configuration development",
-    "serve": "npx --max_old_space_size=4096 ng serve --poll=2000 --host=0.0.0.0 --single-bundle",
+    "serve": "npx --max_old_space_size=4096 ng serve --poll=2000 --host=0.0.0.0 --single-bundle --configuration development",
     "test": "ng test"
   },
   "private": true,
@@ -30,6 +31,7 @@
     "await-to-js": "^3.0.0",
     "core-js": "^3.15.1",
     "lodash": "^4.17.21",
+    "ng-qrcode": "^5.1.1",
     "ngx-build-plus": "^12.0.1",
     "rxjs": "~6.6.0",
     "tslib": "^2.2.0",

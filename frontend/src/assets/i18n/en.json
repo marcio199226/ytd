@@ -39,7 +39,7 @@
       "CHOOSE_EXPORT_DIRECTORY": "Choose directory",
       "CHOOSE_EXPORT_DIRECTORY_KO": "Error while choosing export path: {{error}}",
       "EXPORTED_OK": "Export has been ✅",
-      "EXPORTED_KO": "Something went wrong while exporting",
+      "EXPORTED_KO": "Something went wrong while exporting: {{error}}",
       "REMOVE": "Remove playlist",
       "ADD_TRACK": "Add to playlists",
       "ALREADY_IN_PLAYLIST": "Track is already in this playlist",
@@ -89,6 +89,33 @@
   },
   "SETTINGS": {
     "TITLE": "Settings",
+    "TABS": {
+      "GENERAL": "General",
+      "PUBLIC_SERVER": {
+        "LABEL": "Public server",
+        "DESC": "Share your tracks and playlists to others peoples",
+        "ENABLED": "On",
+        "DISABLED": "Off",
+        "NGROK": {
+          "NOT_INSTALLED": "You have to install ngrok tool on your system to enable this option",
+          "INSTALL_BTN": "Install ngrok",
+          "MOBILE_APP": "Download mobile app and scan your qr code",
+          "MOBILE_APP_BTN": "Download app",
+          "AUTH_TOKEN": "Your ngrok auth token",
+          "AUTH_TOKEN_HINT": "",
+          "AUTH_DESC_ENABLED": "Auth is enabled",
+          "AUTH_DESC_DISABLED": "Enable authentication for your public server",
+          "USERNAME": "Username",
+          "USERNAME_HINT": "Username used for auth",
+          "PASSWORD": "Password",
+          "PASSWORD_HINT": "Password used for auth",
+          "APIKEY_DESC_ENABLED": "Disable api key verification",
+          "APIKEY_DESC_DISABLED": "Enable api key verification",
+          "APP_KEY": "Verify api key (more secure)",
+          "APP_KEY_HINT": "Your local server will verify api key too"
+        }
+      }
+    },
     "SAVE_DIRECTORY": "Save tracks to directory",
     "SAVE_DIRECTORY_HINT": "Directory where all tracks will be saved",
     "MAX_SIM_DOWNLOADS": "Max simultaneous downloads",

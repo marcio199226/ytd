@@ -10,64 +10,153 @@
     </mat-toolbar-row>
   </mat-toolbar>
 
-  <div mat-dialog-content fxLayout="column" fxLayoutGap="12px">
-    <mat-form-field appearance="fill">
-      <mat-label>{{ 'SETTINGS.SAVE_DIRECTORY' | translate }}</mat-label>
-      <input matInput readonly [(ngModel)]="model.BaseSaveDir" required>
-      <button mat-icon-button matSuffix (click)="changeBaseSaveDir()">
-        <mat-icon>edit</mat-icon>
-      </button>
-      <mat-hint>{{ 'SETTINGS.SAVE_DIRECTORY_HINT' | translate }}</mat-hint>
-    </mat-form-field>
-    <mat-form-field appearance="fill">
-      <mat-label>{{ 'SETTINGS.MAX_SIM_DOWNLOADS' | translate }}</mat-label>
-      <input matInput type="number" min="0" max="10" [(ngModel)]="model.MaxParrallelDownloads">
-      <mat-hint>{{ 'SETTINGS.MAX_SIM_DOWNLOADS_HINT' | translate }}</mat-hint>
-    </mat-form-field>
-    <mat-slide-toggle [(ngModel)]="model.ClipboardWatch">
-      {{ 'SETTINGS.CLIBOARD_WATCH' | translate }}
-    </mat-slide-toggle>
-    <mat-slide-toggle [(ngModel)]="model.DownloadOnCopy" [disabled]="!model.ClipboardWatch">
-      {{ 'SETTINGS.DOWNLOAD_ON_COPY' | translate }}
-    </mat-slide-toggle>
-    <mat-slide-toggle [(ngModel)]="model.ConcurrentDownloads">
-      {{ 'SETTINGS.CONCURRENT_DOWNLOADS' | translate }}
-    </mat-slide-toggle>
-    <mat-slide-toggle [(ngModel)]="model.ConcurrentPlaylistDownloads">
-      {{ 'SETTINGS.CONCURRENT_PLAYLIST_DOWNLOADS' | translate }}
-    </mat-slide-toggle>
-    <div class="toggle-wrapper" fxLayout="column" fxLayoutGap="5px">
-      <mat-slide-toggle [(ngModel)]="model.ConvertToMp3" [disabled]="!isFfmpegAvailable">
-        {{ 'SETTINGS.CONVERT_TO_MP3' | translate }}
-      </mat-slide-toggle>
-      <div class="warning" *ngIf="!isFfmpegAvailable">
-        {{ 'SETTINGS.MISSING_FFMPEG' | translate }}
-      </div>
-    </div>
-    <div class="toggle-wrapper" fxLayout="column" fxLayoutGap="5px">
-      <mat-slide-toggle [(ngModel)]="model.CleanWebmFiles" [disabled]="!isFfmpegAvailable || !model.ConvertToMp3">
-        {{ 'SETTINGS.REMOVE_WEBM_AFTER_CONVERTING' | translate }}
-      </mat-slide-toggle>
-      <div class="warning" *ngIf="!model.ConvertToMp3">
-        {{ 'SETTINGS.MUST_ENABLE_CONVERT_TO_MP3' | translate }}
-      </div>
-    </div>
-    <div class="toggle-wrapper" fxLayout="column" fxLayoutGap="5px" hidden>
-      <mat-slide-toggle [(ngModel)]="model.Telegram.Share" [disabled]="!isFfmpegAvailable || !model.ConvertToMp3">
-        {{ 'SETTINGS.TELEGRAM_SHARE' | translate }}
-      </mat-slide-toggle>
-      <div class="warning" *ngIf="!model.ConvertToMp3">
-        {{ 'SETTINGS.MUST_ENABLE_CONVERT_TO_MP3' | translate }}
-      </div>
-      <mat-form-field appearance="fill" *ngIf="model.Telegram.Share">
-        <mat-label>{{ 'SETTINGS.TELEGRAM_USERNAME' | translate }}</mat-label>
-        <input matInput [(ngModel)]="model.Telegram.Username" required>
-        <span matPrefix class="at">@</span>
-        <mat-hint >
-          You have to set <span class="open-link" title="Click for more details" (click)="openUrl('https://telegram.org/faq?setln=en#q-what-are-usernames-how-do-i-get-one')">username</span> into telegram's settings</mat-hint>
-        <mat-error>{{ 'SETTINGS.TELEGRAM_USERNAMNE_EMPTY' | translate }}</mat-error>
-      </mat-form-field>
-    </div>
+  <div mat-dialog-content>
+    <mat-tab-group>
+      <mat-tab label="general">
+        <ng-template mat-tab-label>
+          <mat-icon>tune</mat-icon>
+          {{ 'SETTINGS.TABS.GENERAL' | translate }}
+        </ng-template>
+
+        <div fxLayout="column" fxLayoutGap="12px">
+          <mat-form-field appearance="fill">
+            <mat-label>{{ 'SETTINGS.SAVE_DIRECTORY' | translate }}</mat-label>
+            <input matInput readonly [(ngModel)]="model.BaseSaveDir" required>
+            <button mat-icon-button matSuffix (click)="changeBaseSaveDir()">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <mat-hint>{{ 'SETTINGS.SAVE_DIRECTORY_HINT' | translate }}</mat-hint>
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>{{ 'SETTINGS.MAX_SIM_DOWNLOADS' | translate }}</mat-label>
+            <input matInput type="number" min="0" max="10" [(ngModel)]="model.MaxParrallelDownloads">
+            <mat-hint>{{ 'SETTINGS.MAX_SIM_DOWNLOADS_HINT' | translate }}</mat-hint>
+          </mat-form-field>
+          <mat-slide-toggle [(ngModel)]="model.ClipboardWatch">
+            {{ 'SETTINGS.CLIBOARD_WATCH' | translate }}
+          </mat-slide-toggle>
+          <mat-slide-toggle [(ngModel)]="model.DownloadOnCopy" [disabled]="!model.ClipboardWatch">
+            {{ 'SETTINGS.DOWNLOAD_ON_COPY' | translate }}
+          </mat-slide-toggle>
+          <mat-slide-toggle [(ngModel)]="model.ConcurrentDownloads">
+            {{ 'SETTINGS.CONCURRENT_DOWNLOADS' | translate }}
+          </mat-slide-toggle>
+          <mat-slide-toggle [(ngModel)]="model.ConcurrentPlaylistDownloads">
+            {{ 'SETTINGS.CONCURRENT_PLAYLIST_DOWNLOADS' | translate }}
+          </mat-slide-toggle>
+          <div class="toggle-wrapper" fxLayout="column" fxLayoutGap="5px">
+            <mat-slide-toggle [(ngModel)]="model.ConvertToMp3" [disabled]="!isFfmpegAvailable">
+              {{ 'SETTINGS.CONVERT_TO_MP3' | translate }}
+            </mat-slide-toggle>
+            <div class="warning" *ngIf="!isFfmpegAvailable">
+              {{ 'SETTINGS.MISSING_FFMPEG' | translate }}
+            </div>
+          </div>
+          <div class="toggle-wrapper" fxLayout="column" fxLayoutGap="5px">
+            <mat-slide-toggle [(ngModel)]="model.CleanWebmFiles" [disabled]="!isFfmpegAvailable || !model.ConvertToMp3">
+              {{ 'SETTINGS.REMOVE_WEBM_AFTER_CONVERTING' | translate }}
+            </mat-slide-toggle>
+            <div class="warning" *ngIf="!model.ConvertToMp3">
+              {{ 'SETTINGS.MUST_ENABLE_CONVERT_TO_MP3' | translate }}
+            </div>
+          </div>
+          <div class="toggle-wrapper" fxLayout="column" fxLayoutGap="5px" hidden>
+            <mat-slide-toggle [(ngModel)]="model.Telegram.Share" [disabled]="!isFfmpegAvailable || !model.ConvertToMp3">
+              {{ 'SETTINGS.TELEGRAM_SHARE' | translate }}
+            </mat-slide-toggle>
+            <div class="warning" *ngIf="!model.ConvertToMp3">
+              {{ 'SETTINGS.MUST_ENABLE_CONVERT_TO_MP3' | translate }}
+            </div>
+            <mat-form-field appearance="fill" *ngIf="model.Telegram.Share">
+              <mat-label>{{ 'SETTINGS.TELEGRAM_USERNAME' | translate }}</mat-label>
+              <input matInput [(ngModel)]="model.Telegram.Username" required>
+              <span matPrefix class="at">@</span>
+              <mat-hint >
+                You have to set <span class="open-link" title="Click for more details" (click)="openUrl('https://telegram.org/faq?setln=en#q-what-are-usernames-how-do-i-get-one')">username</span> into telegram's settings</mat-hint>
+              <mat-error>{{ 'SETTINGS.TELEGRAM_USERNAMNE_EMPTY' | translate }}</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+      </mat-tab>
+      <mat-tab label="public_server">
+        <ng-template mat-tab-label>
+          <mat-icon>public</mat-icon>
+          {{ 'SETTINGS.TABS.PUBLIC_SERVER.LABEL' | translate }} ({{ (data.isNgrokRunning && model.PublicServer.Enabled ? 'SETTINGS.TABS.PUBLIC_SERVER.ENABLED' : 'SETTINGS.TABS.PUBLIC_SERVER.DISABLED') | translate }})
+        </ng-template>
+
+        <ng-template matTabContent>
+          <div class="public-server" fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="12px">
+
+            <mat-slide-toggle [(ngModel)]="model.PublicServer.Enabled" (ngModelChange)="reRenderQrcode()"  [disabled]="!isNgrokAvailable">
+              {{ 'SETTINGS.TABS.PUBLIC_SERVER.DESC' | translate }}
+            </mat-slide-toggle>
+
+            <div class="box warning" *ngIf="!isNgrokAvailable">
+              {{ 'SETTINGS.TABS.PUBLIC_SERVER.NGROK.NOT_INSTALLED' | translate }}
+              <button mat-flat-button color="secondary" (click)="openUrl('https://ngrok.com/download')">
+                {{ 'SETTINGS.TABS.PUBLIC_SERVER.NGROK.INSTALL_BTN' | translate }}
+              </button>
+            </div>
+
+            <div fxLayout="row" fxLayoutAlign="start start" fxLayoutGap="12px" [style.width.%]="100" *ngIf="model.PublicServer.Enabled">
+              <div class="qrcode">
+                <qr-code [value]="publicServerQrcode" size="300" errorCorrectionLevel="M"></qr-code>
+              </div>
+              <div class="form" fxLayout="column" fxLayoutAlign="start start" fxLayoutGap="16px">
+                <mat-form-field appearance="fill" [style.width.%]="100">
+                  <mat-label>{{ 'SETTINGS.TABS.PUBLIC_SERVER.NGROK.AUTH_TOKEN' | translate }}</mat-label>
+                  <input matInput [(ngModel)]="model.PublicServer.Ngrok.Authtoken" required>
+                  <mat-error>{{ 'FORMS.VALIDATION.EMPTY' | translate }}</mat-error>
+                  <mat-hint>{{ 'SETTINGS.TABS.PUBLIC_SERVER.NGROK.AUTH_TOKEN_HINT' | translate }}</mat-hint>
+                </mat-form-field>
+
+                <div class="auth" fxLayout="column" fxLayoutAlign="start start" fxLayoutGap="6px">
+                  <mat-slide-toggle [(ngModel)]="model.PublicServer.Ngrok.Auth.Enabled">
+                    {{ (model.PublicServer.Ngrok.Auth.Enabled ? 'SETTINGS.TABS.PUBLIC_SERVER.NGROK.AUTH_DESC_ENABLED' : 'SETTINGS.TABS.PUBLIC_SERVER.NGROK.AUTH_DESC_DISABLED') | translate }}
+                  </mat-slide-toggle>
+
+                  <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="12px">
+                    <mat-form-field appearance="fill">
+                      <mat-label>{{ 'SETTINGS.TABS.PUBLIC_SERVER.NGROK.USERNAME' | translate }}</mat-label>
+                      <input matInput [(ngModel)]="model.PublicServer.Ngrok.Auth.Username" (ngModelChange)="reRenderQrcode()" [required]="model.PublicServer.Ngrok.Auth.Enabled" [disabled]="!model.PublicServer.Ngrok.Auth.Enabled">
+                      <mat-error>{{ 'FORMS.VALIDATION.EMPTY' | translate }}</mat-error>
+                      <mat-hint>{{ 'SETTINGS.TABS.PUBLIC_SERVER.NGROK.USERNAME_HINT' | translate }}</mat-hint>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="fill">
+                      <mat-label>{{ 'SETTINGS.TABS.PUBLIC_SERVER.NGROK.PASSWORD' | translate }}</mat-label>
+                      <input matInput [(ngModel)]="model.PublicServer.Ngrok.Auth.Password" (ngModelChange)="reRenderQrcode()" [required]="model.PublicServer.Ngrok.Auth.Enabled" [disabled]="!model.PublicServer.Ngrok.Auth.Enabled">
+                      <mat-error>{{ 'FORMS.VALIDATION.EMPTY' | translate }}</mat-error>
+                      <mat-hint>{{ 'SETTINGS.TABS.PUBLIC_SERVER.NGROK.PASSWORD_HINT' | translate }}</mat-hint>
+                    </mat-form-field>
+                  </div>
+                </div>
+
+                <div class="api-key" fxLayout="column" fxLayoutAlign="start start" fxLayoutGap="6px">
+                  <mat-slide-toggle [(ngModel)]="model.PublicServer.VerifyAppKey" (ngModelChange)="reRenderQrcode()">
+                    {{ (model.PublicServer.VerifyAppKey ? 'SETTINGS.TABS.PUBLIC_SERVER.NGROK.APIKEY_DESC_ENABLED' : 'SETTINGS.TABS.PUBLIC_SERVER.NGROK.APIKEY_DESC_DISABLED') | translate }}
+                  </mat-slide-toggle>
+
+                  <mat-form-field appearance="fill" [style.width.%]="100">
+                    <mat-label>{{ 'SETTINGS.TABS.PUBLIC_SERVER.NGROK.APP_KEY' | translate }}</mat-label>
+                    <input matInput [(ngModel)]="model.PublicServer.AppKey" (ngModelChange)="reRenderQrcode()" [disabled]="!model.PublicServer.VerifyAppKey">
+                    <mat-hint>{{ 'SETTINGS.TABS.PUBLIC_SERVER.NGROK.APP_KEY_HINT' | translate }}</mat-hint>
+                  </mat-form-field>
+                </div>
+              </div>
+            </div>
+
+            <div class="mobile-app box info" *ngIf="isNgrokAvailable && model.PublicServer.Enabled">
+              <span>{{ 'SETTINGS.TABS.PUBLIC_SERVER.NGROK.MOBILE_APP' | translate }}</span>
+              <button mat-flat-button color="secondary" (click)="openUrl('https://github.com/marcio199226/ytd-mobile/releases')">
+                {{ 'SETTINGS.TABS.PUBLIC_SERVER.NGROK.MOBILE_APP_BTN' | translate }}
+              </button>
+            </div>
+
+          </div>
+        </ng-template>
+      </mat-tab>
+    </mat-tab-group>
   </div>
   <div mat-dialog-actions>
     <button mat-flat-button color="primary" (click)="save()">

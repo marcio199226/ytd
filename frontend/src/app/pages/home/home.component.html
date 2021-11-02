@@ -37,6 +37,7 @@
       matBadgeSize="small"
       (click)="openUpdate()"
       *ngIf="newUpdateInfo">update</mat-icon>
+      <mat-icon class="clickable white" title="Qrcode" (click)="openSettings()" *ngIf="isNgrokRunning">qr_code</mat-icon>
   </div>
 
   <language-switcher></language-switcher>
