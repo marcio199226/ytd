@@ -83,7 +83,6 @@ func newProcessResultWithUrl(url string) NgrokProcessResult {
 }
 
 func (n *NgrokService) isRunning() bool {
-	fmt.Println("IS RUNNING", n.pid, n.ProcessState)
 	return n.pid != 0
 }
 
@@ -116,9 +115,7 @@ func (n *NgrokService) StartProcess(restart bool) NgrokProcessResult {
 		ngrokPath,
 		args...,
 	)
-	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Setpgid: true,
-	}
+
 	// Use the same pipe for standard error
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
