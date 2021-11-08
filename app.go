@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -36,6 +37,8 @@ type AppState struct {
 	Config           *AppConfig        `json:"config"`
 	Stats            *AppStats         `json:"stats"`
 	AppVersion       string            `json:"appVersion"`
+	PwaUrl           string            `json:"pwaUrl"`
+	context.Context
 
 	isInForeground         bool
 	canStartAtLogin        bool
@@ -45,12 +48,13 @@ type AppState struct {
 	ngrok                  *NgrokService
 }
 
-func (state *AppState) PreWailsInit() {
+func (state *AppState) PreWailsInit(ctx context.Context) {
 	state.db = InitializeDb()
 	state.Entries = DbGetAllEntries()
 	state.OfflinePlaylists = DbGetAllOfflinePlaylists()
 	state.offlinePlaylistService = &OfflinePlaylistService{}
 	state.ngrok = &NgrokService{}
+	state.ngrok.Context = ctx
 	state.Config = state.Config.Init()
 	state.AppVersion = version
 
@@ -147,19 +151,16 @@ func (state *AppState) WailsInit(runtime *wails.Runtime) {
 		ShowLoader(state.runtime, "Starting public server...")
 		result := state.ngrok.StartProcess(false)
 		if result.err != nil {
-			fmt.Println("----------------------------")
-			fmt.Println("LAUNCH AT START FAILED", result)
-			fmt.Println("----------------------------")
-			state.runtime.Events.Emit("ytd:notification", &NotificationEventPayload{Type: "error", Label: fmt.Sprintf("Cannot start ngrok: %s")})
+			SendNotification(state.runtime, NotificationEventPayload{Type: "error", Label: fmt.Sprintf("Cannot start ngrok: %s", result.err)}, state.isInForeground)
 			state.runtime.Events.Emit("ytd:ngrok", NgrokStateEventPayload{Status: NgrokStatusError, ErrCode: result.errCode})
 			HideLoader(state.runtime)
 			return
 		}
-		fmt.Println("----------------------------")
-		fmt.Println("LAUNCHED WITH PUBLIC URL", result.publicUrl)
-		fmt.Println("----------------------------")
 		state.runtime.Events.Emit("ytd:ngrok", NgrokStateEventPayload{Status: result.status, Url: result.publicUrl})
 		HideLoader(state.runtime)
+
+		// monitor ngrok state
+		go state.ngrok.MonitorNgrokProcess()
 	}
 }
 
@@ -207,24 +208,26 @@ func (state *AppState) InitializeListeners() {
 	})
 
 	state.runtime.Events.On("ngrok:configured", func(optionalData ...interface{}) {
-		fmt.Println("----------------------------")
-		fmt.Println("AAAAAAAAA ngrok:configured")
-		fmt.Println("----------------------------")
 		if state.Config.PublicServer.Enabled {
 			ShowLoader(state.runtime, "Configuring public server...")
 			result := state.ngrok.StartProcess(true)
 			if result.err != nil {
-				state.runtime.Events.Emit("ytd:notification", &NotificationEventPayload{Type: "error", Label: fmt.Sprintf("Cannot start ngrok: %s")})
+				SendNotification(state.runtime, NotificationEventPayload{Type: "error", Label: fmt.Sprintf("Cannot start ngrok: %s", result.err)}, state.isInForeground)
+				state.runtime.Events.Emit("ytd:ngrok", NgrokStateEventPayload{Status: NgrokStatusError, ErrCode: result.errCode})
+				HideLoader(state.runtime)
+				return
 			}
+			state.runtime.Events.Emit("ytd:ngrok", NgrokStateEventPayload{Status: result.status, Url: result.publicUrl})
+			HideLoader(state.runtime)
+
+			// monitor ngrok process
+			go state.ngrok.MonitorNgrokProcess()
 		}
 
 		if !state.Config.PublicServer.Enabled {
 			err := state.ngrok.KillProcess()
 			if err != nil {
-				fmt.Println("----------------------------")
-				fmt.Println("CANNOTTTT KILLLL", state.ngrok)
-				fmt.Println("----------------------------")
-				state.runtime.Events.Emit("ytd:notification", &NotificationEventPayload{Type: "error", Label: "Cannot close public server"})
+				SendNotification(state.runtime, NotificationEventPayload{Type: "error", Label: "Cannot shutdown public server"}, state.isInForeground)
 			}
 		}
 	})

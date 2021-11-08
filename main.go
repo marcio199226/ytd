@@ -14,6 +14,7 @@ import (
 	"runtime"
 	"runtime/debug"
 	"sync"
+	"syscall"
 	"time"
 
 	. "ytd/clipboard"
@@ -35,8 +36,21 @@ var version string
 //go:embed frontend/dist/assets/*
 var static embed.FS
 
+var pwaUrl = "https://ytd.surge.sh"
 var appState *AppState
 var newEntries = make(chan GenericEntry)
+
+type JsonError struct {
+	Msg string `json:"msg"`
+}
+
+func (e *JsonError) ToJSON() string {
+	j, err := json.Marshal(e)
+	if err != nil {
+		return `{"msg": "json.Marshal() failed"}`
+	}
+	return string(j)
+}
 
 func panicHandler() error {
 	if panicPayload := recover(); panicPayload != nil {
@@ -69,12 +83,20 @@ func cors(fs http.Handler) http.HandlerFunc {
 }
 
 func main() {
-	app := &AppState{}
 	wg := &sync.WaitGroup{}
 	wg.Add(2)
+	app := &AppState{PwaUrl: pwaUrl}
 	ctx, cancelCtx := context.WithCancel(context.Background())
+	app.Context = ctx
 	exitChan := make(chan os.Signal, 1)
-	signal.Notify(exitChan, os.Interrupt, os.Kill)
+	signal.Notify(exitChan,
+		os.Interrupt,
+		os.Kill,
+		syscall.SIGHUP,
+		syscall.SIGINT,
+		syscall.SIGTERM,
+		syscall.SIGQUIT,
+	)
 	changes := make(chan string, 10)
 	stopCh := make(chan struct{}, 1)
 	go MonitorClipboard(time.Second, ctx, wg, stopCh, changes)
@@ -82,7 +104,7 @@ func main() {
 	go func(wg *sync.WaitGroup) {
 		sig := <-exitChan
 		fmt.Println("Received signal", sig)
-		// send the shutdown signal through the context.Context
+		// send the shutdown signal through the context.Context and to the global context passed down
 		cancelCtx()
 		wg.Done()
 		stopCh <- struct{}{}
@@ -130,6 +152,20 @@ func main() {
 		http.HandleFunc("/app/state", func(w http.ResponseWriter, r *http.Request) {
 			var buffer bytes.Buffer
 			w.Header().Set("Content-Type", "application/json")
+
+			// check api-key if needed
+			var xApiKey = r.Header.Get("X-API-KEY")
+			if xApiKey == "" {
+				xApiKey = r.URL.Query().Get("api-key")
+			}
+			if appState.Config.IsNgrokApiKeyEnabled() && (appState.Config.GetNgrokApiKkey() == "" || xApiKey != appState.Config.GetNgrokApiKkey()) {
+				jsonErr := &JsonError{Msg: "Wrong api key"}
+				w.WriteHeader(http.StatusUnauthorized)
+				json.NewEncoder(&buffer).Encode(&jsonErr)
+				w.Write(buffer.Bytes())
+				return
+			}
+
 			err := json.NewEncoder(&buffer).Encode(&app)
 			if err != nil {
 				http.Error(w, err.Error(), 400)
@@ -141,7 +177,7 @@ func main() {
 	}()
 
 	defer panicHandler()
-	app.PreWailsInit()
+	app.PreWailsInit(ctx)
 	err := wails.Run(&options.App{
 		Width:             1024,
 		Height:            768,

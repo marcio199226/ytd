@@ -1,11 +1,13 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"os/exec"
 	"regexp"
 	"strings"
@@ -13,6 +15,7 @@ import (
 	"time"
 
 	. "ytd/constants"
+	. "ytd/models"
 
 	"github.com/pkg/errors"
 	"github.com/wailsapp/wails/v2"
@@ -22,14 +25,17 @@ type NgrokService struct {
 	runtime   *wails.Runtime
 	pid       int
 	publicUrl string
+	*os.ProcessState
+	context.Context
 }
 
 type NgrokProcessResult struct {
-	err       error
-	output    string
-	errCode   string
-	status    string
-	publicUrl string
+	err           error
+	output        string
+	errCode       string
+	status        string
+	publicUrl     string
+	monitorStatus chan string
 }
 
 type NgrokTunnelInfo struct {
@@ -61,10 +67,11 @@ type ngrokCmdError struct {
 
 func newProcessResultWithError(err error, output string, errCode string) NgrokProcessResult {
 	return NgrokProcessResult{
-		status:  NgrokStatusError,
-		err:     err,
-		output:  output,
-		errCode: errCode,
+		status:        NgrokStatusError,
+		err:           err,
+		output:        output,
+		errCode:       errCode,
+		monitorStatus: make(chan string),
 	}
 }
 
@@ -76,6 +83,7 @@ func newProcessResultWithUrl(url string) NgrokProcessResult {
 }
 
 func (n *NgrokService) isRunning() bool {
+	fmt.Println("IS RUNNING", n.pid, n.ProcessState)
 	return n.pid != 0
 }
 
@@ -97,16 +105,20 @@ func (n *NgrokService) StartProcess(restart bool) NgrokProcessResult {
 		"http", fmt.Sprintf("http://localhost:8080"),
 		"--region", "eu",
 		"--bind-tls", "true",
-		// "--log=stdout",
 	}
 	if appState.Config.PublicServer.Ngrok.Auth.Enabled {
 		args = append(args, "--auth")
 		args = append(args, fmt.Sprintf("%s:%s", appState.Config.PublicServer.Ngrok.Auth.Username, appState.Config.PublicServer.Ngrok.Auth.Password))
 	}
-	cmd := exec.Command(
+
+	cmd := exec.CommandContext(
+		n.Context,
 		ngrokPath,
 		args...,
 	)
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		Setpgid: true,
+	}
 	// Use the same pipe for standard error
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
@@ -168,6 +180,7 @@ func (n *NgrokService) KillProcess() error {
 	if err != nil {
 		return err
 	}
+	n.pid = 0
 	return nil
 }
 
@@ -211,6 +224,42 @@ func (n *NgrokService) GetPublicUrl(waitForConnectionChan chan NgrokTunnelInfo) 
 	return
 }
 
+func (n *NgrokService) checkNgrokProcessState() string {
+	p, err := os.FindProcess(n.pid)
+	if err != nil {
+		fmt.Println("checkNgrokProcessState os.FindProcess", err)
+		return ""
+	}
+	// send SIGCONT (on Osx/Linux) which is a safe signal to the process to test if it exists
+	signalErr := p.Signal(syscall.SIGCONT)
+	if signalErr != nil {
+		n.pid = 0
+		return "stopped"
+	}
+	return "running"
+}
+
+func (n *NgrokService) MonitorNgrokProcess() {
+	ticker := time.NewTicker(10 * time.Second)
+	for {
+		select {
+		case <-ticker.C:
+			status := n.checkNgrokProcessState()
+			if status == "" {
+				ticker.Stop()
+				return
+			}
+			if status == "stopped" {
+				// send event to fe
+				n.runtime.Events.Emit("ytd:ngrok", NgrokStateEventPayload{Status: NgrokStatusStopped})
+				SendNotification(n.runtime, NotificationEventPayload{Type: "error", Label: "Public server is crashed"}, appState.isInForeground)
+				// stop to monitor ngrok status
+				ticker.Stop()
+			}
+		}
+	}
+}
+
 func (n *NgrokService) IsNgrokInstalled() (string, error) {
 	ngrok, err := exec.LookPath("ngrok")
 	if n.runtime.System.Platform() == "darwin" && err != nil {
@@ -230,26 +279,8 @@ func errorReciever(cmd *exec.Cmd, stdoutPipe io.ReadCloser, stderrPipe io.ReadCl
 		return
 	}
 
-	stderr, err := ioutil.ReadAll(stderrPipe)
-	if err != nil {
-		errorChan <- ngrokCmdError{err: errors.Wrap(err, "errorReciever ioutil.ReadAll(stderrPipe)")}
-		return
-	}
-	// in the "happy case", there is no output from ngrok. So if there is ANY
-	//  output, we treat it as an error.
-	/* 	if len(output) > 0 {
-		errorChan <- errors.Wrap(err, "errorReciever len(output) > 0")
-		return
-	} */
-	// otherwise, we wait on the process to retrieve it's potentially non-
-	//  zero exit code.
 	err = cmd.Wait()
 	if err != nil {
-		fmt.Println("----------------------------")
-		fmt.Println("errorReciever ERROR NGROK", err)
-		fmt.Println("STDOUT", extractErrorCode(string(stdout)))
-		fmt.Println("STDERR", extractErrorCode(string(stderr)))
-		fmt.Println("----------------------------")
 		errorChan <- ngrokCmdError{err: errors.Wrap(err, "errorReceiver() cmd.Wait()"), errCode: extractErrorCode(string(stdout))}
 	}
 	// close the channel before ending the goroutine.

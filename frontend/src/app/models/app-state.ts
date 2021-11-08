@@ -43,6 +43,7 @@ export interface AppState {
   config: AppConfig;
   appVersion: string;
   stats: AppStats;
+  pwaUrl: string;
 }
 
 

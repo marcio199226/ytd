@@ -236,6 +236,14 @@ func (cfg *AppConfig) SetPublicServer(val interface{}) error {
 	return nil
 }
 
+func (cfg *AppConfig) IsNgrokApiKeyEnabled() bool {
+	return cfg.PublicServer.VerifyAppKey
+}
+
+func (cfg *AppConfig) GetNgrokApiKkey() string {
+	return cfg.PublicServer.AppKey
+}
+
 func getConfigValue(defaultAppCfg AppConfig, name string) interface{} {
 	var data interface{}
 	t := reflect.ValueOf(defaultAppCfg).FieldByName(name).Kind()

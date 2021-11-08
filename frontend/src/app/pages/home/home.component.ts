@@ -315,13 +315,12 @@ export class HomeComponent implements OnInit, OnDestroy {
     setTimeout(() => this.searchInput.setValue(''))
   }
 
-  openSettings(): MatDialogRef<SettingsComponent, any> {
-    console.log('window.APP_STATE.config', window.APP_STATE.config)
+  openSettings(tab?: string): MatDialogRef<SettingsComponent, any> {
     const dialogRef = this._dialog.open(SettingsComponent, {
       panelClass: ['settings-dialog',  'with-header-dialog'],
       width: '700px',
       maxHeight: '700px',
-      data: { config: window.APP_STATE.config, isNgrokRunning: this.isNgrokRunning }
+      data: { tab, config: window.APP_STATE.config, isNgrokRunning: this.isNgrokRunning, ngrok: this.ngrok }
     });
 
     dialogRef.afterClosed().subscribe(async (result: { config: AppConfig }) => {

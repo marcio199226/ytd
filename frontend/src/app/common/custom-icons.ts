@@ -6,4 +6,9 @@ export function RegisterCustomIcons(matIconRegistry: MatIconRegistry, domSanitiz
     'github',
     domSanitizer.bypassSecurityTrustResourceUrl('http://localhost:8080/static/frontend/dist/assets/icons/github.svg')
   )
+
+  matIconRegistry.addSvgIcon(
+    'qrcode_scan',
+    domSanitizer.bypassSecurityTrustResourceUrl('http://localhost:8080/static/frontend/dist/assets/icons/qrcode-scan.svg')
+  )
 }

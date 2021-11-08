@@ -13,4 +13,5 @@ const (
 	NgrokStatusRunning = "running"
 	NgrokStatusError   = "error"
 	NgrokStatusTimeout = "timeout"
+	NgrokStatusStopped = "killed"
 )

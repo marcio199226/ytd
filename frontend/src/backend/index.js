@@ -15,6 +15,27 @@ const backend = {
         return window.backend.main.AppState.AddToDownload(arg1, arg2);
       },
       /**
+       * Deadline
+       * @returns {Promise<any|boolean>}  - Go Type: time.Time
+       */
+      "Deadline": () => {
+        return window.backend.main.AppState.Deadline();
+      },
+      /**
+       * Done
+       * @returns {Promise<any>}  - Go Type: <-chan struct {}
+       */
+      "Done": () => {
+        return window.backend.main.AppState.Done();
+      },
+      /**
+       * Err
+       * @returns {Promise<Error>}  - Go Type: error
+       */
+      "Err": () => {
+        return window.backend.main.AppState.Err();
+      },
+      /**
        * ForceQuit
        * @returns {Promise<void>} 
        */
@@ -68,10 +89,11 @@ const backend = {
       },
       /**
        * PreWailsInit
+       * @param {any} arg1 - Go Type: context.Context
        * @returns {Promise<void>} 
        */
-      "PreWailsInit": () => {
-        return window.backend.main.AppState.PreWailsInit();
+      "PreWailsInit": (arg1) => {
+        return window.backend.main.AppState.PreWailsInit(arg1);
       },
       /**
        * ReadSettingBoolValue
@@ -152,14 +174,58 @@ const backend = {
       "Update": (arg1) => {
         return window.backend.main.AppState.Update(arg1);
       },
+      /**
+       * Value
+       * @param {number} arg1 - Go Type: interface {}
+       * @returns {Promise<number>}  - Go Type: interface {}
+       */
+      "Value": (arg1) => {
+        return window.backend.main.AppState.Value(arg1);
+      },
     }
     "NgrokService": {
       /**
-       * GetPublicUrl
+       * Deadline
+       * @returns {Promise<any|boolean>}  - Go Type: time.Time
+       */
+      "Deadline": () => {
+        return window.backend.main.NgrokService.Deadline();
+      },
+      /**
+       * Done
+       * @returns {Promise<any>}  - Go Type: <-chan struct {}
+       */
+      "Done": () => {
+        return window.backend.main.NgrokService.Done();
+      },
+      /**
+       * Err
        * @returns {Promise<Error>}  - Go Type: error
        */
-      "GetPublicUrl": () => {
-        return window.backend.main.NgrokService.GetPublicUrl();
+      "Err": () => {
+        return window.backend.main.NgrokService.Err();
+      },
+      /**
+       * ExitCode
+       * @returns {Promise<number>}  - Go Type: int
+       */
+      "ExitCode": () => {
+        return window.backend.main.NgrokService.ExitCode();
+      },
+      /**
+       * Exited
+       * @returns {Promise<boolean>}  - Go Type: bool
+       */
+      "Exited": () => {
+        return window.backend.main.NgrokService.Exited();
+      },
+      /**
+       * GetPublicUrl
+       * @param {any} arg1 - Go Type: chan main.NgrokTunnelInfo
+       * @returns {Promise<void>} 
+       */
+      "GetPublicUrl": (arg1) => {
+        return window.backend.main.NgrokService.GetPublicUrl(arg1);
       },
       /**
        * IsNgrokInstalled
@@ -176,6 +242,20 @@ const backend = {
         return window.backend.main.NgrokService.KillProcess();
       },
       /**
+       * MonitorNgrokProcess
+       * @returns {Promise<void>} 
+       */
+      "MonitorNgrokProcess": () => {
+        return window.backend.main.NgrokService.MonitorNgrokProcess();
+      },
+      /**
+       * Pid
+       * @returns {Promise<number>}  - Go Type: int
+       */
+      "Pid": () => {
+        return window.backend.main.NgrokService.Pid();
+      },
+      /**
        * SetAuthToken
        * @returns {Promise<Error>}  - Go Type: error
        */
@@ -185,10 +265,60 @@ const backend = {
       /**
        * StartProcess
        * @param {boolean} arg1 - Go Type: bool
-       * @returns {Promise<Error>}  - Go Type: error
+       * @returns {Promise<any>}  - Go Type: main.NgrokProcessResult
        */
       "StartProcess": (arg1) => {
         return window.backend.main.NgrokService.StartProcess(arg1);
+      },
+      /**
+       * String
+       * @returns {Promise<string>}  - Go Type: string
+       */
+      "String": () => {
+        return window.backend.main.NgrokService.String();
+      },
+      /**
+       * Success
+       * @returns {Promise<boolean>}  - Go Type: bool
+       */
+      "Success": () => {
+        return window.backend.main.NgrokService.Success();
+      },
+      /**
+       * Sys
+       * @returns {Promise<number>}  - Go Type: interface {}
+       */
+      "Sys": () => {
+        return window.backend.main.NgrokService.Sys();
+      },
+      /**
+       * SysUsage
+       * @returns {Promise<number>}  - Go Type: interface {}
+       */
+      "SysUsage": () => {
+        return window.backend.main.NgrokService.SysUsage();
+      },
+      /**
+       * SystemTime
+       * @returns {Promise<any>}  - Go Type: time.Duration
+       */
+      "SystemTime": () => {
+        return window.backend.main.NgrokService.SystemTime();
+      },
+      /**
+       * UserTime
+       * @returns {Promise<any>}  - Go Type: time.Duration
+       */
+      "UserTime": () => {
+        return window.backend.main.NgrokService.UserTime();
+      },
+      /**
+       * Value
+       * @param {number} arg1 - Go Type: interface {}
+       * @returns {Promise<number>}  - Go Type: interface {}
+       */
+      "Value": (arg1) => {
+        return window.backend.main.NgrokService.Value(arg1);
       },
     }
     "OfflinePlaylistService": {

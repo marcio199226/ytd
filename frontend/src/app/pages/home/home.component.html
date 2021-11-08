@@ -37,7 +37,7 @@
       matBadgeSize="small"
       (click)="openUpdate()"
       *ngIf="newUpdateInfo">update</mat-icon>
-      <mat-icon class="clickable white" title="Qrcode" (click)="openSettings()" *ngIf="isNgrokRunning">qr_code</mat-icon>
+      <mat-icon class="clickable white" svgIcon="qrcode_scan" title="Qrcode" (click)="openSettings('public_server')" *ngIf="isNgrokRunning"></mat-icon>
   </div>
 
   <language-switcher></language-switcher>
@@ -69,6 +69,7 @@
       </div>
     </div>
     <div class="footer" fxLayout="column" fxLayoutGap="4px" fxLayoutAlign="start center">
+      <qr-code [value]="'{}'" size="100" errorCorrectionLevel="M" *ngIf="isNgrokRunning"></qr-code>
       <mat-icon svgIcon="github" class="clickable" (click)="openGithubProfile()"></mat-icon>
       <div class="version clickable" (click)="openReleasePage()">{{ appVersion }}</div>
       <div>Made with ❤️ by marcio199226</div>

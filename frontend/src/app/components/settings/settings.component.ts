@@ -4,11 +4,13 @@ import {
   Component,
   Inject,
   OnInit,
+  ViewChild,
   ViewEncapsulation,
 } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import to from 'await-to-js';
-import { AppConfig } from '@models';
+import { AppConfig, NgrokState } from '@models';
+import { MatTabGroup } from '@angular/material/tabs';
 
 @Component({
   selector: 'settings',
@@ -56,10 +58,13 @@ export class SettingsComponent implements OnInit {
 
   public publicServerQrcode: string = "{}";
 
+  @ViewChild(MatTabGroup)
+  private _matTabs: MatTabGroup;
+
   constructor(
     private _cdr: ChangeDetectorRef,
     private _dialogRef: MatDialogRef<SettingsComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { config: AppConfig, isNgrokRunning: boolean }
+    @Inject(MAT_DIALOG_DATA) public data: { tab?: string, config: AppConfig, isNgrokRunning: boolean, ngrok: NgrokState },
   ) {
   }
 
@@ -79,6 +84,11 @@ export class SettingsComponent implements OnInit {
 
     if(this.model.PublicServer.Enabled) {
       this.reRenderQrcode();
+    }
+
+    if(this.data.tab) {
+      const tab = this._matTabs._tabs.find(tab => tab.textLabel === this.data.tab);
+      this._matTabs.selectedIndex = tab.position;
     }
   }
 
@@ -105,13 +115,21 @@ export class SettingsComponent implements OnInit {
   }
 
   private _getQrCodeData(): string {
-    return JSON.stringify({
-      // url: this.model.PublicServer.Ngrok.Url,
-      auth: {
-        username: this.model.PublicServer.Ngrok.Auth.Username,
-        password: this.model.PublicServer.Ngrok.Auth.Password
-      },
-      ...(this.model.PublicServer.VerifyAppKey && {apiKey: this.model.PublicServer.AppKey})
-    })
+    const pwa = window.APP_STATE.pwaUrl;
+    if(this.data.isNgrokRunning) {
+      const url = new URL(pwa);
+      url.searchParams.append("url", this.data.ngrok.url);
+
+      if(this.model.PublicServer.Ngrok.Auth.Enabled) {
+        url.searchParams.append("username", this.model.PublicServer.Ngrok.Auth.Username);
+        url.searchParams.append("password", this.model.PublicServer.Ngrok.Auth.Password);
+      }
+
+      if(this.model.PublicServer.VerifyAppKey) {
+        url.searchParams.append("api_key", this.model.PublicServer.AppKey);
+      }
+      return url.toString();
+    }
+    return "{}";
   }
 }
