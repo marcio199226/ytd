@@ -111,7 +111,7 @@
                 </mat-form-field>
 
                 <div class="auth" fxLayout="column" fxLayoutAlign="start start" fxLayoutGap="6px">
-                  <mat-slide-toggle [(ngModel)]="model.PublicServer.Ngrok.Auth.Enabled">
+                  <mat-slide-toggle [(ngModel)]="model.PublicServer.Ngrok.Auth.Enabled" (ngModelChange)="reRenderQrcode()">
                     {{ (model.PublicServer.Ngrok.Auth.Enabled ? 'SETTINGS.TABS.PUBLIC_SERVER.NGROK.AUTH_DESC_ENABLED' : 'SETTINGS.TABS.PUBLIC_SERVER.NGROK.AUTH_DESC_DISABLED') | translate }}
                   </mat-slide-toggle>
 

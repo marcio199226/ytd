@@ -123,10 +123,15 @@ export class SettingsComponent implements OnInit {
       if(this.model.PublicServer.Ngrok.Auth.Enabled) {
         url.searchParams.append("username", this.model.PublicServer.Ngrok.Auth.Username);
         url.searchParams.append("password", this.model.PublicServer.Ngrok.Auth.Password);
+      } else {
+        url.searchParams.delete("username");
+        url.searchParams.delete("password");
       }
 
       if(this.model.PublicServer.VerifyAppKey) {
         url.searchParams.append("api_key", this.model.PublicServer.AppKey);
+      } else {
+        url.searchParams.delete("api_key");
       }
       return url.toString();
     }
