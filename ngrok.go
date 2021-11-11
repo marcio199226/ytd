@@ -104,6 +104,7 @@ func (n *NgrokService) StartProcess(restart bool) NgrokProcessResult {
 		"http", fmt.Sprintf("http://localhost:8080"),
 		"--region", "eu",
 		"--bind-tls", "true",
+		"--host-header", "rewrite",
 	}
 	if appState.Config.PublicServer.Ngrok.Auth.Enabled {
 		args = append(args, "--auth")
@@ -115,6 +116,10 @@ func (n *NgrokService) StartProcess(restart bool) NgrokProcessResult {
 		ngrokPath,
 		args...,
 	)
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		// set this to true otherwise if we restart ngrok our app will be killed too
+		Setpgid: true,
+	}
 
 	// Use the same pipe for standard error
 	stderr, err := cmd.StderrPipe()

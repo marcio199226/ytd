@@ -38,7 +38,7 @@ type AppState struct {
 	Stats            *AppStats         `json:"stats"`
 	AppVersion       string            `json:"appVersion"`
 	PwaUrl           string            `json:"pwaUrl"`
-	context.Context
+	context.Context  `json:"-"`
 
 	isInForeground         bool
 	canStartAtLogin        bool

@@ -152,6 +152,10 @@ func main() {
 		http.HandleFunc("/app/state", func(w http.ResponseWriter, r *http.Request) {
 			var buffer bytes.Buffer
 			w.Header().Set("Content-Type", "application/json")
+			w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
+			w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+			w.Header().Set("Access-Control-Allow-Headers", "Authorization, X-API-KEY")
+			w.Header().Set("Access-Control-Expose-Headers", "Authorization, X-API-KEY")
 
 			// check api-key if needed
 			var xApiKey = r.Header.Get("X-API-KEY")
