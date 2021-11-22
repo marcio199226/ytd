@@ -114,6 +114,36 @@
       "UNSUPPORTED_URL": "Url non supportato",
       "TRACK_ADDED": "Brano aggiunto al download",
       "TRACK_ADD_KO": "Impossibile aggiungere il brano al download"
+    },
+    "TABS": {
+      "GENERAL": "Generali",
+      "PUBLIC_SERVER": {
+        "LABEL": "Condivisione",
+        "DESC": "Condividi i tuoi brani e le tue playlist con i tuoi amici",
+        "ENABLED": "Attiva",
+        "DISABLED": "Spenta",
+        "NGROK": {
+          "NOT_INSTALLED": "Devi prima installare ngrok per abilitare questa funzionalita",
+          "INSTALL_BTN": "Installa ngrok",
+          "MOBILE_APP": "Scarica l'app mobile e scanerizza il qrcode",
+          "MOBILE_APP_BTN": "Scarica l'app",
+          "AUTH_TOKEN": "Authtoken di ngrok",
+          "AUTH_TOKEN_HINT": "",
+          "AUTH_DESC_ENABLED": "L'autenticazione è abilitata",
+          "AUTH_DESC_DISABLED": "Abilita l'autenticazione (maggiore sicurezza)",
+          "USERNAME": "Username",
+          "USERNAME_HINT": "Username usata per l'autenticazione",
+          "PASSWORD": "Password",
+          "PASSWORD_HINT": "Password usata per l'autenticazione",
+          "APIKEY_DESC_ENABLED": "Disabilita la verifica della api key",
+          "APIKEY_DESC_DISABLED": "Abilita la verifica della api key",
+          "APP_KEY": "Verifica api key (maggiore sicurezza)",
+          "APP_KEY_HINT": "Verra' verificata la api key per la connessione",
+          "SHARE_URL": "Condividi l'url con i tuoi amici per accedere alle tue playlist",
+          "COPY_URL": "Copia nella clipboard",
+          "URL_COPIED": "L'url è stato copiato nei tuoi appunti"
+        }
+      }
     }
   },
   "UPDATER": {

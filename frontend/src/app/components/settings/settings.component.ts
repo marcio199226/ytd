@@ -11,6 +11,8 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import to from 'await-to-js';
 import { AppConfig, getQrcodeData, NgrokState } from '@models';
 import { MatTabGroup } from '@angular/material/tabs';
+import { Clipboard } from '@angular/cdk/clipboard';
+import { SnackbarService } from 'app/services/snackbar.service';
 
 @Component({
   selector: 'settings',
@@ -64,6 +66,8 @@ export class SettingsComponent implements OnInit {
   constructor(
     private _cdr: ChangeDetectorRef,
     private _dialogRef: MatDialogRef<SettingsComponent>,
+    private _clipboard: Clipboard,
+    private _snackbar: SnackbarService,
     @Inject(MAT_DIALOG_DATA) public data: { tab?: string, config: AppConfig, isNgrokRunning: boolean, ngrok: NgrokState },
   ) {
   }
@@ -115,6 +119,11 @@ export class SettingsComponent implements OnInit {
   reRenderQrcode(): void {
     this.publicServerQrcode = this._getQrCodeData();
     this._cdr.detectChanges();
+  }
+
+  copyUrlToClipboard(): void {
+    this._clipboard.copy(this.publicServerQrcode);
+    this._snackbar.openSuccess("SETTINGS.TABS.PUBLIC_SERVER.NGROK.URL_COPIED");
   }
 
   private _getQrCodeData(): string {

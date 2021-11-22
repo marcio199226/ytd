@@ -112,7 +112,10 @@
           "APIKEY_DESC_ENABLED": "Disable api key verification",
           "APIKEY_DESC_DISABLED": "Enable api key verification",
           "APP_KEY": "Verify api key (more secure)",
-          "APP_KEY_HINT": "Your local server will verify api key too"
+          "APP_KEY_HINT": "Your local server will verify api key too",
+          "SHARE_URL": "Share url with your fiends",
+          "COPY_URL": "Copy to clipboard",
+          "URL_COPIED": "Url has been copied to your clipboard"
         }
       }
     },

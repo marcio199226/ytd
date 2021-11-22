@@ -9,6 +9,7 @@ import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HomeComponent, OfflinePlaylistComponent } from './pages';
 import { FlexLayoutModule } from '@angular/flex-layout';
+import { ClipboardModule } from '@angular/cdk/clipboard';
 import { MatButtonModule } from '@angular/material/button';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatCardModule } from '@angular/material/card';
@@ -84,6 +85,7 @@ export function HttpLoaderFactory(http: HttpClient) {
     }),
     FlexLayoutModule,
     QrCodeModule,
+    ClipboardModule,
     MatBadgeModule,
     MatButtonModule,
     MatCardModule,

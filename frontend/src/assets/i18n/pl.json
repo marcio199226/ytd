@@ -114,6 +114,36 @@
       "UNSUPPORTED_URL": "Nieobsługiwany adres URL",
       "TRACK_ADDED": "Utwór dodany do pobrania",
       "TRACK_ADD_KO": "Bład przy dodawaniu utworu do listy pobierania"
+    },
+    "TABS": {
+      "GENERAL": "Ogólne",
+      "PUBLIC_SERVER": {
+        "LABEL": "Tunelowanie",
+        "DESC": "Udostepniaj twoim znajomym twoje utwory i listy odtwarzania",
+        "ENABLED": "Aktywne",
+        "DISABLED": "Nieaktywne",
+        "NGROK": {
+          "NOT_INSTALLED": "Musisz najpierw zainstalować ngrok, aby włączyć tę funkcję",
+          "INSTALL_BTN": "Zainstaluj ngrok",
+          "MOBILE_APP": "Ściągnij aplikacje i zeskanuj qrcode",
+          "MOBILE_APP_BTN": "Ściągnij aplikacje",
+          "AUTH_TOKEN": "Token ngrok",
+          "AUTH_TOKEN_HINT": "",
+          "AUTH_DESC_ENABLED": "Autentykacja włączona",
+          "AUTH_DESC_DISABLED": "Włącz uwierzytelnianie (zwiększone bezpieczeństwo)",
+          "USERNAME": "Użytkownik",
+          "USERNAME_HINT": "Nazwa użytkownik potrzebna do autentykacji",
+          "PASSWORD": "Hasło",
+          "PASSWORD_HINT": "Hasło użytkownika potrzebne do autentykacji",
+          "APIKEY_DESC_ENABLED": "Wyłącz weryfikację klucza API",
+          "APIKEY_DESC_DISABLED": "Włącz weryfikację klucza API",
+          "APP_KEY": "Zweryfikuj klucz API (większe bezpieczeństwo)",
+          "APP_KEY_HINT": "Aby połączyc sie trzeba bedzie podac klucz API",
+          "SHARE_URL": "Udostępnij adres URL znajomym, aby uzyskać dostęp do twoich list odtwarzania",
+          "COPY_URL": "Skopiuj do schowka",
+          "URL_COPIED": "Adres URL został skopiowany do schowka"
+        }
+      }
     }
   },
   "UPDATER": {

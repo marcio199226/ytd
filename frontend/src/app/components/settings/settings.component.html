@@ -101,7 +101,6 @@
             <div fxLayout="row" fxLayoutAlign="start start" fxLayoutGap="12px" [style.width.%]="100" *ngIf="model.PublicServer.Enabled">
               <div class="qrcode">
                 <qr-code [value]="publicServerQrcode" size="300" errorCorrectionLevel="M"></qr-code>
-                {{ publicServerQrcode }}
               </div>
               <div class="form" fxLayout="column" fxLayoutAlign="start start" fxLayoutGap="16px">
                 <mat-form-field appearance="fill" [style.width.%]="100">
@@ -147,10 +146,17 @@
               </div>
             </div>
 
-            <div class="mobile-app box info" *ngIf="isNgrokAvailable && model.PublicServer.Enabled">
+            <div class="mobile-app box info" *ngIf="false && isNgrokAvailable && model.PublicServer.Enabled">
               <span>{{ 'SETTINGS.TABS.PUBLIC_SERVER.NGROK.MOBILE_APP' | translate }}</span>
               <button mat-flat-button color="secondary" (click)="openUrl('https://github.com/marcio199226/ytd-mobile/releases')">
                 {{ 'SETTINGS.TABS.PUBLIC_SERVER.NGROK.MOBILE_APP_BTN' | translate }}
+              </button>
+            </div>
+
+            <div class="share-url box info" *ngIf="isNgrokAvailable && model.PublicServer.Enabled">
+              <span>{{ 'SETTINGS.TABS.PUBLIC_SERVER.NGROK.SHARE_URL' | translate }}</span>
+              <button mat-icon-button [title]="'SETTINGS.TABS.PUBLIC_SERVER.NGROK.COPY_URL' | translate" (click)="copyUrlToClipboard()">
+                <mat-icon>content_copy</mat-icon>
               </button>
             </div>
 
