@@ -101,6 +101,7 @@
             <div fxLayout="row" fxLayoutAlign="start start" fxLayoutGap="12px" [style.width.%]="100" *ngIf="model.PublicServer.Enabled">
               <div class="qrcode">
                 <qr-code [value]="publicServerQrcode" size="300" errorCorrectionLevel="M"></qr-code>
+                {{ publicServerQrcode }}
               </div>
               <div class="form" fxLayout="column" fxLayoutAlign="start start" fxLayoutGap="16px">
                 <mat-form-field appearance="fill" [style.width.%]="100">

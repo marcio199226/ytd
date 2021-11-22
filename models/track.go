@@ -10,6 +10,7 @@ type ConvertStatus struct {
 	Status   string `json:"status"`
 	Err      string `json:"error"`
 	Attempts int    `json:"attempts"`
+	Filesize int    `json:"filesize"` // bytes
 }
 
 type GenericTrack struct {

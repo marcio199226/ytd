@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import to from 'await-to-js';
-import { AppConfig, NgrokState } from '@models';
+import { AppConfig, getQrcodeData, NgrokState } from '@models';
 import { MatTabGroup } from '@angular/material/tabs';
 
 @Component({
@@ -85,10 +85,13 @@ export class SettingsComponent implements OnInit {
     if(this.model.PublicServer.Enabled) {
       this.reRenderQrcode();
     }
+  }
 
+  ngAfterViewInit(): void {
     if(this.data.tab) {
       const tab = this._matTabs._tabs.find(tab => tab.textLabel === this.data.tab);
       this._matTabs.selectedIndex = tab.position;
+      this._cdr.detectChanges();
     }
   }
 
@@ -117,23 +120,7 @@ export class SettingsComponent implements OnInit {
   private _getQrCodeData(): string {
     const pwa = window.APP_STATE.pwaUrl;
     if(this.data.isNgrokRunning) {
-      const url = new URL(pwa);
-      url.searchParams.append("url", this.data.ngrok.url);
-
-      if(this.model.PublicServer.Ngrok.Auth.Enabled) {
-        url.searchParams.append("username", this.model.PublicServer.Ngrok.Auth.Username);
-        url.searchParams.append("password", this.model.PublicServer.Ngrok.Auth.Password);
-      } else {
-        url.searchParams.delete("username");
-        url.searchParams.delete("password");
-      }
-
-      if(this.model.PublicServer.VerifyAppKey) {
-        url.searchParams.append("api_key", this.model.PublicServer.AppKey);
-      } else {
-        url.searchParams.delete("api_key");
-      }
-      return url.toString();
+      return getQrcodeData(this.data.ngrok.url);
     }
     return "{}";
   }

@@ -14,7 +14,7 @@ import {
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { AudioPlayerService } from 'app/components/audio-player/audio-player.service';
-import { Track, Entry, UpdateRelease, ReleaseEventPayload, NgrokState } from '@models';
+import { Track, Entry, UpdateRelease, ReleaseEventPayload, NgrokState, getQrcodeData } from '@models';
 import { AppConfig, AppState } from '../../models/app-state';
 import * as Wails from '@wailsapp/runtime';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -99,6 +99,10 @@ export class HomeComponent implements OnInit, OnDestroy {
       return false;
     }
     return this.ngrok.status === 'running';
+  }
+
+  public get qrCodeData(): string {
+    return getQrcodeData(this.ngrok.url);
   }
 
   @ViewChild('searchNativeInput')

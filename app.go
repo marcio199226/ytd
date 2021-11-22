@@ -313,12 +313,19 @@ func (state *AppState) convertToMp3(restart chan<- int) error {
 		plugin := getPluginFor(entry.Source)
 
 		if entry.Type == "track" && entry.Track.Status == TrackStatusDownladed && !entry.Track.IsConvertedToMp3 && plugin.IsTrackFileExists(entry.Track, "webm") {
+			// skip tracks which has failed at least 3 times in a row
+			if entry.Track.ConvertingStatus.Attempts >= 3 {
+				fmt.Printf("Skipping audio extraction for %s(%s)...due to too many attempts\n", entry.Track.Name, entry.Track.ID)
+				return nil
+			}
+
 			fmt.Printf("Extracting audio for %s...\n", entry.Track.Name)
 			entry.Track.ConvertingStatus.Status = TrakcConverting
 			DbWriteEntry(entry.Track.ID, entry)
 			state.runtime.Events.Emit("ytd:track", entry)
 
 			// ffmpeg -i "41qC3w3UUkU.webm" -vn -ab 128k -ar 44100 -y "41qC3w3UUkU.mp3"
+			outputPath := fmt.Sprintf("%s/%s.mp3", plugin.GetDir(), entry.Track.ID)
 			cmd := exec.Command(
 				ffmpeg,
 				"-loglevel", "quiet",
@@ -326,7 +333,7 @@ func (state *AppState) convertToMp3(restart chan<- int) error {
 				"-vn",
 				"-ab", "128k",
 				"-ar", "44100",
-				"-y", fmt.Sprintf("%s/%s.mp3", plugin.GetDir(), entry.Track.ID),
+				"-y", outputPath,
 			)
 			cmd.Stdin = os.Stdin
 			cmd.Stdout = os.Stdout
@@ -343,10 +350,17 @@ func (state *AppState) convertToMp3(restart chan<- int) error {
 			} else {
 				entry.Track.ConvertingStatus.Status = TrakcConverted
 				entry.Track.IsConvertedToMp3 = true
-				DbWriteEntry(entry.Track.ID, entry)
-				state.runtime.Events.Emit("ytd:track", entry) // track:converted:mp3
 
-				// remove webm
+				// check new filesize and save it
+				fileInfo, err := os.Stat(outputPath)
+				if err == nil {
+					entry.Track.ConvertingStatus.Filesize = int(fileInfo.Size())
+				}
+
+				DbWriteEntry(entry.Track.ID, entry)
+				state.runtime.Events.Emit("ytd:track", entry)
+
+				// remove webm if needed
 				if state.Config.CleanWebmFiles && plugin.IsTrackFileExists(entry.Track, "webm") {
 					err = os.Remove(fmt.Sprintf("%s/%s.webm", plugin.GetDir(), entry.Track.ID))
 					if err != nil && !os.IsNotExist(err) {

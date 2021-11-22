@@ -149,6 +149,10 @@ func main() {
 		fs := http.StripPrefix("/static/", http.FileServer(http.FS(static)))
 		http.Handle("/tracks/", http.StripPrefix("/tracks/", http.FileServer(http.Dir(currentDir))))
 		http.Handle("/static/", cors(fs))
+
+		// api for mobile/pwa app
+		ytTracks := http.StripPrefix("/app/download", http.FileServer(http.Dir(currentDir)))
+		http.Handle("/app/download/", cors(ytTracks))
 		http.HandleFunc("/app/state", func(w http.ResponseWriter, r *http.Request) {
 			var buffer bytes.Buffer
 			w.Header().Set("Content-Type", "application/json")
@@ -177,6 +181,7 @@ func main() {
 			}
 			w.Write(buffer.Bytes())
 		})
+
 		http.ListenAndServe(":8080", nil)
 	}()
 
