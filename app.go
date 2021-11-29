@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"os/user"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -18,6 +19,7 @@ import (
 	. "ytd/models"
 	. "ytd/plugins"
 
+	"github.com/denisbrodbeck/machineid"
 	"github.com/leonelquinteros/gotext"
 	"github.com/mitchellh/mapstructure"
 	"github.com/wailsapp/wails/v2"
@@ -26,7 +28,14 @@ import (
 	"github.com/xujiajun/nutsdb"
 )
 
+var i18nPath string
+
 var wailsRuntime *wails.Runtime
+
+type HostInfo struct {
+	ID       string `json:"id"`
+	Username string `json:"username"`
+}
 
 type AppState struct {
 	runtime          *wails.Runtime
@@ -37,6 +46,7 @@ type AppState struct {
 	Config           *AppConfig        `json:"config"`
 	Stats            *AppStats         `json:"stats"`
 	AppVersion       string            `json:"appVersion"`
+	Host             HostInfo          `json:"host"`
 	PwaUrl           string            `json:"pwaUrl"`
 	context.Context  `json:"-"`
 
@@ -63,6 +73,13 @@ func (state *AppState) PreWailsInit(ctx context.Context) {
 
 	if _, err := mac.StartsAtLogin(); err == nil {
 		state.canStartAtLogin = true
+	}
+
+	if machineid, err := machineid.ProtectedID("ytd"); err == nil {
+		state.Host.ID = machineid
+	}
+	if user, err := user.Current(); err == nil {
+		state.Host.Username = user.Username
 	}
 }
 
@@ -177,7 +194,7 @@ func (state *AppState) WailsShutdown() {
 }
 
 func (state *AppState) ReloadNewLanguage() {
-	gotext.Configure("/Users/oskarmarciniak/projects/golang/ytd/i18n", state.Config.Language, "default")
+	gotext.Configure(i18nPath, state.Config.Language, "default")
 	// re render tray to take effect for new language translations
 	state.tray.reRenderTray(func() {})
 	// do other stuff if needed to reload translations from some ui native elements

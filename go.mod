@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	github.com/Masterminds/semver/v3 v3.1.1
+	github.com/denisbrodbeck/machineid v1.0.1
 	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/frankban/quicktest v1.13.1 // indirect
 	github.com/go-ole/go-ole v1.2.5 // indirect

@@ -5,6 +5,9 @@ github.com/Masterminds/semver/v3
 github.com/bitly/go-simplejson
 # github.com/bwmarrin/snowflake v0.3.0
 github.com/bwmarrin/snowflake
+# github.com/denisbrodbeck/machineid v1.0.1
+## explicit
+github.com/denisbrodbeck/machineid
 # github.com/dsnet/compress v0.0.1
 ## explicit
 github.com/dsnet/compress
