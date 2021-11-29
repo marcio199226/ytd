@@ -6,9 +6,10 @@ Dekstop app for downloading audio tracks from youtube built with wails & angular
 
 ## Install
 [Download from releases page](https://github.com/marcio199226/ytd/releases)
+[PWA](https://ytd.surge.sh/)
 
 Supported platfroms for now
-- Macos (tested on 11.5.x apple m1)
+- Macos (tested on 11.5.x/11.6.x & 12.x apple m1)
 
 ## Main features:
 - check for updates & app update
@@ -67,6 +68,6 @@ Extract translation for golang side:
 ## Roadmap
 - [ ] Chrome extension so tracks may be downloaded without user interaction (even without copy yt links)
 - [x] Internalization
-- [ ] Share tracks through public webserver running locally
+- [x] Share tracks through public webserver running locally
 - [ ] Share tracks through telegram (user could subscribe to ytd bot and then will be able to send downloaded tracks to yourself telegram account)
 - [ ] Download playlists from yt (exports them, search for playlist, playback playlist etc...)
