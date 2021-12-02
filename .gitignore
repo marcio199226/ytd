@@ -15,5 +15,9 @@ build/
 .version
 pwa/
 
+# System Files
+.DS_Store
+Thumbs.db
+
 # Dependency directories (remove the comment below to include it)
 # vendor/
