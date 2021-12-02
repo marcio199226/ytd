@@ -6,6 +6,7 @@ Dekstop app for downloading audio tracks from youtube built with wails & angular
 
 ## Install
 [Download from releases page](https://github.com/marcio199226/ytd/releases)
+
 [PWA](https://ytd.surge.sh/)
 
 Supported platfroms for now
