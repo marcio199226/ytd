@@ -115,7 +115,20 @@
           "APP_KEY_HINT": "Your local server will verify api key too",
           "SHARE_URL": "Share url with your fiends",
           "COPY_URL": "Copy to clipboard",
-          "URL_COPIED": "Url has been copied to your clipboard"
+          "URL_COPIED": "Url has been copied to your clipboard",
+          "ERROR_DETAILS_BTN": "Show details",
+          "CRASHED": "Ngrok service crashed unexpectedly",
+          "ON_STARTUP_ERRORS": {
+            "DEFAULT": "An error occurred: {{errCode}}",
+            "ERR_NGROK_103": "Your account seems to be suspended",
+            "ERR_NGROK_105": "Invalid authtoken",
+            "ERR_NGROK_107": "Invalid authtoken",
+            "ERR_NGROK_10888": "Max simultaneous ngrok clients reached, check if there is any ngrok process already running",
+            "ERR_NGROK_121": "You have an outdated ngrok version, please update it",
+            "ERR_NGROK_205": "Your account seems to be suspended",
+            "ERR_NGROK_225": "You have reached max simultaneous requests",
+            "ERR_NGROK_226": "You have reached max requests per interval"
+          }
         }
       }
     },

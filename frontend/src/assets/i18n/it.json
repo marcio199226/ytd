@@ -141,7 +141,20 @@
           "APP_KEY_HINT": "Verra' verificata la api key per la connessione",
           "SHARE_URL": "Condividi l'url con i tuoi amici per accedere alle tue playlist",
           "COPY_URL": "Copia nella clipboard",
-          "URL_COPIED": "L'url è stato copiato nei tuoi appunti"
+          "URL_COPIED": "L'url è stato copiato nei tuoi appunti",
+          "ERROR_DETAILS_BTN": "Mostra dettagli",
+          "CRASHED": "Il servizio ngrok è andato in crash inaspettatamente",
+          "ON_STARTUP_ERRORS": {
+            "DEFAULT": "Errore : {{errCode}}",
+            "ERR_NGROK_103": "Il tuo account risulta sospeso",
+            "ERR_NGROK_105": "Authtoken non valido",
+            "ERR_NGROK_107": "Authtoken non valido",
+            "ERR_NGROK_10888": "Risulta esserci gia in esecuzione ngrok controlla tra i processi",
+            "ERR_NGROK_121": "Hai una versione di ngrok obsoleta, per favore aggiornala",
+            "ERR_NGROK_205": "Il tuo account risulta sospeso",
+            "ERR_NGROK_225": "Hai raggiunto il numero massimo di richieste simultanee",
+            "ERR_NGROK_226": "Il numero massimo di richieste per intervallo è stato raggiunto"
+          }
         }
       }
     }

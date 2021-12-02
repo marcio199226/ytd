@@ -26,7 +26,7 @@ msgstr "L’app e’ in esecuzione in background"
 
 #: tray.go:71
 msgid "Check for updates"
-msgstr ""
+msgstr "Verifica aggiornamento"
 
 #: app.go:185
 msgid "Choose directory"

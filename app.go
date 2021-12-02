@@ -168,7 +168,6 @@ func (state *AppState) WailsInit(runtime *wails.Runtime) {
 		ShowLoader(state.runtime, "Starting public server...")
 		result := state.ngrok.StartProcess(false)
 		if result.err != nil {
-			SendNotification(state.runtime, NotificationEventPayload{Type: "error", Label: fmt.Sprintf("Cannot start ngrok: %s", result.err)}, state.isInForeground)
 			state.runtime.Events.Emit("ytd:ngrok", NgrokStateEventPayload{Status: NgrokStatusError, ErrCode: result.errCode})
 			HideLoader(state.runtime)
 			return
@@ -229,7 +228,6 @@ func (state *AppState) InitializeListeners() {
 			ShowLoader(state.runtime, "Configuring public server...")
 			result := state.ngrok.StartProcess(true)
 			if result.err != nil {
-				SendNotification(state.runtime, NotificationEventPayload{Type: "error", Label: fmt.Sprintf("Cannot start ngrok: %s", result.err)}, state.isInForeground)
 				state.runtime.Events.Emit("ytd:ngrok", NgrokStateEventPayload{Status: NgrokStatusError, ErrCode: result.errCode})
 				HideLoader(state.runtime)
 				return
@@ -403,7 +401,7 @@ func (state *AppState) checkForUpdates() {
 
 	state.updater = &Updater{
 		CurrentVersion:              version,
-		LatestReleaseGitHubEndpoint: "https://api.github.com/repos/marcio199226/ytd-binaries/releases",
+		LatestReleaseGitHubEndpoint: "https://api.github.com/repos/marcio199226/ytd/releases",
 		Client:                      &http.Client{Timeout: 10 * time.Minute},
 		SelectAsset: func(release Release, asset Asset) bool {
 			// look for the zip file

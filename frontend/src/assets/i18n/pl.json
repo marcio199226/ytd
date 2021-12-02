@@ -141,7 +141,20 @@
           "APP_KEY_HINT": "Aby połączyc sie trzeba bedzie podac klucz API",
           "SHARE_URL": "Udostępnij adres URL znajomym, aby uzyskać dostęp do twoich list odtwarzania",
           "COPY_URL": "Skopiuj do schowka",
-          "URL_COPIED": "Adres URL został skopiowany do schowka"
+          "URL_COPIED": "Adres URL został skopiowany do schowka",
+          "ERROR_DETAILS_BTN": "Pokaż szczegóły",
+          "CRASHED": "Ngrok niespodziewanie się zawiesił",
+          "ON_STARTUP_ERRORS": {
+            "DEFAULT": "Wystąpił błąd: {{errCode}}",
+            "ERR_NGROK_103": "Wygląda na to, że Twoje konto zostało zawieszone",
+            "ERR_NGROK_105": "Nieprawidłowy token uwierzytelniający",
+            "ERR_NGROK_107": "Nieprawidłowy token uwierzytelniający",
+            "ERR_NGROK_10888": "Wygląda na to, że ngrok już działa w tle, sprawdź czy jest uruchomiony jakiś proces ngrok w tle",
+            "ERR_NGROK_121": "Masz przestarzałą wersję ngrok, zaktualizuj ją",
+            "ERR_NGROK_205": "Wygląda na to, że Twoje konto zostało zawieszone",
+            "ERR_NGROK_225": "Osiągnięto maksymalną liczbę jednoczesnych żądań",
+            "ERR_NGROK_226": "Osiągnięto maksymalną liczbę jednoczesnych żądań"
+          }
         }
       }
     }

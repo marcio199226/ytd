@@ -231,9 +231,28 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
 
     Wails.Events.On("ytd:ngrok", (ngrok: NgrokState) => {
-      this._ngZone.run(() => {
-        this.ngrok = ngrok;
+      this._ngZone.run(async () => {
         console.log("ytd:ngrok", ngrok)
+        this.ngrok = ngrok;
+
+        if(this.ngrok.status === 'error') {
+          const transPath = `SETTINGS.TABS.PUBLIC_SERVER.NGROK.ON_STARTUP_ERRORS.${this.ngrok.errCode}`;
+          const defaultTransPath = `SETTINGS.TABS.PUBLIC_SERVER.NGROK.ON_STARTUP_ERRORS.DEFAULT`;
+          const transStr = this._trans.instant(transPath);
+          const exists = transStr !== transPath;
+          const snackRef = this._snackbar.openWarning(
+            exists ? transPath : defaultTransPath, 'SETTINGS.TABS.PUBLIC_SERVER.NGROK.ERROR_DETAILS_BTN',
+            { duration: 10000 },
+            { errCode: this.ngrok.errCode }
+          );
+          snackRef.onAction().subscribe(async () => {
+            await window.backend.main.AppState.OpenUrl(`https://ngrok.com/docs/errors/${this.ngrok.errCode.toLowerCase()}`);
+          });
+        }
+
+        if(this.ngrok.status === 'killed') {
+          this._snackbar.openWarning('SETTINGS.TABS.PUBLIC_SERVER.NGROK.CRASHED', '', { duration: 10000 });
+        }
         this._cdr.detectChanges();
       })
     });
