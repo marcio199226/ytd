@@ -56,6 +56,7 @@ type AppState struct {
 	updater                *Updater
 	offlinePlaylistService *OfflinePlaylistService
 	ngrok                  *NgrokService
+	convertQueue           chan GenericEntry
 }
 
 func (state *AppState) PreWailsInit(ctx context.Context) {
@@ -67,6 +68,7 @@ func (state *AppState) PreWailsInit(ctx context.Context) {
 	state.ngrok.Context = ctx
 	state.Config = state.Config.Init()
 	state.AppVersion = version
+	state.convertQueue = make(chan GenericEntry)
 
 	// configure i18n paths
 	gotext.Configure("/Users/oskarmarciniak/projects/golang/ytd/i18n", state.Config.Language, "default")
@@ -109,6 +111,7 @@ func (state *AppState) WailsInit(runtime *wails.Runtime) {
 	// initialize plugins
 	for _, plugin := range plugins {
 		plugin.SetWailsRuntime(runtime)
+		plugin.SetContext(state.Context)
 		plugin.SetAppConfig(state.Config)
 		plugin.SetAppStats(state.Stats)
 	}
@@ -134,24 +137,45 @@ func (state *AppState) WailsInit(runtime *wails.Runtime) {
 	}() */
 
 	go func() {
-		restart := make(chan int)
-		time.Sleep(3 * time.Second)
-		go state.convertToMp3(restart)
+		ticker := time.NewTicker(3 * time.Second)
+		pending := make(chan int, maxConvertJobs)
 
 		for {
 			select {
-			// @TODO
-			// qui leggiamo da newEntries dove andiamo a scrivere o dentro yt.Fetch alla fine del metodo
-			// oppure da dentro AddToDownload e facciamo tornare a plugin.fetch l'entry creata
-			// cosi se legge prima da newEntries converte per prima quella altrimenti convertira le tracce che sono in attesa da prima
-			/* 			case <-newEntries:
-			fmt.Println("Converto new track...")
-			go state.convertToMp3(restart, newEntries) */
-			case <-restart:
-				fmt.Println("Restart converting...")
-				go state.convertToMp3(restart)
-			}
+			case entry := <-state.convertQueue:
+				go func() {
+					if len(pending) == cap(pending) {
+						state.runtime.Events.Emit("ytd:track:convert:queued", entry)
+					}
+					pending <- 1
+					state.convertToMp3(ticker, &entry, true)
+					<-pending
+				}()
+			case <-ticker.C:
+				// get entries that could be converted
+				for _, t := range DbGetAllEntries() {
+					entry := t
+					plugin := getPluginFor(entry.Source)
 
+					if entry.Type == "track" && entry.Track.Status == TrackStatusDownladed && !entry.Track.IsConvertedToMp3 && plugin.IsTrackFileExists(entry.Track, "webm") {
+						// skip tracks which has failed at least 3 times in a row
+						if entry.Track.ConvertingStatus.Attempts >= 3 {
+							fmt.Printf("Skipping audio extraction for %s(%s)...due to too many attempts\n", entry.Track.Name, entry.Track.ID)
+							continue
+						}
+
+						go func() {
+							// this will block until pending channel is full
+							pending <- 1
+							state.convertToMp3(ticker, &entry, false)
+							<-pending
+						}()
+					}
+				}
+			default:
+				fmt.Printf("Convert to mp3 nothing to do....max parralel %d | converting %d | pending %d entries\n\n", maxConvertJobs, state.Stats.ConvertingCount, len(pending))
+				time.Sleep(1 * time.Second)
+			}
 		}
 	}()
 
@@ -312,85 +336,79 @@ func (state *AppState) checkForTracksToDownload() error {
 	return nil
 }
 
-func (state *AppState) convertToMp3(restart chan<- int) error {
+func (state *AppState) convertToMp3(restartTicker *time.Ticker, entry *GenericEntry, force bool) error {
 	if !state.Config.ConvertToMp3 {
-		// if option is not enabled restart check after 30s
-		time.Sleep(60 * time.Second)
-		restart <- 1
+		// if option is not enabled restart check after 3s
+		restartTicker.Stop()
+		restartTicker.Reset(3 * time.Second)
 		return nil
 	}
 
 	fmt.Println("Converting....")
 	ffmpeg, _ := state.IsFFmpegInstalled()
+	plugin := getPluginFor(entry.Source)
 
-	for _, t := range DbGetAllEntries() {
-		entry := t
-		plugin := getPluginFor(entry.Source)
-
-		if entry.Type == "track" && entry.Track.Status == TrackStatusDownladed && !entry.Track.IsConvertedToMp3 && plugin.IsTrackFileExists(entry.Track, "webm") {
-			// skip tracks which has failed at least 3 times in a row
-			if entry.Track.ConvertingStatus.Attempts >= 3 {
-				fmt.Printf("Skipping audio extraction for %s(%s)...due to too many attempts\n", entry.Track.Name, entry.Track.ID)
-				return nil
-			}
-
-			fmt.Printf("Extracting audio for %s...\n", entry.Track.Name)
-			entry.Track.ConvertingStatus.Status = TrakcConverting
-			DbWriteEntry(entry.Track.ID, entry)
-			state.runtime.Events.Emit("ytd:track", entry)
-
-			// ffmpeg -i "41qC3w3UUkU.webm" -vn -ab 128k -ar 44100 -y "41qC3w3UUkU.mp3"
-			outputPath := fmt.Sprintf("%s/%s.mp3", plugin.GetDir(), entry.Track.ID)
-			cmd := exec.Command(
-				ffmpeg,
-				"-loglevel", "quiet",
-				"-i", fmt.Sprintf("%s/%s.webm", plugin.GetDir(), entry.Track.ID),
-				"-vn",
-				"-ab", "128k",
-				"-ar", "44100",
-				"-y", outputPath,
-			)
-			cmd.Stdin = os.Stdin
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-
-			if err := cmd.Run(); err != nil {
-				fmt.Println("Failed to extract audio:", err)
-				entry.Track.ConvertingStatus.Status = TrakcConvertFailed
-				entry.Track.ConvertingStatus.Err = err.Error()
-				entry.Track.ConvertingStatus.Attempts += 1
-				DbWriteEntry(entry.Track.ID, entry)
-				state.runtime.Events.Emit("ytd:track", entry)
-
-			} else {
-				entry.Track.ConvertingStatus.Status = TrakcConverted
-				entry.Track.IsConvertedToMp3 = true
-
-				// check new filesize and save it
-				fileInfo, err := os.Stat(outputPath)
-				if err == nil {
-					entry.Track.ConvertingStatus.Filesize = int(fileInfo.Size())
-				}
-
-				DbWriteEntry(entry.Track.ID, entry)
-				state.runtime.Events.Emit("ytd:track", entry)
-
-				// remove webm if needed
-				if state.Config.CleanWebmFiles && plugin.IsTrackFileExists(entry.Track, "webm") {
-					err = os.Remove(fmt.Sprintf("%s/%s.webm", plugin.GetDir(), entry.Track.ID))
-					if err != nil && !os.IsNotExist(err) {
-						fmt.Printf("Cannot remove %s.webm file after successfull converting to mp3\n", entry.Track.ID)
-					}
-				}
-			}
-			restart <- 1
+	if entry.Type == "track" && entry.Track.Status == TrackStatusDownladed && !entry.Track.IsConvertedToMp3 && plugin.IsTrackFileExists(entry.Track, "webm") {
+		// skip tracks which has failed at least 3 times in a row
+		if entry.Track.ConvertingStatus.Attempts >= 3 && !force {
+			fmt.Printf("Skipping audio extraction for %s - (%s)...due to too many attempts\n", entry.Track.Name, entry.Track.ID)
 			return nil
 		}
-	}
 
-	// if there are no tracks to convert delay between restart
-	time.Sleep(15 * time.Second)
-	restart <- 1
+		fmt.Printf("Extracting audio for %s - (%s)...\n", entry.Track.Name, entry.Track.ID)
+		entry.Track.ConvertingStatus.Status = TrakcConverting
+		DbWriteEntry(entry.Track.ID, entry)
+		state.Stats.IncConvertCount()
+		state.runtime.Events.Emit("ytd:track", entry)
+
+		// ffmpeg -i "41qC3w3UUkU.webm" -vn -ab 128k -ar 44100 -y "41qC3w3UUkU.mp3"
+		outputPath := fmt.Sprintf("%s/%s.mp3", plugin.GetDir(), entry.Track.ID)
+		cmd := exec.CommandContext(
+			state.Context,
+			ffmpeg,
+			"-loglevel", "quiet",
+			"-i", fmt.Sprintf("%s/%s.webm", plugin.GetDir(), entry.Track.ID),
+			"-vn",
+			"-ab", "128k",
+			"-ar", "44100",
+			"-y", outputPath,
+		)
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+
+		if err := cmd.Run(); err != nil {
+			fmt.Println("Failed to extract audio:", err)
+			entry.Track.ConvertingStatus.Status = TrakcConvertFailed
+			entry.Track.ConvertingStatus.Err = err.Error()
+			entry.Track.ConvertingStatus.Attempts += 1
+			DbWriteEntry(entry.Track.ID, entry)
+			state.Stats.DecConvertCount()
+			state.runtime.Events.Emit("ytd:track", entry)
+		} else {
+			entry.Track.ConvertingStatus.Status = TrakcConverted
+			entry.Track.IsConvertedToMp3 = true
+
+			// check new filesize and save it
+			fileInfo, err := os.Stat(outputPath)
+			if err == nil {
+				entry.Track.ConvertingStatus.Filesize = int(fileInfo.Size())
+			}
+
+			DbWriteEntry(entry.Track.ID, entry)
+			state.Stats.DecConvertCount()
+			state.runtime.Events.Emit("ytd:track", entry)
+
+			// remove webm if needed
+			if state.Config.CleanWebmFiles && plugin.IsTrackFileExists(entry.Track, "webm") {
+				err = os.Remove(fmt.Sprintf("%s/%s.webm", plugin.GetDir(), entry.Track.ID))
+				if err != nil && !os.IsNotExist(err) {
+					fmt.Printf("Cannot remove %s.webm file after successfull converting to mp3\n", entry.Track.ID)
+				}
+			}
+		}
+		return nil
+	}
 	return nil
 }
 
@@ -616,10 +634,10 @@ func (state *AppState) AddToDownload(url string, isFromClipboard bool) error {
 		if support := plugin.Supports(url); support {
 			if appState.GetAppConfig().ConcurrentDownloads {
 				go func() {
-					plugin.Fetch(url, isFromClipboard)
+					newEntries <- plugin.Fetch(url, isFromClipboard)
 				}()
 			} else {
-				plugin.Fetch(url, isFromClipboard)
+				newEntries <- plugin.Fetch(url, isFromClipboard)
 			}
 			continue
 		}
@@ -651,6 +669,11 @@ func (state *AppState) StartDownload(record map[string]interface{}) error {
 			continue
 		}
 	}
+	return nil
+}
+
+func (state *AppState) AddToConvertQueue(entry GenericEntry) error {
+	state.convertQueue <- entry
 	return nil
 }
 

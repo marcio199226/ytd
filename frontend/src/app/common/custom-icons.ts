@@ -11,4 +11,9 @@ export function RegisterCustomIcons(matIconRegistry: MatIconRegistry, domSanitiz
     'qrcode_scan',
     domSanitizer.bypassSecurityTrustResourceUrl('http://localhost:8080/static/frontend/dist/assets/icons/qrcode-scan.svg')
   )
+
+  matIconRegistry.addSvgIcon(
+    'download_failed',
+    domSanitizer.bypassSecurityTrustResourceUrl('http://localhost:8080/static/frontend/dist/assets/icons/download-failed.svg')
+  )
 }

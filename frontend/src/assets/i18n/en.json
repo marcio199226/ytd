@@ -23,6 +23,8 @@
     },
     "START_DOWNLOAD_TRACK": "Start download",
     "STARTED_DOWNLOAD_TRACK": "Started downloading",
+    "CONVERT_TO_MP3_QUEUED": "Track added to queue for convert to mp3",
+    "WAITING_TO_CONVERT_MP3": "Waiting to be converted...",
     "CONVERTING_MP3": "Converting to mp3...",
     "NO_DOWNLOAED_TRACKS": "You have not downloaded tracks, start to download some",
     "NO_SEARCH_RESULTS": "There are no tracks for your searching",

@@ -84,7 +84,14 @@
             <mat-icon>delete</mat-icon>
             {{ ('HOME.REMOVE.' + entry.type.toUpperCase()) | translate }}
           </button>
-          <button mat-menu-item *ngIf="entry.track.status === 'failed'">Download</button>
+          <button mat-menu-item (click)="startDownload(entry)" *ngIf="entry.track.status === 'failed'">
+            <mat-icon>file_download</mat-icon>
+            Download
+          </button>
+          <button mat-menu-item (click)="convertTrack(entry)" *ngIf="entry.track.converting.status === 'failed'">
+            <mat-icon>file_download</mat-icon>
+            Convert to mp3
+          </button>
           <button mat-menu-item (click)="openInYt(entry.track.url)">
             <mat-icon>open_in_browser</mat-icon>
             {{ 'HOME.OPEN_ON_YT' | translate }}
@@ -97,16 +104,26 @@
         [class.lastOfRow]="(idx + 1) % 4 === 0"
         [class.playing]="inPlaybackTrackId === entry.track?.id"
         [class.downloading]="entry.track.status === 'downloading'"
-        [class.converting]="entry.track.converting.status === 'converting'"
+        [class.converting]="['converting', 'queued'].indexOf(entry.track.converting.status) > -1"
         [ngClass]="entry.type"
         *ngFor="let entry of filteredEntries; trackBy: trackById; let idx = index;"
         (mouseenter.silent)="onMouseEnter($event, entry)"
         (mouseleave.silent)="onMouseLeave($event, entry)">
         <div class="bg" [ngStyle]="{'background': getBgUrl(entry)}"></div>
         <div class="title">{{ entry.type === 'track' ? entry.track.name : entry.playlist.name }}</div>
+        <div class="errors" *ngIf="entry.track.status === 'failed' || entry.track.converting.status === 'failed'">
+          <mat-icon
+            svgIcon="download_failed"
+            [matTooltip]="entry.track.statusError">
+            error
+          </mat-icon>
+          <mat-icon [matTooltip]="entry.track.converting.error">
+            error
+          </mat-icon>
+        </div>
         <div class="fg">
           <div class="wrapper">
-            <ng-container *ngIf="entry.track.status === 'downloaded' && entry.track.converting.status !== 'converting'">
+            <ng-container *ngIf="entry.track.status === 'downloaded' && ['converting', 'queued'].indexOf(entry.track.converting.status) === -1">
               <mat-icon class="clickable" title="{{ 'HOME.PLAYLISTS.ADD_TRACK' | translate }}" (click)="addToPlaylist(entry)">playlist_add</mat-icon>
               <mat-icon class="clickable play" (click)="playback(entry)" title="{{ 'PLAYER.PLAY' | translate }}">play_circle_filled</mat-icon>
               <mat-icon class="clickable stop" (click)="stop(entry)" title="{{ 'PLAYER.STOP' | translate }}">stop</mat-icon>
@@ -144,6 +161,12 @@
             <ng-container *ngIf="entry.track.converting.status === 'converting'">
               <div fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="4px" fxFlex>
                 <span>{{ 'HOME.CONVERTING_MP3' | translate }}</span>
+                <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+              </div>
+            </ng-container>
+            <ng-container *ngIf="entry.track.converting.status === 'queued'">
+              <div fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="4px" fxFlex>
+                <span>{{ 'HOME.WAITING_TO_CONVERT_MP3' | translate }}</span>
                 <mat-progress-bar mode="indeterminate"></mat-progress-bar>
               </div>
             </ng-container>

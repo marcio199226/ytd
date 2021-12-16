@@ -185,6 +185,17 @@ export class HomeComponent implements OnInit, OnDestroy {
       this._cdr.detectChanges();
     });
 
+    // show snackbar when convert queue is full and some track is waiting to be converted
+    Wails.Events.On("ytd:track:convert:queued", (payload: Entry) => {
+      this._ngZone.run(() => {
+        console.log("ytd:track:convert:queued", payload)
+        this._snackbar.openInfo('HOME.CONVERT_TO_MP3_QUEUED');
+        const entry = this.entries.find(e => e.track.id === payload.track.id);
+        entry.track.converting.status = 'queued';
+        this._cdr.detectChanges();
+      });
+    });
+
     Wails.Events.On("ytd:playlist", payload => console.log(payload));
 
     Wails.Events.On("ytd:offline:playlists", offlinePlaylists => {
@@ -502,6 +513,14 @@ export class HomeComponent implements OnInit, OnDestroy {
     try {
       await window.backend.main.AppState.StartDownload(entry);
       this._snackbar.openSuccess("HOME.STARTED_DOWNLOAD_TRACK");
+    } catch(e) {
+      this._snackbar.openError(e);
+    }
+  }
+
+  async convertTrack(entry: Entry): Promise<void> {
+    try {
+      await window.backend.main.AppState.AddToConvertQueue(entry);
     } catch(e) {
       this._snackbar.openError(e);
     }

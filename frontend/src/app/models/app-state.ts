@@ -60,6 +60,7 @@ export interface BackendCallbacks {
       SaveSettingBoolValue: (name: string, val: boolean) => Promise<any>;
       SaveSettingValue: (name: string, val: string) => Promise<any>;
       RemoveEntry: (entry: Entry) => Promise<any>;
+      AddToConvertQueue: (entry: Entry) => Promise<any>;
       IsFFmpegInstalled: () => Promise<boolean>;
       OpenUrl: (url: string) => Promise<any>;
       ReloadNewLanguage: () => Promise<void>;

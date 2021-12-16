@@ -23,6 +23,7 @@ func dbReadSetting(Name string) (string, error)
 type AppStats struct {
 	sync.Mutex
 	DownloadingCount uint
+	ConvertingCount  uint
 }
 
 func (stats *AppStats) IncDndCount() {
@@ -35,6 +36,22 @@ func (stats *AppStats) DecDndCount() {
 	stats.Lock()
 	defer stats.Unlock()
 	stats.DownloadingCount--
+}
+
+func (stats *AppStats) IncConvertCount() {
+	stats.Lock()
+	defer stats.Unlock()
+	stats.ConvertingCount++
+}
+
+func (stats *AppStats) DecConvertCount() {
+	stats.Lock()
+	defer stats.Unlock()
+	stats.ConvertingCount--
+}
+
+func (stats *AppStats) HasRunningJobs() bool {
+	return stats.DownloadingCount > 0 || stats.ConvertingCount > 0
 }
 
 type TelegramConfig struct {
@@ -89,7 +106,7 @@ func NewAppConfig(watch bool, dldOnCopy bool, cDownloads bool, cPlaylistDownload
 		ConvertToMp3:                false,
 		CleanWebmFiles:              false,
 		BaseSaveDir:                 baseSaveDir,
-		RunInBackgroundOnClose:      false,
+		RunInBackgroundOnClose:      true,
 		CheckForUpdates:             false,
 		StartAtLogin:                false,
 		Language:                    "en",

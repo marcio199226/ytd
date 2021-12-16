@@ -1,6 +1,7 @@
 package plugins
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/url"
@@ -21,8 +22,10 @@ type Yt struct {
 	WailsRuntime *wails.Runtime
 	AppConfig    *AppConfig
 	AppStats     *AppStats
+	NewEntries   chan GenericEntry
 	dir          string
 	client       ytDownloader.Client
+	ctx          context.Context
 }
 
 type YtEntry struct {
@@ -33,6 +36,10 @@ type YtEntry struct {
 
 func (yt *Yt) SetWailsRuntime(runtime *wails.Runtime) {
 	yt.WailsRuntime = runtime
+}
+
+func (yt *Yt) SetContext(ctx context.Context) {
+	yt.ctx = ctx
 }
 
 func (yt *Yt) SetAppConfig(config *AppConfig) {
@@ -72,7 +79,7 @@ func (yt *Yt) IsTrackFileExists(track GenericTrack, fileType string) bool {
 	return true
 }
 
-func (yt *Yt) Fetch(url string, isFromClipboard bool) {
+func (yt *Yt) Fetch(url string, isFromClipboard bool) *GenericEntry {
 	fmt.Printf("Fetching from yt %s...", url)
 
 	if isPlaylist := strings.Contains(url, "playlist?"); isPlaylist {
@@ -81,7 +88,7 @@ func (yt *Yt) Fetch(url string, isFromClipboard bool) {
 		playlist, err := yt.client.GetPlaylist(url)
 		if err != nil {
 			fmt.Printf("yt.client.GetPlaylist(url) error: %s", err)
-			return
+			return nil
 		}
 
 		var playlistTracks []string
@@ -129,10 +136,10 @@ func (yt *Yt) Fetch(url string, isFromClipboard bool) {
 			DbWriteEntry(ytEntry.Track.ID, ytEntry)
 			yt.WailsRuntime.Events.Emit("ytd:track", ytEntry)
 		}
-		return
+		return ytEntry
 	}
 
-	yt.fetchTrack(url, isFromClipboard)
+	return yt.fetchTrack(url, isFromClipboard)
 }
 
 func (yt *Yt) GetFilename() error {
@@ -147,13 +154,13 @@ func (yt *Yt) Supports(address string) bool {
 	return strings.Contains(u.Hostname(), "youtube")
 }
 
-func (yt *Yt) fetchTrack(url string, isFromClipboard bool) {
-	video, err := yt.client.GetVideo(url)
+func (yt *Yt) fetchTrack(url string, isFromClipboard bool) *GenericEntry {
+	video, err := yt.client.GetVideoContext(yt.ctx, url)
 	if err != nil {
 		fmt.Printf("yt.client.GetVideo(url) error: %s \n", err)
 		ytEntry := GenericEntry{Source: yt.Name, Type: "track", Track: NewFailedTrack(url, err)}
 		yt.WailsRuntime.Events.Emit("ytd:track", ytEntry)
-		return
+		return nil
 	}
 
 	ytEntry := yt.addTrack(url, video)
@@ -161,12 +168,12 @@ func (yt *Yt) fetchTrack(url string, isFromClipboard bool) {
 	yt.WailsRuntime.Events.Emit("ytd:track", ytEntry) // notify frontend
 
 	if yt.AppConfig.ClipboardWatch && !yt.AppConfig.DownloadOnCopy && isFromClipboard {
-		return
+		return nil
 	}
 
 	if yt.AppStats.DownloadingCount >= yt.AppConfig.MaxParrallelDownloads {
 		fmt.Println("MaxParrallelDownloads has been reached")
-		return
+		return nil
 	}
 
 	yt.AppStats.IncDndCount()
@@ -177,11 +184,12 @@ func (yt *Yt) fetchTrack(url string, isFromClipboard bool) {
 		ytEntry.Track.StatusError = err.Error()
 		DbWriteEntry(ytEntry.Track.ID, ytEntry)
 		yt.WailsRuntime.Events.Emit("ytd:track", ytEntry)
-		return
+		return nil
 	}
 	ytEntry.Track.Status = TrackStatusDownladed
 	DbWriteEntry(ytEntry.Track.ID, ytEntry)
 	yt.WailsRuntime.Events.Emit("ytd:track", ytEntry)
+	return ytEntry
 }
 
 func (yt *Yt) StartDownload(ytEntry *GenericEntry) GenericEntry {

@@ -209,6 +209,23 @@ app-home {
         min-height: 52px;
       }
 
+      .errors {
+        position: absolute;
+        top: 5px;
+        left: 0px;
+        z-index: 1000;
+        display: flex;
+        justify-content: space-between;
+        width: calc(100% - 16px);
+        padding: 0px 8px;
+
+
+        .mat-icon {
+          cursor: pointer;
+          color: #fff;
+        }
+      }
+
       .fg {
         display: none;
 

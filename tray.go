@@ -143,6 +143,21 @@ func (tray *TrayMenu) createTrayMenu() *menu.Menu {
 		Accelerator: keys.CmdOrCtrl("q"),
 		Hidden:      false,
 		Click: func(ctx *menu.CallbackData) {
+			if appState.Stats.HasRunningJobs() {
+				// this will popup only if user quits through tray's "Quit" menu option, if user have disabled RunInBackgroundOnClose and
+				// close app by "X" this dialog will not pop out
+				selection, _ := appState.runtime.Dialog.Message(&dialog.MessageDialog{
+					Type:          dialog.QuestionDialog,
+					Title:         "There is work in progress!",
+					Message:       "Are you sure you want to exit?",
+					Buttons:       []string{"Yes", "No"},
+					DefaultButton: "Yes",
+					CancelButton:  "No",
+				})
+				if selection == "No" {
+					return
+				}
+			}
 			appState.ForceQuit()
 		},
 	})

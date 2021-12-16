@@ -38,7 +38,8 @@ var static embed.FS
 
 var pwaUrl = "https://ytd.surge.sh"
 var appState *AppState
-var newEntries = make(chan GenericEntry)
+var newEntries = make(chan *GenericEntry)
+var maxConvertJobs = runtime.NumCPU()
 
 type JsonError struct {
 	Msg string `json:"msg"`
