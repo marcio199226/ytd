@@ -49,6 +49,28 @@ func NewFailedTrack(url string, err error) GenericTrack {
 	}
 }
 
+func NewQueuedTrack(url string) GenericTrack {
+	return GenericTrack{
+		Status: TrackStatusQueued,
+		Url:    url,
+	}
+}
+
+func NewQueuedTrackForPlaylist(url string, pid string) GenericTrack {
+	return GenericTrack{
+		Status:     TrackStatusQueued,
+		Url:        url,
+		PlaylistID: pid,
+	}
+}
+
+func NewPlaceholderTrack(url string) GenericTrack {
+	return GenericTrack{
+		Status: TrackStatusPlaceholder,
+		Url:    url,
+	}
+}
+
 func (s GenericTrack) isEmpty() bool {
 	return s.ID == ""
 }

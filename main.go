@@ -175,7 +175,7 @@ func main() {
 				return
 			}
 
-			err := json.NewEncoder(&buffer).Encode(&app)
+			err := json.NewEncoder(&buffer).Encode(appState.GetAll())
 			if err != nil {
 				http.Error(w, err.Error(), 400)
 				return

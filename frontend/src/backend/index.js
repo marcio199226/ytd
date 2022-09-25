@@ -6,6 +6,14 @@ const backend = {
   "main": {
     "AppState": {
       /**
+       * AddToConvertQueue
+       * @param {any} arg1 - Go Type: models.GenericEntry
+       * @returns {Promise<Error>}  - Go Type: error
+       */
+      "AddToConvertQueue": (arg1) => {
+        return window.backend.main.AppState.AddToConvertQueue(arg1);
+      },
+      /**
        * AddToDownload
        * @param {string} arg1 - Go Type: string
        * @param {boolean} arg2 - Go Type: bool
@@ -43,6 +51,13 @@ const backend = {
         return window.backend.main.AppState.ForceQuit();
       },
       /**
+       * GetAll
+       * @returns {Promise<any>}  - Go Type: *main.AppState
+       */
+      "GetAll": () => {
+        return window.backend.main.AppState.GetAll();
+      },
+      /**
        * GetAppConfig
        * @returns {Promise<any>}  - Go Type: *models.AppConfig
        */
@@ -78,6 +93,13 @@ const backend = {
        */
       "IsSupportedUrl": (arg1) => {
         return window.backend.main.AppState.IsSupportedUrl(arg1);
+      },
+      /**
+       * Lock
+       * @returns {Promise<void>} 
+       */
+      "Lock": () => {
+        return window.backend.main.AppState.Lock();
       },
       /**
        * OpenUrl
@@ -165,6 +187,13 @@ const backend = {
        */
       "StartDownload": (arg1) => {
         return window.backend.main.AppState.StartDownload(arg1);
+      },
+      /**
+       * Unlock
+       * @returns {Promise<void>} 
+       */
+      "Unlock": () => {
+        return window.backend.main.AppState.Unlock();
       },
       /**
        * Update
@@ -321,6 +350,9 @@ const backend = {
         return window.backend.main.NgrokService.Value(arg1);
       },
     }
+  }
+
+  "offline": {
     "OfflinePlaylistService": {
       /**
        * AddTrackToPlaylist
@@ -328,7 +360,7 @@ const backend = {
        * @returns {Promise<boolean|Error>}  - Go Type: bool
        */
       "AddTrackToPlaylist": (arg1) => {
-        return window.backend.main.OfflinePlaylistService.AddTrackToPlaylist(arg1);
+        return window.backend.offline.OfflinePlaylistService.AddTrackToPlaylist(arg1);
       },
       /**
        * CreateNewPlaylist
@@ -336,7 +368,16 @@ const backend = {
        * @returns {Promise<any|Error>}  - Go Type: models.OfflinePlaylist
        */
       "CreateNewPlaylist": (arg1) => {
-        return window.backend.main.OfflinePlaylistService.CreateNewPlaylist(arg1);
+        return window.backend.offline.OfflinePlaylistService.CreateNewPlaylist(arg1);
+      },
+      /**
+       * CreateNewPlaylistWithTracks
+       * @param {string} arg1 - Go Type: string
+       * @param {Array.<string>} arg2 - Go Type: []string
+       * @returns {Promise<any|Error>}  - Go Type: models.OfflinePlaylist
+       */
+      "CreateNewPlaylistWithTracks": (arg1, arg2) => {
+        return window.backend.offline.OfflinePlaylistService.CreateNewPlaylistWithTracks(arg1, arg2);
       },
       /**
        * ExportPlaylist
@@ -345,7 +386,7 @@ const backend = {
        * @returns {Promise<boolean|Error>}  - Go Type: bool
        */
       "ExportPlaylist": (arg1, arg2) => {
-        return window.backend.main.OfflinePlaylistService.ExportPlaylist(arg1, arg2);
+        return window.backend.offline.OfflinePlaylistService.ExportPlaylist(arg1, arg2);
       },
       /**
        * GetPlaylistByUUID
@@ -353,7 +394,7 @@ const backend = {
        * @returns {Promise<any>}  - Go Type: models.OfflinePlaylist
        */
       "GetPlaylistByUUID": (arg1) => {
-        return window.backend.main.OfflinePlaylistService.GetPlaylistByUUID(arg1);
+        return window.backend.offline.OfflinePlaylistService.GetPlaylistByUUID(arg1);
       },
       /**
        * GetPlaylists
@@ -361,7 +402,7 @@ const backend = {
        * @returns {Promise<Array.<any>|Error>}  - Go Type: []models.OfflinePlaylist
        */
       "GetPlaylists": (arg1) => {
-        return window.backend.main.OfflinePlaylistService.GetPlaylists(arg1);
+        return window.backend.offline.OfflinePlaylistService.GetPlaylists(arg1);
       },
       /**
        * RemovePlaylist
@@ -369,7 +410,7 @@ const backend = {
        * @returns {Promise<boolean|Error>}  - Go Type: bool
        */
       "RemovePlaylist": (arg1) => {
-        return window.backend.main.OfflinePlaylistService.RemovePlaylist(arg1);
+        return window.backend.offline.OfflinePlaylistService.RemovePlaylist(arg1);
       },
       /**
        * RemoveTrackFromPlaylist
@@ -378,7 +419,15 @@ const backend = {
        * @returns {Promise<any|Error>}  - Go Type: models.OfflinePlaylist
        */
       "RemoveTrackFromPlaylist": (arg1, arg2) => {
-        return window.backend.main.OfflinePlaylistService.RemoveTrackFromPlaylist(arg1, arg2);
+        return window.backend.offline.OfflinePlaylistService.RemoveTrackFromPlaylist(arg1, arg2);
+      },
+      /**
+       * SetConfig
+       * @param {any} arg1 - Go Type: models.AppConfig
+       * @returns {Promise<void>} 
+       */
+      "SetConfig": (arg1) => {
+        return window.backend.offline.OfflinePlaylistService.SetConfig(arg1);
       },
     }
   }

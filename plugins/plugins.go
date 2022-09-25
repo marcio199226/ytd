@@ -5,6 +5,7 @@ import (
 
 	"github.com/wailsapp/wails/v2"
 
+	offline "ytd/internal/offline"
 	. "ytd/models"
 )
 
@@ -21,5 +22,7 @@ type Plugin interface {
 	SetWailsRuntime(*wails.Runtime)
 	SetContext(context.Context)
 	SetAppConfig(config *AppConfig)
+	SetQueue(queue chan GenericEntry) error
+	SetOfflineService(service *offline.OfflinePlaylistService)
 	SetAppStats(stats *AppStats)
 }

@@ -12,10 +12,12 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync"
 	"time"
 
 	. "ytd/constants"
 	. "ytd/db"
+	offline "ytd/internal/offline"
 	. "ytd/models"
 	. "ytd/plugins"
 
@@ -49,26 +51,32 @@ type AppState struct {
 	Host             HostInfo          `json:"host"`
 	PwaUrl           string            `json:"pwaUrl"`
 	context.Context  `json:"-"`
+	*sync.Mutex      `json:"-"`
 
 	isInForeground         bool
 	canStartAtLogin        bool
 	tray                   TrayMenu
 	updater                *Updater
-	offlinePlaylistService *OfflinePlaylistService
+	offlinePlaylistService *offline.OfflinePlaylistService
 	ngrok                  *NgrokService
 	convertQueue           chan GenericEntry
+	downloadQueue          []GenericEntry
+	downloadQueueChan      chan GenericEntry
+	downloadParralel       chan int
 }
 
 func (state *AppState) PreWailsInit(ctx context.Context) {
 	state.db = InitializeDb()
 	state.Entries = DbGetAllEntries()
 	state.OfflinePlaylists = DbGetAllOfflinePlaylists()
-	state.offlinePlaylistService = &OfflinePlaylistService{}
+	state.offlinePlaylistService = &offline.OfflinePlaylistService{}
 	state.ngrok = &NgrokService{}
 	state.ngrok.Context = ctx
 	state.Config = state.Config.Init()
 	state.AppVersion = version
-	state.convertQueue = make(chan GenericEntry)
+	state.convertQueue = make(chan GenericEntry, 100)
+	state.downloadQueueChan = make(chan GenericEntry, 100)
+	state.downloadParralel = make(chan int, state.Config.MaxParrallelDownloads)
 
 	// configure i18n paths
 	gotext.Configure("/Users/oskarmarciniak/projects/golang/ytd/i18n", state.Config.Language, "default")
@@ -85,10 +93,16 @@ func (state *AppState) PreWailsInit(ctx context.Context) {
 	}
 }
 
+func (state *AppState) GetAll() *AppState {
+	state.Entries = DbGetAllEntries()
+	state.OfflinePlaylists = DbGetAllOfflinePlaylists()
+	return state
+}
+
 func (state *AppState) WailsInit(runtime *wails.Runtime) {
 	// Save runtime
 	state.runtime = runtime
-	state.offlinePlaylistService.runtime = runtime
+	state.offlinePlaylistService.Runtime = runtime
 	state.ngrok.runtime = runtime
 	state.Config.SetRuntime(runtime)
 	// Do some other initialisation
@@ -114,6 +128,8 @@ func (state *AppState) WailsInit(runtime *wails.Runtime) {
 		plugin.SetContext(state.Context)
 		plugin.SetAppConfig(state.Config)
 		plugin.SetAppStats(state.Stats)
+		plugin.SetQueue(state.downloadQueueChan)
+		plugin.SetOfflineService(state.offlinePlaylistService)
 	}
 
 	fmt.Println("APP STATE INITIALIZED")
@@ -129,12 +145,12 @@ func (state *AppState) WailsInit(runtime *wails.Runtime) {
 
 	state.checkStartsAtLogin()
 
-	/* 	go func() {
+	go func() {
 		for {
-			time.Sleep(10 * time.Second)
+			time.Sleep(5 * time.Second)
 			state.checkForTracksToDownload()
 		}
-	}() */
+	}()
 
 	go func() {
 		ticker := time.NewTicker(3 * time.Second)
@@ -143,6 +159,7 @@ func (state *AppState) WailsInit(runtime *wails.Runtime) {
 		for {
 			select {
 			case entry := <-state.convertQueue:
+				fmt.Println("CONVERT REQQQQQQQQ", entry.Track.Name)
 				go func() {
 					if len(pending) == cap(pending) {
 						state.runtime.Events.Emit("ytd:track:convert:queued", entry)
@@ -297,38 +314,51 @@ func (state *AppState) GetEntryById(entry GenericEntry) *GenericEntry {
 
 func (state *AppState) checkForTracksToDownload() error {
 	fmt.Printf("Check for tracks to start downloads...%d/%d\n", state.Stats.DownloadingCount, state.Config.MaxParrallelDownloads)
-	if state.Stats.DownloadingCount >= state.Config.MaxParrallelDownloads {
+	/* 	if state.Stats.DownloadingCount >= state.Config.MaxParrallelDownloads {
 		return nil
-	}
+	} */
 
 	fmt.Printf("Checking...%d entries\n", len(state.Entries))
-	// range over DbGetAllEntries()
-	for _, t := range DbGetAllEntries() {
-		var freeSlots uint = state.Config.MaxParrallelDownloads - state.Stats.DownloadingCount
-		entry := t
-		// auto download only tracks with processing status
-		// if track has pending/failed status it means that something goes wrong so user have to download it manually from UI
-		if entry.Type == "track" && entry.Track.Status == TrackStatusProcessing {
-			if freeSlots == 0 {
-				return nil
-			}
+	ticker := time.NewTicker(5 * time.Second)
 
-			// start download for track
-			fmt.Printf("Found %s to download\n", entry.Track.Name)
-			plugin := getPluginFor(entry.Source)
-			// make chan GenericEntry
-			// goriutine scrive li dentro
-			if plugin != nil {
-				freeSlots--
+	for {
+		select {
+		case entry := <-state.downloadQueueChan:
+			state.downloadQueue = append(state.downloadQueue, entry)
+		case <-ticker.C:
+			fmt.Printf("TICKER PARRALELE %d/%d | IN QUEUE %d | MAX QUEUE SLICE %d", len(state.downloadParralel), cap(state.downloadParralel), len(state.downloadQueue), cap(state.downloadQueue))
+			for _, t := range state.downloadQueue {
+				fmt.Printf("\n[+] Found track %s in state.downloadQueue\n", t.Track.Url)
+			}
+			if len(state.downloadQueue) > 0 && len(state.downloadParralel) < cap(state.downloadParralel) {
+
+				fmt.Printf("Found %d tracks in queue...BEFORE\n\n", len(state.downloadQueue))
+				entry := state.downloadQueue[0]
+				newState := state.downloadQueue[1:]
+				fmt.Println("\nNEW QUEUE\n", newState)
+				state.downloadQueue = newState
+				fmt.Printf("Found %d tracks in queue...AFTER\n\n", len(state.downloadQueue))
+				fmt.Println("New track can be downloaded", entry.Track.Url, entry.Track.Status)
+				if entry.Track.Status == TrackStatusQueued {
+					fmt.Println("________FOUND QUEIUED TRACk___________", entry.Track.ID)
+				}
+				if entry.Track.Status == TrackStatusDownloading {
+					fmt.Println("________FOUND DOWNLOADING TRACk______", entry.Track.ID)
+				}
+				if entry.Track.Status == TrackStatusDownladed {
+					fmt.Println("________FOUND DOWNLOADED TRACk______", entry.Track.ID)
+				}
+
 				go func(entry GenericEntry) {
-					// storedEntry := state.GetEntryById(entry)
-					// fmt.Printf("Stored entry %v\n", storedEntry)
-					// fmt.Println(entry.Track.Url)
-					// fmt.Println(storedEntry.Track.Url)
-					plugin.StartDownload(&entry)
-					// storedEntry.Track = entry.Track
+					state.downloadParralel <- 1
+					plugin := getPluginFor(entry.Source)
+					plugin.Fetch(entry.Track.Url, false)
+					<-state.downloadParralel
 				}(entry)
 			}
+		default:
+			fmt.Printf("No tracks in queue....max parralel %d | downloading %d | pending %d entries\n\n", state.Config.MaxParrallelDownloads, state.Stats.DownloadingCount, len(state.downloadQueue))
+			time.Sleep(3 * time.Second)
 		}
 	}
 
@@ -368,6 +398,8 @@ func (state *AppState) convertToMp3(restartTicker *time.Ticker, entry *GenericEn
 			ffmpeg,
 			"-loglevel", "quiet",
 			"-i", fmt.Sprintf("%s/%s.webm", plugin.GetDir(), entry.Track.ID),
+			"-metadata", fmt.Sprintf("title=%s", entry.Track.Name),
+			"-metadata", fmt.Sprintf("author=%s", entry.Track.Author),
 			"-vn",
 			"-ab", "128k",
 			"-ar", "44100",
@@ -632,13 +664,17 @@ func (state *AppState) RemoveEntry(record map[string]interface{}) error {
 func (state *AppState) AddToDownload(url string, isFromClipboard bool) error {
 	for _, plugin := range plugins {
 		if support := plugin.Supports(url); support {
-			if appState.GetAppConfig().ConcurrentDownloads {
-				go func() {
-					newEntries <- plugin.Fetch(url, isFromClipboard)
-				}()
-			} else {
-				newEntries <- plugin.Fetch(url, isFromClipboard)
-			}
+			go func() {
+				if len(state.downloadParralel) == cap(state.downloadParralel) {
+					ytEntry := GenericEntry{Source: plugin.GetName(), Type: "track", Track: NewQueuedTrack(url)}
+					state.runtime.Events.Emit("ytd:track", ytEntry)
+					state.downloadQueueChan <- ytEntry
+					return
+				}
+				state.downloadParralel <- 1
+				plugin.Fetch(url, isFromClipboard)
+				<-state.downloadParralel
+			}()
 			continue
 		}
 	}

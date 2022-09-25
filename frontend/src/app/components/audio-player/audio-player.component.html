@@ -16,11 +16,15 @@
         <mat-icon class="next clickable" title="Next track" (click)="next()">skip_next</mat-icon>
         <mat-icon class="replay clickable" title="Replay" (click)="replay()">replay</mat-icon>
       </div>
-      <div class="" fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="8px">
-        <div class="duration">{{ elapsedTime }}</div>
+      <div class="time" fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="8px">
+        <div class="duration">
+          {{ elapsedTime > 3600 ? (elapsedTime * 1000 | date: 'HH:mm:ss' : 'UTC') : (elapsedTime * 1000 | date: 'mm:ss') }}
+        </div>
         <mat-progress-bar [mode]="isReady() ? 'determinate' : 'indeterminate'" [value]="elapsedTimeProgress" color="warn">
         </mat-progress-bar>
-        <div class="duration">{{ duration * 1000 | date: 'mm:ss' }}</div>
+        <div class="duration">
+          {{ duration > 3600 ? (duration * 1000 | date: 'HH:mm:ss' : 'UTC') : (duration * 1000 | date: 'mm:ss') }}
+        </div>
       </div>
     </div>
     <div class="volume" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="4px">

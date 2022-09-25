@@ -126,6 +126,10 @@ export class SettingsComponent implements OnInit {
     this._snackbar.openSuccess("SETTINGS.TABS.PUBLIC_SERVER.NGROK.URL_COPIED");
   }
 
+  setMaxParrallelDownloads(n: number): void {
+    this.model.MaxParrallelDownloads = 1;
+  }
+
   private _getQrCodeData(): string {
     const pwa = window.APP_STATE.pwaUrl;
     if(this.data.isNgrokRunning) {

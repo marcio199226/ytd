@@ -19,7 +19,7 @@ import { AppConfig, AppState } from '../../models/app-state';
 import * as Wails from '@wailsapp/runtime';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { SettingsComponent, UpdaterComponent } from 'app/components';
-import { debounceTime, distinctUntilChanged, filter } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, filter, takeUntil } from 'rxjs/operators';
 import { MatMenu } from '@angular/material/menu';
 import { DOCUMENT } from '@angular/common';
 import { SnackbarService } from 'app/services/snackbar.service';
@@ -35,6 +35,7 @@ import { OfflinePlaylistComponent } from '../offline-playlist/offline-playlist.c
 import { LoaderService } from 'app/services/loader.service';
 import { TranslateService } from '@ngx-translate/core';
 import { fakeAsync } from '@angular/core/testing';
+import { Subject } from 'rxjs';
 
 @Component({
   selector: 'app-home',
@@ -126,7 +127,9 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   private _mobileQueryListener: (event: MediaQueryListEvent) => void;
 
-  private _offlinePlaylistComponent: OfflinePlaylistComponent = null
+  private _offlinePlaylistComponent: OfflinePlaylistComponent = null;
+
+  private _unsubscribe: Subject<any> = new Subject();
 
   constructor(
     private _cdr: ChangeDetectorRef,
@@ -169,7 +172,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     Wails.Events.On("ytd:track", (payload: Entry) => {
       this._ngZone.run(() => {
         console.log("ytd:track", payload)
-        const entry = this.entries.find(e => e.track.id === payload.track.id);
+        const entry = this.entries.find(e => e.track.url === payload.track.url);
         if(entry) {
           entry.track = payload.track;
         } else {
@@ -179,8 +182,9 @@ export class HomeComponent implements OnInit, OnDestroy {
       });
     });
 
-    Wails.Events.On("ytd:track:progress", ({ id, progress }) => {
-      const entry = this.entries.find(e => e.track.id === id);
+    Wails.Events.On("ytd:track:progress", ({ id, url, progress }) => {
+      console.log("ytd:track:progress", id, url, progress)
+      const entry = this.entries.find(e => e.track.url === url);
       entry.track.downloadProgress = progress;
       this._cdr.detectChanges();
     });
@@ -196,7 +200,13 @@ export class HomeComponent implements OnInit, OnDestroy {
       });
     });
 
-    Wails.Events.On("ytd:playlist", payload => console.log(payload));
+    Wails.Events.On("ytd:playlist", (playlist) => {
+      this._ngZone.run(() => {
+        console.log("ytd:playlist", playlist)
+        this.offlinePlaylists.unshift(playlist);
+        this._cdr.detectChanges();
+      });
+    });
 
     Wails.Events.On("ytd:offline:playlists", offlinePlaylists => {
       this._ngZone.run(() => {
@@ -274,7 +284,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       this._cdr.detectChanges();
     });
 
-    this._audioPlayerService.onStopCmdTrack.subscribe(track => {
+    this._audioPlayerService.onStopCmdTrack.pipe(takeUntil(this._unsubscribe)).subscribe(track => {
       console.log("ON STOPPP FROM HOMEEE", track)
       this.inPlayback = null;
       this._cdr.detectChanges();
@@ -514,7 +524,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       await window.backend.main.AppState.StartDownload(entry);
       this._snackbar.openSuccess("HOME.STARTED_DOWNLOAD_TRACK");
     } catch(e) {
-      this._snackbar.openError(e);
+      this._snackbar.openError(e as string);
     }
   }
 
@@ -522,7 +532,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     try {
       await window.backend.main.AppState.AddToConvertQueue(entry);
     } catch(e) {
-      this._snackbar.openError(e);
+      this._snackbar.openError(e as string);
     }
   }
 
@@ -669,8 +679,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       await this.drawer.close();
     }
     const tracks = this.entries.filter(e => e.type === 'track' && playlist.tracksIds.indexOf(e.track.id) > -1).map(e => e.track);
-    this._router.navigate(['playlist', playlist.uuid], { relativeTo: this._route,  state: { playlist, tracks } });
-    this._audioPlayerService.onPlaybackTrack.next(tracks[0]);
+    this._router.navigate(['playlist', playlist.uuid], { relativeTo: this._route, state: { playlist, tracks } }).then(() => this._audioPlayerService.onPlaybackTrack.next(tracks[0]));
     this._cdr.detectChanges();
   }
 
@@ -714,6 +723,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.filteredEntries = this.entries;
       //this._cdr.detectChanges();
     } catch(e) {
+      console.log(e)
       this._snackbar.openError(`HOME.REMOVED.KO_${entry.type.toUpperCase()}`);
     }
   }
@@ -755,6 +765,11 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    console.log('HOME DESTROY')
     this.mobileQuery.removeEventListener("change", this._mobileQueryListener);
+
+    // cleanup observables
+    this._unsubscribe.next();
+    this._unsubscribe.complete();
   }
 }

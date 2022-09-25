@@ -31,7 +31,7 @@ export class AudioPlayerComponent implements OnInit {
 
   public audio: HTMLAudioElement = null;
 
-  public volume: number = 0.5;
+  public volume: number = 1;
 
   public isPlaying: Boolean = false;
 
@@ -39,7 +39,7 @@ export class AudioPlayerComponent implements OnInit {
 
   public duration: number = null;
 
-  public elapsedTime: string = null;
+  public elapsedTime: any = null;
 
   public elapsedTimeProgress: number = null;
 
@@ -53,7 +53,7 @@ export class AudioPlayerComponent implements OnInit {
     private _cdr: ChangeDetectorRef,
     @Inject(DOCUMENT) private document: Document,
     private _snackbar: SnackbarService,
-    private _audioPlayerService: AudioPlayerService
+    private _audioPlayerService: AudioPlayerService,
   ) {}
 
   ngOnInit(): void {
@@ -87,14 +87,12 @@ export class AudioPlayerComponent implements OnInit {
         return;
       }
 
-      const s = parseInt((this.audio.currentTime % 60).toString(), 10);
-      const m = parseInt(((this.audio.currentTime / 60) % 60).toString(), 10);
       this.duration = this.audio.duration;
       this.elapsedTimeProgress = +(
         (+this.audio.currentTime.toFixed(1) / +this.audio.duration.toFixed(1)) *
         100
       ).toFixed(0);
-      this.elapsedTime = s < 10 ? m + ':0' + s : m + ':' + s;
+      this.elapsedTime = this.audio.currentTime;
       this._cdr.detectChanges();
     };
 
@@ -168,7 +166,9 @@ export class AudioPlayerComponent implements OnInit {
 
   closePlayer(): void {
     this.audio.pause();
-    this._audioPlayerService.onStopCmdTrack.next(this.track);
+    if(this.isPlaying) {
+      this._audioPlayerService.onStopCmdTrack.next(this.track);
+    }
     this.audio = null;
     this.track = null;
     this._audioPlayerService.onClosePlayer.next(true);

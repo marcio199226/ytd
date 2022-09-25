@@ -72,13 +72,17 @@ export class OfflinePlaylistComponent implements OnInit, OnDestroy {
 
     // players commands
     this._audioPlayerService.onPlayCmdTrack.pipe(filter(track => track !== null), takeUntil(this._unsubscribe)).subscribe(track => {
+      console.log('onPlayCmdTrack', track, this)
       this.inPlayback = track;
       this.inPauseTrack = null;
       this._cdr.detectChanges();
     });
 
     this._audioPlayerService.onStopCmdTrack.pipe(filter(track => track !== null), takeUntil(this._unsubscribe)).subscribe(track => {
-      console.log("ON STOPPPPP", track)
+      console.log("ON STOPPPPP", track, this)
+      if(!this.inPlayback) {
+        return;
+      }
       this.inPlayback = null;
       this.inPauseTrack = track;
       this._cdr.detectChanges();

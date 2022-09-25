@@ -1,4 +1,4 @@
-<header fxLayout="row wrap" fxLayoutAlign="space-between center" fxLayoutGap="10px">
+<header data-wails-drag="true" fxLayout="row wrap" fxLayoutAlign="space-between center" fxLayoutGap="10px">
   <mat-icon class="clickable white" title="Open left menu" (click)="drawer.toggle()" *ngIf="mobileQuery.matches">menu</mat-icon>
   <div class="input-wrapper paste" #pasteWrapper *ngIf="!isClipboardWatchEnabled">
     <div class="input" fxFlex fxLayout="row" fxLayoutAlign="start center">
@@ -103,21 +103,22 @@
         class="entry"
         [class.lastOfRow]="(idx + 1) % 4 === 0"
         [class.playing]="inPlaybackTrackId === entry.track?.id"
-        [class.downloading]="entry.track.status === 'downloading'"
+        [class.downloading]="['queued', 'placeholder', 'processing', 'downloading'].indexOf(entry.track.status) > -1"
         [class.converting]="['converting', 'queued'].indexOf(entry.track.converting.status) > -1"
         [ngClass]="entry.type"
         *ngFor="let entry of filteredEntries; trackBy: trackById; let idx = index;"
         (mouseenter.silent)="onMouseEnter($event, entry)"
         (mouseleave.silent)="onMouseLeave($event, entry)">
         <div class="bg" [ngStyle]="{'background': getBgUrl(entry)}"></div>
-        <div class="title">{{ entry.type === 'track' ? entry.track.name : entry.playlist.name }}</div>
+        <div class="title">{{ entry.type === 'track' ? entry.track.name ? entry.track.name : entry.track.url : entry.playlist.name }}</div>
         <div class="errors" *ngIf="entry.track.status === 'failed' || entry.track.converting.status === 'failed'">
           <mat-icon
             svgIcon="download_failed"
-            [matTooltip]="entry.track.statusError">
+            [matTooltip]="entry.track.statusError"
+            *ngIf="entry.track.status === 'failed'">
             error
           </mat-icon>
-          <mat-icon [matTooltip]="entry.track.converting.error">
+          <mat-icon [matTooltip]="entry.track.converting.error" *ngIf="entry.track.converting.status === 'failed'">
             error
           </mat-icon>
         </div>
@@ -144,6 +145,12 @@
                 (menuClosed)="menuClosed()">
                 more_horiz
               </mat-icon>
+            </ng-container>
+            <ng-container *ngIf="entry.track.status === 'queued'">
+              <span class="m-auto">{{ 'HOME.QUEUED_TRACK' | translate }}</span>
+            </ng-container>
+            <ng-container *ngIf="entry.track.status === 'placeholder'">
+              <span class="m-auto">{{ 'HOME.FETCHING_INFO' | translate }}</span>
             </ng-container>
             <ng-container *ngIf="entry.track.status === 'processing'">
               <mat-icon class="clickable m-auto" title="{{ 'HOME.START_DOWNLOAD_TRACK' | translate }}" (click)="startDownload(entry)">

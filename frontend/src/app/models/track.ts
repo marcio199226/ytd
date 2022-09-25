@@ -6,7 +6,7 @@ export interface Track {
   filesize: number;
   name: string;
   playlistId: string;
-  status: "pending" | "processing" | "downloading" | "downloaded" | "failed";
+  status: "queued" | "placeholder" | "pending" | "processing" | "downloading" | "downloaded" | "failed";
   statusError: string;
   thumbnails: string[];
   isConvertedToMp3: boolean;

@@ -1,6 +1,8 @@
 package constants
 
 const (
+	TrackStatusPlaceholder = "placeholder"
+	TrackStatusQueued      = "queued"
 	TrackStatusPending     = "pending"
 	TrackStatusProcessing  = "processing"
 	TrackStatusFailed      = "failed"

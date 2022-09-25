@@ -14,18 +14,20 @@ import (
 
 	. "ytd/constants"
 	. "ytd/db"
+	offline "ytd/internal/offline"
 	. "ytd/models"
 )
 
 type Yt struct {
-	Name         string
-	WailsRuntime *wails.Runtime
-	AppConfig    *AppConfig
-	AppStats     *AppStats
-	NewEntries   chan GenericEntry
-	dir          string
-	client       ytDownloader.Client
-	ctx          context.Context
+	Name                   string
+	WailsRuntime           *wails.Runtime
+	AppConfig              *AppConfig
+	AppStats               *AppStats
+	dir                    string
+	client                 ytDownloader.Client
+	ctx                    context.Context
+	downloadQueueChan      chan GenericEntry
+	offlinePlaylistService *offline.OfflinePlaylistService
 }
 
 type YtEntry struct {
@@ -60,6 +62,15 @@ func (yt *Yt) Initialize() error {
 	return nil
 }
 
+func (yt *Yt) SetQueue(queue chan GenericEntry) error {
+	yt.downloadQueueChan = queue
+	return nil
+}
+
+func (yt *Yt) SetOfflineService(service *offline.OfflinePlaylistService) {
+	yt.offlinePlaylistService = service
+}
+
 func (yt *Yt) SetDir(dir string) {
 	yt.dir = dir
 	if _, err := os.Stat(yt.dir); os.IsNotExist(err) {
@@ -82,8 +93,8 @@ func (yt *Yt) IsTrackFileExists(track GenericTrack, fileType string) bool {
 func (yt *Yt) Fetch(url string, isFromClipboard bool) *GenericEntry {
 	fmt.Printf("Fetching from yt %s...", url)
 
-	if isPlaylist := strings.Contains(url, "playlist?"); isPlaylist {
-		fmt.Println("Fetching playlist info...")
+	if isPlaylist := strings.Contains(url, "list="); isPlaylist {
+		fmt.Println("[+] Fetching playlist info...")
 		ytEntry := &GenericEntry{Source: yt.Name, Type: "playlist"}
 		playlist, err := yt.client.GetPlaylist(url)
 		if err != nil {
@@ -97,44 +108,22 @@ func (yt *Yt) Fetch(url string, isFromClipboard bool) *GenericEntry {
 		ytEntry.Playlist.Url = url
 		for _, v := range playlist.Videos {
 			ytEntry.Playlist.TracksIds = append(ytEntry.Playlist.TracksIds, v.ID)
+			playlistTracks = append(playlistTracks, v.ID)
 		}
-		err = DbWriteEntry(ytEntry.Playlist.ID, ytEntry)
+		offlinePlaylist, err := yt.offlinePlaylistService.CreateNewPlaylistWithTracks(playlist.Title, playlistTracks)
+		// offlinePlaylist := NewOfflinePlaylist(playlist.Title, playlistTracks)
+		// err = DbAddOfflinePlaylist(offlinePlaylist.UUID, offlinePlaylist, false)
+		//err = DbWriteEntry(ytEntry.Playlist.ID, ytEntry)
 		if err != nil {
 			fmt.Printf("Error while saving playlist: %s", err)
 		}
-		yt.WailsRuntime.Events.Emit("ytd:playlist", ytEntry) // notify frontend
-		for k, v := range playlist.Videos {
-			fmt.Printf("(%d) %s - '%s'\n", k+1, v.Author, v.Title)
-			video, err := yt.client.VideoFromPlaylistEntry(v)
-			if err != nil {
-				fmt.Printf("yt.client.VideoFromPlaylistEntry(v) error: %s", err)
-				continue
-			}
-
-			track := NewGenericTrack(video.ID, video.Title, video.Author, video.ID, url)
-			for _, thumbnail := range video.Thumbnails {
-				track.Thumbnails = append(track.Thumbnails, thumbnail.URL)
-			}
-			ytEntry := &GenericEntry{Source: yt.Name, Type: "track", Track: track}
-			ytEntry.Track.Status = TrackStatusProcessing
-			ytEntry.Track.Duration = video.Duration.Minutes()
-			ytEntry.Track.PlaylistID = playlist.ID
-			DbWriteEntry(ytEntry.Track.ID, ytEntry)           // write to rigth bucket
-			yt.WailsRuntime.Events.Emit("ytd:track", ytEntry) // notify frontend
-
-			err = yt.downloadTrack(video, ytEntry)
-			if err != nil {
-				fmt.Printf("yt.downloadTrack(video, video.ID) error: %s \n", err)
-				ytEntry.Track.Status = TrackStatusFailed
-				ytEntry.Track.StatusError = err.Error()
-				DbWriteEntry(ytEntry.Track.ID, ytEntry)
-				yt.WailsRuntime.Events.Emit("ytd:track", ytEntry)
-				continue
-			}
-			ytEntry.Track.Status = TrackStatusDownladed
-
-			DbWriteEntry(ytEntry.Track.ID, ytEntry)
+		yt.WailsRuntime.Events.Emit("ytd:playlist", offlinePlaylist) // notify frontend
+		//yt.WailsRuntime.Events.Emit("ytd:playlist", ytEntry) // notify frontend
+		for _, v := range playlist.Videos {
+			ytEntry := GenericEntry{Source: yt.Name, Type: "track", Track: NewQueuedTrackForPlaylist(fmt.Sprintf("https://www.youtube.com/watch?v=%s", v.ID), playlist.ID)}
+			// ytEntry := NewGenericTrack(v.ID, v.Title, v.Author, v.ID, fmt.Sprintf("https://www.youtube.com/watch?v=%s", v.ID))
 			yt.WailsRuntime.Events.Emit("ytd:track", ytEntry)
+			yt.downloadQueueChan <- ytEntry
 		}
 		return ytEntry
 	}
@@ -155,6 +144,9 @@ func (yt *Yt) Supports(address string) bool {
 }
 
 func (yt *Yt) fetchTrack(url string, isFromClipboard bool) *GenericEntry {
+	ytEntryPlaceholder := GenericEntry{Source: yt.Name, Type: "track", Track: NewPlaceholderTrack(url)}
+	yt.WailsRuntime.Events.Emit("ytd:track", ytEntryPlaceholder)
+
 	video, err := yt.client.GetVideoContext(yt.ctx, url)
 	if err != nil {
 		fmt.Printf("yt.client.GetVideo(url) error: %s \n", err)
@@ -172,7 +164,7 @@ func (yt *Yt) fetchTrack(url string, isFromClipboard bool) *GenericEntry {
 	}
 
 	if yt.AppStats.DownloadingCount >= yt.AppConfig.MaxParrallelDownloads {
-		fmt.Println("MaxParrallelDownloads has been reached")
+		fmt.Println("[Youtube plugin] MaxParrallelDownloads has been reached")
 		return nil
 	}
 
@@ -227,43 +219,45 @@ func (yt *Yt) downloadTrack(video *ytDownloader.Video, ytEntry *GenericEntry) er
 		return TrackWithoutAudioFormat
 	}
 
-	stream, size, err := yt.client.GetStream(video, &audioFormats[0])
+	stream, size, err := yt.client.GetStreamContext(yt.ctx, video, &audioFormats[0])
 	ytEntry.Track.FileSize = size
 	ytEntry.Track.Status = TrackStatusDownloading
 	yt.WailsRuntime.Events.Emit("ytd:track", ytEntry)
 	if err != nil {
 		return err
 	}
-	return yt.saveTrack(stream, video.ID, size)
+	return yt.saveTrack(stream, ytEntry)
 }
 
-func (yt *Yt) saveTrack(stream io.ReadCloser, filename string, filesize int64) error {
-	file, err := os.Create(fmt.Sprintf("%s/%s.webm", yt.dir, filename))
+func (yt *Yt) saveTrack(stream io.ReadCloser, ytEntry *GenericEntry) error {
+	file, err := os.Create(fmt.Sprintf("%s/%s.webm", yt.dir, ytEntry.Track.ID))
 	if err != nil {
-		fmt.Printf("Cannot create file for track %s | %s\n", filename, err)
+		fmt.Printf("Cannot create file for track %s | %s\n", ytEntry.Track.ID, err)
 		return err
 	}
 	defer file.Close()
 
 	done := make(chan int64)
 	progress := make(chan uint)
-	go downloadProgress(done, progress, fmt.Sprintf("%s/%s.webm", yt.dir, filename), filesize)
+	go downloadProgress(done, progress, fmt.Sprintf("%s/%s.webm", yt.dir, ytEntry.Track.ID), ytEntry.Track.FileSize)
 	go func() { // read from progress channel as soon as downloadProgress writes to progress chan
 		// loop until channel progress is closed by downloadProgress goroutine
 		for p := range progress {
-			fmt.Printf("Received progress: %d for video with ID %s\n", p, filename)
+			fmt.Printf("Received progress: %d for video with ID %s\n", p, ytEntry.Track.ID)
 			yt.WailsRuntime.Events.Emit(
 				"ytd:track:progress",
 				struct {
 					Id       string `json:"id"`
+					Url      string `json:"url"`
 					Progress uint   `json:"progress"`
-				}{Id: filename, Progress: p},
+				}{Id: ytEntry.Track.ID, Url: ytEntry.Track.Url, Progress: p},
 			)
 		}
 	}()
 
 	w, err := io.Copy(file, stream)
 	if err != nil {
+		done <- w
 		return err
 	}
 
@@ -299,12 +293,12 @@ func downloadProgress(done chan int64, progress chan<- uint, path string, total 
 
 			file, err := os.Open(path)
 			if err != nil {
-				fmt.Println(err)
+				fmt.Printf("downloadProgress os.Open %s", err)
 			}
 
 			fi, err := file.Stat()
 			if err != nil {
-				fmt.Println(err)
+				fmt.Printf("downloadProgress file.Stat %s", err)
 			}
 
 			size := fi.Size()

@@ -29,7 +29,7 @@
           </mat-form-field>
           <mat-form-field appearance="fill">
             <mat-label>{{ 'SETTINGS.MAX_SIM_DOWNLOADS' | translate }}</mat-label>
-            <input matInput type="number" min="0" max="10" [(ngModel)]="model.MaxParrallelDownloads">
+            <input matInput type="number" min="1" max="24" [(ngModel)]="model.MaxParrallelDownloads" [disabled]="!model.ConcurrentDownloads">
             <mat-hint>{{ 'SETTINGS.MAX_SIM_DOWNLOADS_HINT' | translate }}</mat-hint>
           </mat-form-field>
           <mat-slide-toggle [(ngModel)]="model.ClipboardWatch">
@@ -38,7 +38,7 @@
           <mat-slide-toggle [(ngModel)]="model.DownloadOnCopy" [disabled]="!model.ClipboardWatch">
             {{ 'SETTINGS.DOWNLOAD_ON_COPY' | translate }}
           </mat-slide-toggle>
-          <mat-slide-toggle [(ngModel)]="model.ConcurrentDownloads">
+          <mat-slide-toggle [(ngModel)]="model.ConcurrentDownloads" (change)="setMaxParrallelDownloads(1)">
             {{ 'SETTINGS.CONCURRENT_DOWNLOADS' | translate }}
           </mat-slide-toggle>
           <mat-slide-toggle [(ngModel)]="model.ConcurrentPlaylistDownloads">

@@ -23,6 +23,7 @@
     },
     "START_DOWNLOAD_TRACK": "Avvia il download",
     "STARTED_DOWNLOAD_TRACK": "Il download è stato avviato",
+    "FETCHING_INFO": "Caricamento...",
     "CONVERT_TO_MP3_QUEUED": "Il brano è in coda per la conversione",
     "WAITING_TO_CONVERT_MP3": "In attesa per la conversione...",
     "CONVERTING_MP3": "Conversione a mp3...",
