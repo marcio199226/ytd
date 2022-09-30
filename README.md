@@ -70,5 +70,4 @@ Extract translation for golang side:
 - [ ] Chrome extension so tracks may be downloaded without user interaction (even without copy yt links)
 - [x] Internalization
 - [x] Share tracks through public webserver running locally
-- [ ] Share tracks through telegram (user could subscribe to ytd bot and then will be able to send downloaded tracks to yourself telegram account)
-- [ ] Download playlists from yt (exports them, search for playlist, playback playlist etc...)
+- [x] Download playlists from yt (exports them, search for playlist, playback playlist etc...)
